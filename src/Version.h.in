@@ -8,7 +8,7 @@ const char *PLUGIN_VERSION{ "@CMAKE_PROJECT_VERSION@-DEV.@DEV_RELEASE_NUMBER@"};
 #else
 const char *PLUGIN_VERSION{ "@CMAKE_PROJECT_VERSION@" };
 #endif
-const char *PLUGIN_AUTHOR{ "vACDM Team" };
+const char *PLUGIN_AUTHOR{ "vACDM Team+vACC-FR" };
 const char *PLUGIN_LICENSE{ "GPLv3" };
 
 static constexpr std::uint8_t PLUGIN_VERSION_MAJOR = @CMAKE_PROJECT_VERSION_MAJOR@;

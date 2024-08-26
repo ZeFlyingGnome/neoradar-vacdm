@@ -294,10 +294,10 @@ DataManager::MessageType DataManager::deltaEuroscopeToBackend(const std::array<t
 
         int deltaCount = 0;
 
-        if (data[EuroscopeData].inactive != data[ServerData].inactive) {
-            message["inactive"] = data[EuroscopeData].inactive;
-            deltaCount += 1;
-        }
+        // if (data[EuroscopeData].inactive != data[ServerData].inactive) {
+        //     message["inactive"] = data[EuroscopeData].inactive;
+        //     deltaCount += 1;
+        // }
 
         auto lastDelta = deltaCount;
         message["position"] = Json::Value();
