@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "develop"
+      - "vaccfr"
 
 env:
   DLL_NAME: vACDM.dll
