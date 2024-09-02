@@ -297,9 +297,9 @@ DataManager::MessageType DataManager::deltaEuroscopeToBackend(const std::array<t
         // Stop pushing updates to server if either of the conditions is met:
         //  - Above 5000ft
         //  - More than 10nm away from origin
-        if (data[EuroscopeData].trueAltitude > 5000) || (data[EuroscopeData].distanceFromOrigin > 10.0) {
-                return DataManager::MessageType::None;
-            }
+        if ((data[EuroscopeData].trueAltitude > 5000) || (data[EuroscopeData].distanceFromOrigin > 10.0)) {
+            return DataManager::MessageType::None;
+        }
 
         // if (data[EuroscopeData].inactive != data[ServerData].inactive) {
         //     message["inactive"] = data[EuroscopeData].inactive;
