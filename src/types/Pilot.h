@@ -19,7 +19,10 @@ typedef struct Pilot_t {
 
     double latitude = 0.0;
     double longitude = 0.0;
+
+    double trueAltitude = 0.0;
     double distanceFromOrigin = 0.0;
+
     bool taxizoneIsTaxiout = false;
 
     // flightplan & clearance data

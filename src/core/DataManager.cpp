@@ -294,10 +294,12 @@ DataManager::MessageType DataManager::deltaEuroscopeToBackend(const std::array<t
 
         int deltaCount = 0;
 
-        // Do not push updates for pilots further away than X miles from origin
-        if (data[EuroscopeData].distanceFromOrigin > 10.0) {
-            return DataManager::MessageType::None;
-        }
+        // Stop pushing updates to server if either of the conditions is met:
+        //  - Above 5000ft
+        //  - More than 10nm away from origin
+        if (data[EuroscopeData].trueAltitude > 5000) || (data[EuroscopeData].distanceFromOrigin > 10.0) {
+                return DataManager::MessageType::None;
+            }
 
         // if (data[EuroscopeData].inactive != data[ServerData].inactive) {
         //     message["inactive"] = data[EuroscopeData].inactive;
@@ -521,6 +523,7 @@ types::Pilot DataManager::CFlightPlanToPilot(const EuroScopePlugIn::CFlightPlan 
     // position data
     pilot.latitude = flightplan.GetFPTrackPosition().GetPosition().m_Latitude;
     pilot.longitude = flightplan.GetFPTrackPosition().GetPosition().m_Longitude;
+    pilot.trueAltitude = flightplan.GetFPTrackPosition().GetPressureAltitude();
     pilot.distanceFromOrigin = flightplan.GetDistanceFromOrigin();
 
     // flightplan & clearance data
