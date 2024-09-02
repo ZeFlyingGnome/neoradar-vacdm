@@ -294,6 +294,11 @@ DataManager::MessageType DataManager::deltaEuroscopeToBackend(const std::array<t
 
         int deltaCount = 0;
 
+        // Do not push updates for pilots above this altitude (in feets)
+        if (data[EuroscopeData].trueAltitude > 5000) {
+            return DataManager::MessageType::None;
+        }
+
         // if (data[EuroscopeData].inactive != data[ServerData].inactive) {
         //     message["inactive"] = data[EuroscopeData].inactive;
         //     deltaCount += 1;
@@ -516,6 +521,7 @@ types::Pilot DataManager::CFlightPlanToPilot(const EuroScopePlugIn::CFlightPlan 
     // position data
     pilot.latitude = flightplan.GetFPTrackPosition().GetPosition().m_Latitude;
     pilot.longitude = flightplan.GetFPTrackPosition().GetPosition().m_Longitude;
+    pilot.trueAltitude = flightplan.GetFPTrackPosition().GetPressureAltitude();
 
     // flightplan & clearance data
     pilot.origin = flightplan.GetFlightPlanData().GetOrigin();
