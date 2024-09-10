@@ -24,6 +24,7 @@ typedef struct Pilot_t {
     double distanceFromOrigin = 0.0;
 
     bool taxizoneIsTaxiout = false;
+    bool isSimulated = false;
 
     // flightplan & clearance data
 
