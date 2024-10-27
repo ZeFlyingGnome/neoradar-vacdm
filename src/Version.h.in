@@ -4,7 +4,7 @@
 namespace {
 const char *PLUGIN_NAME{ "vACDM" };
 #if DEV_BUILD 
-const char *PLUGIN_VERSION{ "@CMAKE_PROJECT_VERSION@-DEV.@DEV_RELEASE_NUMBER@"};
+const char *PLUGIN_VERSION{ "@CMAKE_PROJECT_VERSION@-vaccFR+@DEV_RELEASE_NUMBER@"};
 #else
 const char *PLUGIN_VERSION{ "@CMAKE_PROJECT_VERSION@" };
 #endif

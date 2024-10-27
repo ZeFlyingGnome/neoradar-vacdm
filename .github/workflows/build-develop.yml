@@ -11,7 +11,7 @@ env:
   BUILD_CONFIGURATION: Release
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   VERSION: "0"
-  DEV_RELEASE: "-1"
+  DEV_RELEASE: "1"
 
 jobs:
   formatting-check:
