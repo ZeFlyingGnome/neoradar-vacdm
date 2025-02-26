@@ -48,6 +48,10 @@ bool vACDM::OnCompileCommand(const char *sCommandLine) {
             userIsNotEligibleMessage =
                 "You are logged in on a Sweatbox Server and Server does not allow Sweatbox connections";
         } else {
+            // Clear all pilot data when switching to master mode
+            DataManager::instance().clearAllPilotData();
+            DisplayMessage("All pilot data cleared");
+
             DisplayMessage("Executing vACDM as the MASTER");
             Logger::instance().log(Logger::LogSender::vACDM, "Switched to MASTER", Logger::LogLevel::Info);
             com::Server::instance().setMaster(true);
@@ -62,6 +66,11 @@ bool vACDM::OnCompileCommand(const char *sCommandLine) {
         DisplayMessage("Executing vACDM as the SLAVE");
         Logger::instance().log(Logger::LogSender::vACDM, "Switched to SLAVE", Logger::LogLevel::Info);
         com::Server::instance().setMaster(false);
+
+        // Clear all pilot data when switching to slave mode
+        DataManager::instance().clearAllPilotData();
+        DisplayMessage("All pilot data cleared");
+
         return true;
     } else if (std::string::npos != command.find("RELOAD")) {
         this->reloadConfiguration();

@@ -41,6 +41,21 @@ void DataManager::pause() { this->m_pause = true; }
 
 void DataManager::resume() { this->m_pause = false; }
 
+void DataManager::clearAllPilotData() {
+    std::lock_guard guard(this->m_pilotLock);
+    this->m_pilots.clear();
+
+    // Also clear any pending updates
+    std::lock_guard guardUpdates(this->m_euroscopeUpdatesLock);
+    this->m_euroscopeFlightplanUpdates.clear();
+
+    // Clear any pending messages
+    std::lock_guard guardMessages(this->m_asyncMessagesLock);
+    this->m_asynchronousMessages.clear();
+
+    Logger::instance().log(Logger::LogSender::DataManager, "All pilot data cleared", Logger::LogLevel::Info);
+}
+
 std::string DataManager::setUpdateCycleSeconds(const int newUpdateCycleSeconds) {
     if (newUpdateCycleSeconds < minUpdateCycleSeconds || newUpdateCycleSeconds > maxUpdateCycleSeconds)
         return "Could not set update rate";

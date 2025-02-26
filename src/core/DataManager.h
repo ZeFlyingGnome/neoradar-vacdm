@@ -113,5 +113,6 @@ class DataManager {
     const types::Pilot getPilot(const std::string &callsign);
     void pause();
     void resume();
+    void clearAllPilotData();
 };
 }  // namespace vacdm::core
