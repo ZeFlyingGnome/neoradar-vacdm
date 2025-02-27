@@ -367,7 +367,7 @@ void DataManager::queueFlightplanUpdate(EuroScopePlugIn::CFlightPlan flightplan)
     // - or the aircraft is out of range therefore GetSimulated() is true
     //  - More than 10nm away from origin
     if (false == flightplan.IsValid() || nullptr == flightplan.GetFlightPlanData().GetPlanType() ||
-        nullptr == flightplan.GetFlightPlanData().GetOrigin() || flightlan.GetSimulated() ||
+        nullptr == flightplan.GetFlightPlanData().GetOrigin() || flightplan.GetSimulated() ||
         flightplan.GetDistanceFromOrigin() > 10.0) {
         return;
     }
