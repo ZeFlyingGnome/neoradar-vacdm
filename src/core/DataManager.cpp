@@ -302,14 +302,6 @@ DataManager::MessageType DataManager::deltaEuroscopeToBackend(const std::array<t
                                                               Json::Value& message) {
     message.clear();
 
-    // Do not push updates to server if simulated update or either of the conditions is met:
-    //  - Above 5000ft
-    //  - More than 10nm away from origin
-    if (!data[EuroscopeData].isSimulated &&
-        ((data[EuroscopeData].trueAltitude > 5000) || (data[EuroscopeData].distanceFromOrigin > 10.0))) {
-        return DataManager::MessageType::None;
-    }
-
     if (data[ServerData].callsign == "" && data[EuroscopeData].callsign != "") {
         return DataManager::MessageType::Post;
     } else {
@@ -370,8 +362,14 @@ void DataManager::setActiveAirports(const std::list<std::string> activeAirports)
 }
 
 void DataManager::queueFlightplanUpdate(EuroScopePlugIn::CFlightPlan flightplan) {
+    // skip the update if:
+    // - the flightplan or its data is invalid
+    // - or the aircraft is out of range therefore GetSimulated() is true
+    //  - Above 5000ft
+    //  - More than 10nm away from origin
     if (false == flightplan.IsValid() || nullptr == flightplan.GetFlightPlanData().GetPlanType() ||
-        nullptr == flightplan.GetFlightPlanData().GetOrigin())
+        nullptr == flightplan.GetFlightPlanData().GetOrigin() || flightlan.isSimulated() ||
+        flightplan.trueAltitude > 5000 || flightplan.distanceFromOrigin > 10.0) {
         return;
 
     auto pilot = this->CFlightPlanToPilot(flightplan);
