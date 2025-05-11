@@ -85,29 +85,5 @@ class String {
         return value.substr(begin, range);
     }
 
-    /**
-     * @brief finds the ICAO in a EuroScope airport name
-     * @details There is no consistent naming defined for EuroScope airports
-     * This means that an airport name may include only the ICAO (e.g. "EDDK") or additionally the name aswell like
-     * "EDDK Cologne-Bonn" in no paticular order. This functions finds the ICAO in this string based on two conditions.
-     * 1. The airport ICAO is 4-letters long
-     * 2. The airport ICAO is full uppercase
-     * @param[in] input the string to find the ICAO in
-     * @return the ICAO or "" if none was found
-     */
-    static auto findIcao(std::string input) -> std::string {
-        if (input.size() < 4) return "";
-
-        // split the input into separate words
-        const auto words = splitString(input, " ");
-
-        for (auto word : words) {
-            if (word.size() == 4 && std::all_of(word.begin(), word.end(), [](char c) { return std::isupper(c); })) {
-                return word;
-            }
-        }
-
-        return "";  // Return an empty string if no valid ICAO code is found
-    }
 };
 }  // namespace vacdm::utils

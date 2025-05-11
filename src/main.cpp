@@ -1,15 +1,13 @@
-#include <memory>
-#pragma warning(push, 0)
-#include <EuroScopePlugIn.h>
-#pragma warning(pop)
+#include "NeoVACDM.h"
 
-#include "vACDM.h"
-
-std::unique_ptr<EuroScopePlugIn::CPlugIn> Plugin;
-
-void __declspec(dllexport) EuroScopePlugInInit(EuroScopePlugIn::CPlugIn **ppPlugInInstance) {
-    Plugin.reset(new vacdm::vACDM());
-    *ppPlugInInstance = Plugin.get();
+extern "C" PLUGIN_API PluginSDK::BasePlugin *CreatePluginInstance()
+{
+    try
+    {
+        return new vacdm::NeoVACDM();
+    }
+    catch (const std::exception &e)
+    {
+        return nullptr;
+    }
 }
-
-void __declspec(dllexport) EuroScopePlugInExit(void) {}

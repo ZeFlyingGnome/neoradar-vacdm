@@ -18,7 +18,7 @@ std::uint32_t ConfigParser::errorLine() const { return this->m_errorLine; }
 
 const std::string &ConfigParser::errorMessage() const { return this->m_errorMessage; }
 
-bool ConfigParser::parseColor(const std::string &block, COLORREF &color, std::uint32_t line) {
+bool ConfigParser::parseColor(const std::string &block, VACDMCOLOR &color, std::uint32_t line) {
     std::vector<std::string> colorValues = utils::String::splitString(block, ",");
 
     if (3 != colorValues.size()) {
@@ -30,7 +30,7 @@ bool ConfigParser::parseColor(const std::string &block, COLORREF &color, std::ui
     std::array<std::uint8_t, 3> colors;
     for (std::size_t i = 0; i < 3; ++i) colors[i] = static_cast<std::uint8_t>(std::atoi(colorValues[i].c_str()));
 
-    color = RGB(colors[0], colors[1], colors[2]);
+    color = { colors[0], colors[1], colors[2] };
 
     return true;
 }
@@ -40,7 +40,7 @@ bool ConfigParser::parse(const std::string &filename, PluginConfig &config) {
 
     std::ifstream stream(filename);
     if (stream.is_open() == false) {
-        this->m_errorMessage = "Unable to open the configuration file";
+        this->m_errorMessage = "Unable to open the configuration file: " + filename;
         this->m_errorLine = 0;
         return false;
     }

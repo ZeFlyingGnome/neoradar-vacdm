@@ -6,9 +6,7 @@
 #include <string>
 #include <thread>
 
-#pragma warning(push, 0)
-#include "EuroScopePlugIn.h"
-#pragma warning(pop)
+#include "SDK.h"
 
 #include <json/json.h>
 
@@ -68,30 +66,30 @@ class DataManager {
     std::mutex m_airportLock;
     std::list<std::string> m_activeAirports;
 
-    struct EuroscopeFlightplanUpdate {
+    struct ScopeFlightplanUpdate {
         std::chrono::utc_clock::time_point timeIssued;
         types::Pilot data;
     };
 
-    std::mutex m_euroscopeUpdatesLock;
-    std::list<EuroscopeFlightplanUpdate> m_euroscopeFlightplanUpdates;
+    std::mutex m_scopeUpdatesLock;
+    std::list<ScopeFlightplanUpdate> m_scopeFlightplanUpdates;
 
     /// @brief consolidates all flightplan updates by throwing out old updates and keeping the most current ones
     /// @param list of flightplans to consolidate
-    void consolidateFlightplanUpdates(std::list<EuroscopeFlightplanUpdate> &list);
-    /// @brief updates the pilots with the saved EuroScope flightplan updates
+    void consolidateFlightplanUpdates(std::list<ScopeFlightplanUpdate> &list);
+    /// @brief updates the pilots with the saved Scope flightplan updates
     /// @param pilots to update
-    void processEuroScopeUpdates(std::map<std::string, std::array<types::Pilot, 3U>> &pilots);
-    /// @brief gathers all information from EuroScope::CFlightPlan and converts it to type Pilot
-    types::Pilot CFlightPlanToPilot(const EuroScopePlugIn::CFlightPlan flightplan);
+    void processScopeUpdates(std::map<std::string, std::array<types::Pilot, 3U>> &pilots);
+    /// @brief gathers all information from Flightplan and Aircraft and converts it to type Pilot
+    types::Pilot CFlightPlanToPilot(const PluginSDK::Flightplan::Flightplan flightplan, const PluginSDK::Aircraft::Aircraft aircraft);
     /// @brief updates the local data with the data from the backend
     /// @param pilots to update
     void consolidateWithBackend(std::map<std::string, std::array<types::Pilot, 3U>> &pilots);
-    /// @brief consolidates EuroScope and backend data
+    /// @brief consolidates Scope and backend data
     /// @param pilot
     void consolidateData(std::array<types::Pilot, 3> &pilot);
 
-    MessageType deltaEuroscopeToBackend(const std::array<types::Pilot, 3> &data, Json::Value &message);
+    MessageType deltaScopeToBackend(const std::array<types::Pilot, 3> &data, Json::Value &message);
 
     struct AsynchronousMessage {
         const MessageType type;
@@ -105,7 +103,7 @@ class DataManager {
 
    public:
     void setActiveAirports(const std::list<std::string> activeAirports);
-    void queueFlightplanUpdate(EuroScopePlugIn::CFlightPlan flightplan);
+    void queueFlightplanUpdate(PluginSDK::Flightplan::Flightplan flightplan, PluginSDK::Aircraft::Aircraft aircraft);
     void handleTagFunction(MessageType message, const std::string callsign,
                            const std::chrono::utc_clock::time_point value);
 

@@ -18,11 +18,11 @@ class Color {
     static types::Pilot pilotT;
     static void updatePluginConfig(PluginConfig newPluginConfig) { pluginConfig = newPluginConfig; }
 
-    static COLORREF colorizeEobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
+    static VACDMCOLOR colorizeEobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
 
-    static COLORREF colorizeTobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
+    static VACDMCOLOR colorizeTobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
 
-    static COLORREF colorizeTsat(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeTsat(const types::Pilot &pilot) {
         if (pilot.asat != types::defaultTime || pilot.tsat == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -54,7 +54,7 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static COLORREF colorizeTtot(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeTtot(const types::Pilot &pilot) {
         if (pilot.ttot == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -99,10 +99,11 @@ class Color {
 
     static int colorizeExot(const types::Pilot &pilot) {
         std::ignore = pilot;
-        return EuroScopePlugIn::TAG_COLOR_DEFAULT;
+        // return ESPlugIn::TAG_COLOR_DEFAULT;
+        return 0;
     }
 
-    static COLORREF colorizeAsat(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeAsat(const types::Pilot &pilot) {
         if (pilot.asat == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -134,17 +135,17 @@ class Color {
         return pluginConfig.orange;
     }
 
-    static COLORREF colorizeAobt(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeAobt(const types::Pilot &pilot) {
         std::ignore = pilot;
         return pluginConfig.grey;
     }
 
-    static COLORREF colorizeAtot(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeAtot(const types::Pilot &pilot) {
         std::ignore = pilot;
         return pluginConfig.grey;
     }
 
-    static COLORREF colorizeAsrt(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeAsrt(const types::Pilot &pilot) {
         if (pilot.asat.time_since_epoch().count() > 0) {
             return pluginConfig.grey;
         }
@@ -166,7 +167,7 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static COLORREF colorizeAort(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeAort(const types::Pilot &pilot) {
         if (pilot.aort == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -192,11 +193,11 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static COLORREF colorizeCtot(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
+    static VACDMCOLOR colorizeCtot(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
 
-    static COLORREF colorizeCtotTimer(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
+    static VACDMCOLOR colorizeCtotTimer(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
 
-    static COLORREF colorizeAsatTimer(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeAsatTimer(const types::Pilot &pilot) {
         // aort set
         if (pilot.aort.time_since_epoch().count() > 0) {
             return pluginConfig.grey;
@@ -234,16 +235,16 @@ class Color {
 
     // other:
 
-    static COLORREF colorizeEcfmpMeasure(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeEcfmpMeasure(const types::Pilot &pilot) {
         return pilot.measures.empty() ? pluginConfig.grey : pluginConfig.green;
     }
 
-    static COLORREF colorizeEventBooking(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeEventBooking(const types::Pilot &pilot) {
         return pilot.hasBooking ? pluginConfig.green : pluginConfig.grey;
     }
 
    private:
-    static COLORREF colorizeEobtAndTobt(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeEobtAndTobt(const types::Pilot &pilot) {
         const auto now = std::chrono::utc_clock::now();
         const auto timeSinceTobt = std::chrono::duration_cast<std::chrono::seconds>(now - pilot.tobt).count();
         const auto timeSinceTsat = std::chrono::duration_cast<std::chrono::seconds>(now - pilot.tsat).count();
@@ -282,7 +283,7 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static COLORREF colorizeCtotandCtottimer(const types::Pilot &pilot) {
+    static VACDMCOLOR colorizeCtotandCtottimer(const types::Pilot &pilot) {
         if (pilot.ctot == types::defaultTime) {
             return pluginConfig.grey;
         }

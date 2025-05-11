@@ -1,15 +1,11 @@
 #pragma once
 
-#pragma warning(push, 0)
-#include "EuroScopePlugIn.h"
-#pragma warning(pop)
-
 #include "core/DataManager.h"
 #include "core/Server.h"
 #include "types/Pilot.h"
 #include "utils/Date.h"
 #include "utils/Number.h"
-#include "vACDM.h"
+#include "NeoVACDM.h"
 
 using namespace vacdm;
 using namespace vacdm::core;
@@ -40,28 +36,145 @@ enum itemFunction {
     RESET_PILOT,
 };
 
-void vACDM::RegisterTagItemFuntions() {
-    RegisterTagItemFunction("Modify EXOT", EXOT_MODIFY);
-    RegisterTagItemFunction("TOBT now", TOBT_NOW);
-    RegisterTagItemFunction("Set TOBT", TOBT_MANUAL);
-    RegisterTagItemFunction("TOBT confirm", TOBT_CONFIRM);
-    RegisterTagItemFunction("Tobt menu", TOBT_MENU);
-    RegisterTagItemFunction("ASAT now", ASAT_NOW);
-    RegisterTagItemFunction("ASAT now and startup state", ASAT_NOW_AND_STARTUP);
-    RegisterTagItemFunction("Startup Request", STARTUP_REQUEST);
-    RegisterTagItemFunction("Request Offblock", OFFBLOCK_REQUEST);
-    RegisterTagItemFunction("Set AOBT and Groundstate", AOBT_NOW_AND_STATE);
-    // Reset Functions
-    RegisterTagItemFunction("Reset TOBT", RESET_TOBT);
-    RegisterTagItemFunction("Reset ASAT", RESET_ASAT);
-    RegisterTagItemFunction("Reset confirmed TOBT", RESET_TOBT_CONFIRM);
-    RegisterTagItemFunction("Reset Offblock Request", RESET_AORT);
-    RegisterTagItemFunction("Reset AOBT", RESET_AOBT_AND_STATE);
-    RegisterTagItemFunction("Reset Menu", RESET_MENU);
-    RegisterTagItemFunction("Reset pilot", RESET_PILOT);
+void NeoVACDM::RegisterTagActions()
+{
+    PluginSDK::Tag::TagActionDefinition tagDef;
+    tagDef.name = "EXOTModify";
+    tagDef.requiresInput = true;
+    tagDef.description = "Modify EXOT";
+    std::string tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    EXOTModifyActionId_ = tagId;
+
+    tagDef.name = "TOBTNow";
+    tagDef.requiresInput = false;
+    tagDef.description = "TOBT Now";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    TOBTNowActionId_ = tagId;
+
+    tagDef.name = "TOBTManual";
+    tagDef.requiresInput = true;
+    tagDef.description = "Set TOBT";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    TOBTManualActionId_ = tagId;
+
+    tagDef.name = "TOBTConfirm";
+    tagDef.requiresInput = false;
+    tagDef.description = "TOBT confirm";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    TOBTConfirmActionId_ = tagId;    
+
+    tagDef.name = "TOBTMenu";
+    tagDef.requiresInput = false;
+    tagDef.description = "TOBT menu";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    TOBTMenuActionId_ = tagId;    
+
+    tagDef.name = "ASATNow";
+    tagDef.requiresInput = false;
+    tagDef.description = "ASAT Now";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ASATNowActionId_ = tagId;
+
+    tagDef.name = "ASATNowAndStartup";
+    tagDef.requiresInput = false;
+    tagDef.description = "ASAT now and startup state";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ASATNowAndStartupActionId_ = tagId;
+
+    tagDef.name = "StartupRequest";
+    tagDef.requiresInput = false;
+    tagDef.description = "Startup Request";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    StartupRequestActionId_ = tagId;
+
+    tagDef.name = "OffblockRequest";
+    tagDef.requiresInput = false;
+    tagDef.description = "Request Offblock";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    OffblockRequestActionId_ = tagId;
+
+    tagDef.name = "AOBTNowAndState";
+    tagDef.requiresInput = false;
+    tagDef.description = "Set AOBT and Groundstate";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    AOBTNowAndStateActionId_ = tagId;
+
+    tagDef.name = "ResetTOBT";
+    tagDef.requiresInput = false;
+    tagDef.description = "Reset TOBT";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ResetTOBTActionId_ = tagId;
+
+    tagDef.name = "ResetASAT";
+    tagDef.requiresInput = false;
+    tagDef.description = "Reset ASAT";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ResetASATActionId_ = tagId;
+
+    tagDef.name = "ResetTOBTConfirm";
+    tagDef.requiresInput = false;
+    tagDef.description = "Reset confirmed TOBT";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ResetTOBTConfirmActionId_ = tagId;
+
+    tagDef.name = "ResetAORT";
+    tagDef.requiresInput = false;
+    tagDef.description = "Reset Offblock Request";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ResetAORTActionId_ = tagId;
+
+    tagDef.name = "ResetAOBT";
+    tagDef.requiresInput = false;
+    tagDef.description = "Reset AOBT";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ResetAOBTActionId_ = tagId;
+
+    tagDef.name = "ResetMenu";
+    tagDef.requiresInput = false;
+    tagDef.description = "Reset Menu";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ResetMenuActionId_ = tagId;
+
+    tagDef.name = "ResetPilot";
+    tagDef.requiresInput = false;
+    tagDef.description = "Reset TOBT";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    ResetPilotActionId_ = tagId;
+   
 }
 
-void vACDM::OnFunctionCall(int functionId, const char *itemString, POINT pt, RECT area) {
+void NeoVACDM::OnTagAction(const PluginSDK::Tag::TagActionEvent *event)
+{
+    logger_->info("Entering TagActionEvent");
+    logger_->info("documentsPath root_name: " + clientInfo_.documentsPath.string());
+
+    if (!initialized_ || !event )
+    {
+        return;
+    }
+
+    logger_->info("NeoVACDM event actionId: " + event->actionId);
+    logger_->info("NeoVACDM event tagId: " + event->tagId);
+    logger_->info("NeoVACDM event callsign: " + event->callsign);
+    logger_->info("NeoVACDM event userInput: " + event->userInput);
+}
+void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *event)
+{
+    logger_->info("Entering OnTagDropdownAction");
+
+
+    if (!initialized_ || !event )
+    {
+        return;
+    }
+
+    logger_->info("NeoVACDM event actionId: " + event->actionId);
+    logger_->info("NeoVACDM event componentId: " + event->componentId);
+    logger_->info("NeoVACDM event tagId: " + event->tagId);
+    logger_->info("NeoVACDM event callsign: " + event->callsign);
+}
+
+/*void vACDM::OnFunctionCall(int functionId, const char *itemString, POINT pt, RECT area) {
     std::ignore = pt;
 
     // do not handle functions if client is not master
@@ -215,5 +328,5 @@ void vACDM::OnFunctionCall(int functionId, const char *itemString, POINT pt, REC
         default:
             break;
     }
-}
+}*/
 }  // namespace vacdm

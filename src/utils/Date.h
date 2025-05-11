@@ -3,9 +3,7 @@
 #include <chrono>
 #include <string>
 
-#pragma warning(push, 0)
-#include "EuroScopePlugIn.h"
-#pragma warning(pop)
+#include "SDK.h"
 
 #include "log/Logger.h"
 
@@ -64,17 +62,17 @@ class Date {
         return retval;
     }
 
-    /// @brief Converts a EuroScope departure time string to a UTC time_point.
-    /// This function takes a EuroScope flight plan and extracts the estimated departure time string.
+    /// @brief Converts a Scope departure time string to a UTC time_point.
+    /// This function takes a Scope flight plan and extracts the estimated departure time string.
     /// Using a different util function it then convert the string to a utc time_point
     ///
-    /// @param flightplan EuroScope flight plan to extract information from.
+    /// @param flightplan Scope flight plan to extract information from.
     /// @return std::chrono::utc_clock::time_point representing the converted departure time.
     ///
-    static std::chrono::utc_clock::time_point convertEuroscopeDepartureTime(
-        const EuroScopePlugIn::CFlightPlan flightplan) {
-        const std::string callsign = flightplan.GetCallsign();
-        const std::string eobt = flightplan.GetFlightPlanData().GetEstimatedDepartureTime();
+    static std::chrono::utc_clock::time_point convertDepartureTime(
+        const PluginSDK::Flightplan::Flightplan flightplan) {
+        const std::string callsign = flightplan.callsign;
+        const std::string eobt = flightplan.eobt;
 
         return convertStringToTimePoint(eobt);
     }

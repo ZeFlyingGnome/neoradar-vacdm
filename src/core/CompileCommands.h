@@ -1,16 +1,12 @@
 #include <algorithm>
 #include <string>
 
-#pragma warning(push, 0)
-#include "EuroScopePlugIn.h"
-#pragma warning(pop)
-
 #include "core/DataManager.h"
 #include "core/Server.h"
 #include "log/Logger.h"
 #include "utils/Number.h"
 #include "utils/String.h"
-#include "vACDM.h"
+#include "NeoVACDM.h"
 
 using namespace vacdm;
 using namespace vacdm::logging;
@@ -18,7 +14,7 @@ using namespace vacdm::core;
 using namespace vacdm::utils;
 
 namespace vacdm {
-bool vACDM::OnCompileCommand(const char *sCommandLine) {
+/*bool vACDM::OnCompileCommand(const char *sCommandLine) {
     std::string command(sCommandLine);
 
 #pragma warning(push)
@@ -101,5 +97,5 @@ bool vACDM::OnCompileCommand(const char *sCommandLine) {
         return true;
     }
     return false;
-}
+}*/
 }  // namespace vacdm

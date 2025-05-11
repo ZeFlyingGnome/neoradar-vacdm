@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wtypes.h>
+// #include <wtypes.h>
 
 #include <chrono>
 #include <format>
@@ -8,7 +8,7 @@
 
 #include "TagItemsColor.h"
 #include "types/Pilot.h"
-#include "vACDM.h"
+#include "NeoVACDM.h"
 
 using namespace vacdm::tagitems;
 
@@ -29,20 +29,75 @@ enum itemType {
     EVENT_BOOKING,
 };
 
-void vACDM::RegisterTagItemTypes() {
-    RegisterTagItemType("EOBT", itemType::EOBT);
-    RegisterTagItemType("TOBT", itemType::TOBT);
-    RegisterTagItemType("TSAT", itemType::TSAT);
-    RegisterTagItemType("TTOT", itemType::TTOT);
-    RegisterTagItemType("EXOT", itemType::EXOT);
-    RegisterTagItemType("ASAT", itemType::ASAT);
-    RegisterTagItemType("AOBT", itemType::AOBT);
-    RegisterTagItemType("ATOT", itemType::ATOT);
-    RegisterTagItemType("ASRT", itemType::ASRT);
-    RegisterTagItemType("AORT", itemType::AORT);
-    RegisterTagItemType("CTOT", itemType::CTOT);
-    RegisterTagItemType("Event Booking", itemType::EVENT_BOOKING);
-    RegisterTagItemType("ECFMP Measures", itemType::ECFMP_MEASURES);
+void NeoVACDM::RegisterTagItems()
+{
+    PluginSDK::Tag::TagItemDefinition tagDef;
+
+    tagDef.name = "EOBT";
+    tagDef.defaultValue = "0000";
+    std::string tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    EOBTTagID_ = tagId;
+
+    tagDef.name = "TOBT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    TOBTTagID_ = tagId;
+
+    tagDef.name = "TSAT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    TSATTagID_ = tagId;
+
+    tagDef.name = "TTOT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    TTOTTagID_ = tagId;
+
+    tagDef.name = "EXOT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    EXOTTagID_ = tagId;
+
+    tagDef.name = "ASAT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    ASATTagID_ = tagId;
+
+    tagDef.name = "AOBT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    AOBTTagID_ = tagId;
+
+    tagDef.name = "ATOT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    ATOTTagID_ = tagId;
+
+    tagDef.name = "ASRT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    ASRTTagID_ = tagId;
+
+    tagDef.name = "AORT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    AORTTagID_ = tagId;
+
+    tagDef.name = "CTOT";
+    tagDef.defaultValue = "0000";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    CTOTTagID_ = tagId;
+
+    tagDef.name = "EventBooking";
+    tagDef.defaultValue = "-";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    EventBookingTagID_ = tagId;
+
+    tagDef.name = "ECFMPMeasures";
+    tagDef.defaultValue = "--";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
+    ECFMPMeasuresTagID_ = tagId;
+
 }
 
 std::string formatTime(const std::chrono::utc_clock::time_point timepoint) {
@@ -52,7 +107,7 @@ std::string formatTime(const std::chrono::utc_clock::time_point timepoint) {
         return "";
 }
 
-void vACDM::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget,
+/*void vACDM::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget,
                          int ItemCode, int TagData, char sItemString[16], int *pColorCode, COLORREF *pRGB,
                          double *pFontSize) {
     std::ignore = RadarTarget;
@@ -141,5 +196,5 @@ void vACDM::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugI
     }
 
     std::strcpy(sItemString, outputText.str().c_str());
-}
+}*/
 }  // namespace vacdm

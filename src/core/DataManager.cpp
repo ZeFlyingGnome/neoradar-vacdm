@@ -8,9 +8,11 @@ using namespace vacdm::com;
 using namespace vacdm::core;
 using namespace vacdm::logging;
 using namespace std::chrono_literals;
+using namespace PluginSDK::Aircraft;
+using namespace PluginSDK::Flightplan;
 
 static constexpr std::size_t ConsolidatedData = 0;
-static constexpr std::size_t EuroscopeData = 1;
+static constexpr std::size_t ScopeData = 1;
 static constexpr std::size_t ServerData = 2;
 
 DataManager::DataManager() : m_pause(false), m_stop(false) { this->m_worker = std::thread(&DataManager::run, this); }
@@ -46,8 +48,8 @@ void DataManager::clearAllPilotData() {
     this->m_pilots.clear();
 
     // Also clear any pending updates
-    std::lock_guard guardUpdates(this->m_euroscopeUpdatesLock);
-    this->m_euroscopeFlightplanUpdates.clear();
+    std::lock_guard guardUpdates(this->m_scopeUpdatesLock);
+    this->m_scopeFlightplanUpdates.clear();
 
     // Clear any pending messages
     std::lock_guard guardMessages(this->m_asyncMessagesLock);
@@ -83,7 +85,7 @@ void DataManager::run() {
 
         this->processAsynchronousMessages(pilots);
 
-        this->processEuroScopeUpdates(pilots);
+        this->processScopeUpdates(pilots);
 
         this->consolidateWithBackend(pilots);
 
@@ -91,7 +93,7 @@ void DataManager::run() {
             std::list<std::tuple<types::Pilot, DataManager::MessageType, Json::Value>> transmissionBuffer;
             for (auto& pilot : pilots) {
                 Json::Value message;
-                const auto sendType = DataManager::deltaEuroscopeToBackend(pilot.second, message);
+                const auto sendType = DataManager::deltaScopeToBackend(pilot.second, message);
                 if (MessageType::None != sendType)
                     transmissionBuffer.push_back({pilot.second[ConsolidatedData], sendType, message});
             }
@@ -298,30 +300,30 @@ void DataManager::handleTagFunction(MessageType type, const std::string callsign
     }
 }
 
-DataManager::MessageType DataManager::deltaEuroscopeToBackend(const std::array<types::Pilot, 3>& data,
+DataManager::MessageType DataManager::deltaScopeToBackend(const std::array<types::Pilot, 3>& data,
                                                               Json::Value& message) {
     message.clear();
 
-    if (data[ServerData].callsign == "" && data[EuroscopeData].callsign != "") {
+    if (data[ServerData].callsign == "" && data[ScopeData].callsign != "") {
         return DataManager::MessageType::Post;
     } else {
-        message["callsign"] = data[EuroscopeData].callsign;
+        message["callsign"] = data[ScopeData].callsign;
 
         int deltaCount = 0;
 
-        // if (data[EuroscopeData].inactive != data[ServerData].inactive) {
-        //     message["inactive"] = data[EuroscopeData].inactive;
+        // if (data[ScopeData].inactive != data[ServerData].inactive) {
+        //     message["inactive"] = data[ScopeData].inactive;
         //     deltaCount += 1;
         // }
 
         auto lastDelta = deltaCount;
         message["position"] = Json::Value();
-        if (data[EuroscopeData].latitude != data[ServerData].latitude) {
-            message["position"]["lat"] = data[EuroscopeData].latitude;
+        if (data[ScopeData].latitude != data[ServerData].latitude) {
+            message["position"]["lat"] = data[ScopeData].latitude;
             deltaCount += 1;
         }
-        if (data[EuroscopeData].longitude != data[ServerData].longitude) {
-            message["position"]["lon"] = data[EuroscopeData].longitude;
+        if (data[ScopeData].longitude != data[ServerData].longitude) {
+            message["position"]["lon"] = data[ScopeData].longitude;
             deltaCount += 1;
         }
         if (deltaCount == lastDelta) message.removeMember("position");
@@ -329,26 +331,26 @@ DataManager::MessageType DataManager::deltaEuroscopeToBackend(const std::array<t
         // patch flightplan data
         lastDelta = deltaCount;
         message["flightplan"] = Json::Value();
-        if (data[EuroscopeData].origin != data[ServerData].origin) {
+        if (data[ScopeData].origin != data[ServerData].origin) {
             deltaCount += 1;
-            message["flightplan"]["departure"] = data[EuroscopeData].origin;
+            message["flightplan"]["departure"] = data[ScopeData].origin;
         }
-        if (data[EuroscopeData].destination != data[ServerData].destination) {
+        if (data[ScopeData].destination != data[ServerData].destination) {
             deltaCount += 1;
-            message["flightplan"]["arrival"] = data[EuroscopeData].destination;
+            message["flightplan"]["arrival"] = data[ScopeData].destination;
         }
         if (deltaCount == lastDelta) message.removeMember("flightplan");
 
         // patch clearance data
         lastDelta = deltaCount;
         message["clearance"] = Json::Value();
-        if (data[EuroscopeData].runway != data[ServerData].runway) {
+        if (data[ScopeData].runway != data[ServerData].runway) {
             deltaCount += 1;
-            message["clearance"]["dep_rwy"] = data[EuroscopeData].runway;
+            message["clearance"]["dep_rwy"] = data[ScopeData].runway;
         }
-        if (data[EuroscopeData].sid != data[ServerData].sid) {
+        if (data[ScopeData].sid != data[ServerData].sid) {
             deltaCount += 1;
-            message["clearance"]["sid"] = data[EuroscopeData].sid;
+            message["clearance"]["sid"] = data[ScopeData].sid;
         }
         if (deltaCount == lastDelta) message.removeMember("clearance");
 
@@ -361,21 +363,21 @@ void DataManager::setActiveAirports(const std::list<std::string> activeAirports)
     this->m_activeAirports = activeAirports;
 }
 
-void DataManager::queueFlightplanUpdate(EuroScopePlugIn::CFlightPlan flightplan) {
+void DataManager::queueFlightplanUpdate(Flightplan flightplan, Aircraft aircraft) {
     // skip the update if:
     // - the flightplan or its data is invalid
     // - or the aircraft is out of range therefore GetSimulated() is true
     //  - More than 10nm away from origin
-    if (false == flightplan.IsValid() || nullptr == flightplan.GetFlightPlanData().GetPlanType() ||
+    if (false == flightplan.isValid /*|| nullptr == flightplan.GetFlightPlanData().GetPlanType() ||
         nullptr == flightplan.GetFlightPlanData().GetOrigin() || flightplan.GetSimulated() ||
-        flightplan.GetDistanceFromOrigin() > 10.0) {
+        flightplan.GetDistanceFromOrigin() > 10.0*/) {
         return;
     }
 
-    auto pilot = this->CFlightPlanToPilot(flightplan);
+    auto pilot = this->CFlightPlanToPilot(flightplan, aircraft);
 
-    std::lock_guard guard(this->m_euroscopeUpdatesLock);
-    this->m_euroscopeFlightplanUpdates.push_back({std::chrono::utc_clock::now(), pilot});
+    std::lock_guard guard(this->m_scopeUpdatesLock);
+    this->m_scopeFlightplanUpdates.push_back({std::chrono::utc_clock::now(), pilot});
 }
 
 void DataManager::consolidateWithBackend(std::map<std::string, std::array<types::Pilot, 3U>>& pilots) {
@@ -386,10 +388,10 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
         // update backend data & consolidate
         bool removeFlight = pilot->second[ServerData].inactive == true;
         for (auto updateIt = backendPilots.begin(); updateIt != backendPilots.end(); ++updateIt) {
-            if (updateIt->callsign == pilot->second[EuroscopeData].callsign) {
+            if (updateIt->callsign == pilot->second[ScopeData].callsign) {
                 Logger::instance().log(
                     Logger::LogSender::DataManager,
-                    "Updating " + pilot->second[EuroscopeData].callsign + " with" + updateIt->callsign,
+                    "Updating " + pilot->second[ScopeData].callsign + " with" + updateIt->callsign,
                     Logger::LogLevel::Info);
                 pilot->second[ServerData] = *updateIt;
                 DataManager::consolidateData(pilot->second);
@@ -409,7 +411,7 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
 }
 
 void DataManager::consolidateData(std::array<types::Pilot, 3>& pilot) {
-    if (pilot[EuroscopeData].callsign == pilot[ServerData].callsign) {
+    if (pilot[ScopeData].callsign == pilot[ServerData].callsign) {
         // backend data
         pilot[ConsolidatedData].inactive = pilot[ServerData].inactive;
         pilot[ConsolidatedData].lastUpdate = pilot[ServerData].lastUpdate;
@@ -431,31 +433,31 @@ void DataManager::consolidateData(std::array<types::Pilot, 3>& pilot) {
         pilot[ConsolidatedData].hasBooking = pilot[ServerData].hasBooking;
         pilot[ConsolidatedData].taxizoneIsTaxiout = pilot[ServerData].taxizoneIsTaxiout;
 
-        // EuroScope data
-        pilot[ConsolidatedData].latitude = pilot[EuroscopeData].latitude;
-        pilot[ConsolidatedData].longitude = pilot[EuroscopeData].longitude;
+        // Scope data
+        pilot[ConsolidatedData].latitude = pilot[ScopeData].latitude;
+        pilot[ConsolidatedData].longitude = pilot[ScopeData].longitude;
 
-        pilot[ConsolidatedData].origin = pilot[EuroscopeData].origin;
-        pilot[ConsolidatedData].destination = pilot[EuroscopeData].destination;
-        pilot[ConsolidatedData].runway = pilot[EuroscopeData].runway;
-        pilot[ConsolidatedData].sid = pilot[EuroscopeData].sid;
+        pilot[ConsolidatedData].origin = pilot[ScopeData].origin;
+        pilot[ConsolidatedData].destination = pilot[ScopeData].destination;
+        pilot[ConsolidatedData].runway = pilot[ScopeData].runway;
+        pilot[ConsolidatedData].sid = pilot[ScopeData].sid;
 
         logging::Logger::instance().log(Logger::LogSender::DataManager, "Consolidated " + pilot[ServerData].callsign,
                                         logging::Logger::LogLevel::Info);
     } else {
         logging::Logger::instance().log(Logger::LogSender::DataManager,
-                                        "Callsign mismatch during consolidation: " + pilot[EuroscopeData].callsign +
+                                        "Callsign mismatch during consolidation: " + pilot[ScopeData].callsign +
                                             ", " + pilot[ServerData].callsign,
                                         logging::Logger::LogLevel::Critical);
     }
 }
 
-void DataManager::processEuroScopeUpdates(std::map<std::string, std::array<types::Pilot, 3U>>& pilots) {
+void DataManager::processScopeUpdates(std::map<std::string, std::array<types::Pilot, 3U>>& pilots) {
     // obtain a copy of the flightplan updates, clear the update list, consolidate flightplan updates
-    this->m_euroscopeUpdatesLock.lock();
-    auto flightplanUpdates = this->m_euroscopeFlightplanUpdates;
-    this->m_euroscopeFlightplanUpdates.clear();
-    this->m_euroscopeUpdatesLock.unlock();
+    this->m_scopeUpdatesLock.lock();
+    auto flightplanUpdates = this->m_scopeFlightplanUpdates;
+    this->m_scopeFlightplanUpdates.clear();
+    this->m_scopeUpdatesLock.unlock();
 
     this->consolidateFlightplanUpdates(flightplanUpdates);
 
@@ -470,7 +472,7 @@ void DataManager::processEuroScopeUpdates(std::map<std::string, std::array<types
                 Logger::instance().log(Logger::LogSender::DataManager, "Updated data of " + pilot.callsign,
                                        Logger::LogLevel::Info);
 
-                pair.second[EuroscopeData] = pilot;
+                pair.second[ScopeData] = pilot;
                 found = true;
                 break;
             }
@@ -483,8 +485,8 @@ void DataManager::processEuroScopeUpdates(std::map<std::string, std::array<types
     }
 }
 
-void DataManager::consolidateFlightplanUpdates(std::list<EuroscopeFlightplanUpdate>& inputList) {
-    std::list<DataManager::EuroscopeFlightplanUpdate> resultList;
+void DataManager::consolidateFlightplanUpdates(std::list<ScopeFlightplanUpdate>& inputList) {
+    std::list<DataManager::ScopeFlightplanUpdate> resultList;
 
     for (const auto& currentUpdate : inputList) {
         auto pilot = currentUpdate.data;
@@ -499,7 +501,7 @@ void DataManager::consolidateFlightplanUpdates(std::list<EuroscopeFlightplanUpda
 
         // Check if the flight plan already exists in the result list
         auto it = std::find_if(resultList.begin(), resultList.end(),
-                               [&currentUpdate](const EuroscopeFlightplanUpdate& existingUpdate) {
+                               [&currentUpdate](const ScopeFlightplanUpdate& existingUpdate) {
                                    return existingUpdate.data.callsign == currentUpdate.data.callsign;
                                });
 
@@ -528,27 +530,31 @@ void DataManager::consolidateFlightplanUpdates(std::list<EuroscopeFlightplanUpda
     inputList = resultList;
 }
 
-types::Pilot DataManager::CFlightPlanToPilot(const EuroScopePlugIn::CFlightPlan flightplan) {
+types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flightplan flightplan, const PluginSDK::Aircraft::Aircraft aircraft) {
     types::Pilot pilot;
 
-    pilot.callsign = flightplan.GetCallsign();
+    pilot.callsign = flightplan.callsign;
     pilot.lastUpdate = std::chrono::utc_clock::now();
 
     // position data
-    pilot.latitude = flightplan.GetFPTrackPosition().GetPosition().m_Latitude;
-    pilot.longitude = flightplan.GetFPTrackPosition().GetPosition().m_Longitude;
-    pilot.trueAltitude = flightplan.GetFPTrackPosition().GetPressureAltitude();
-    pilot.distanceFromOrigin = flightplan.GetDistanceFromOrigin();
-    pilot.isSimulated = flightplan.GetSimulated();
+    pilot.latitude = aircraft.position.latitude;
+    pilot.longitude = aircraft.position.longitude;
+    pilot.trueAltitude = aircraft.position.trueAltitude;
+    // pilot.distanceFromOrigin = flightplan.GetDistanceFromOrigin();
+    // pilot.isSimulated = flightplan.GetSimulated();
+    pilot.distanceFromOrigin = 0.5;
+    pilot.isSimulated = false;
 
     // flightplan & clearance data
-    pilot.origin = flightplan.GetFlightPlanData().GetOrigin();
-    pilot.destination = flightplan.GetFlightPlanData().GetDestination();
-    pilot.runway = flightplan.GetFlightPlanData().GetDepartureRwy();
-    pilot.sid = flightplan.GetFlightPlanData().GetSidName();
+    pilot.origin = flightplan.origin;
+    pilot.destination = flightplan.destination;
+    // pilot.runway = flightplan.GetFlightPlanData().GetDepartureRwy();
+    // pilot.sid = flightplan.GetFlightPlanData().GetSidName();
+    pilot.runway = "08L";
+    pilot.sid = "LGL6H";
 
     // acdm data
-    pilot.eobt = utils::Date::convertEuroscopeDepartureTime(flightplan);
+    pilot.eobt = utils::Date::convertDepartureTime(flightplan);
     pilot.tobt = pilot.eobt;
 
     return pilot;
