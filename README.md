@@ -11,3 +11,4 @@ TODO:
 * Finish porting TagItems.h, vACDM.cpp
 * Finish porting TagItems.h, vACDM.cpp
 * Correctly find vacdm.txt under the plugins directory and on all platforms
+* disable when connected as OBS
