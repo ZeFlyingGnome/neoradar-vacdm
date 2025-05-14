@@ -28,7 +28,7 @@ include_directories(
 
 # Find external dependencies
 find_package(CURL REQUIRED)
-find_package(jsoncpp CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 # Source files
 set(SOURCES
@@ -48,7 +48,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 # Link dependencies
 target_link_libraries(${PROJECT_NAME} PRIVATE
     CURL::libcurl 
-    JsonCpp::JsonCpp
+    nlohmann_json::nlohmann_json
 )
 
 # Set output directory and properties

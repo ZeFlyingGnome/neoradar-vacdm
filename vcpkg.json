@@ -2,5 +2,5 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "neo-radar-vacdm",
   "version": "1.3.3",
-  "dependencies": ["curl","jsoncpp"]
+  "dependencies": ["curl","nlohmann-json"]
 }
