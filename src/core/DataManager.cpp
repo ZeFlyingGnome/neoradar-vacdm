@@ -90,9 +90,9 @@ void DataManager::run() {
         this->consolidateWithBackend(pilots);
 
         if (true == Server::instance().getMaster()) {
-            std::list<std::tuple<types::Pilot, DataManager::MessageType, Json::Value>> transmissionBuffer;
+            std::list<std::tuple<types::Pilot, DataManager::MessageType, nlohmann::json>> transmissionBuffer;
             for (auto& pilot : pilots) {
-                Json::Value message;
+                nlohmann::json message;
                 const auto sendType = DataManager::deltaScopeToBackend(pilot.second, message);
                 if (MessageType::None != sendType)
                     transmissionBuffer.push_back({pilot.second[ConsolidatedData], sendType, message});
@@ -301,7 +301,7 @@ void DataManager::handleTagFunction(MessageType type, const std::string callsign
 }
 
 DataManager::MessageType DataManager::deltaScopeToBackend(const std::array<types::Pilot, 3>& data,
-                                                              Json::Value& message) {
+                                                              nlohmann::json& message) {
     message.clear();
 
     if (data[ServerData].callsign == "" && data[ScopeData].callsign != "") {
@@ -317,7 +317,7 @@ DataManager::MessageType DataManager::deltaScopeToBackend(const std::array<types
         // }
 
         auto lastDelta = deltaCount;
-        message["position"] = Json::Value();
+        message["position"] = nlohmann::json();
         if (data[ScopeData].latitude != data[ServerData].latitude) {
             message["position"]["lat"] = data[ScopeData].latitude;
             deltaCount += 1;
@@ -326,11 +326,11 @@ DataManager::MessageType DataManager::deltaScopeToBackend(const std::array<types
             message["position"]["lon"] = data[ScopeData].longitude;
             deltaCount += 1;
         }
-        if (deltaCount == lastDelta) message.removeMember("position");
+        if (deltaCount == lastDelta) message.erase("position");
 
         // patch flightplan data
         lastDelta = deltaCount;
-        message["flightplan"] = Json::Value();
+        message["flightplan"] = nlohmann::json();
         if (data[ScopeData].origin != data[ServerData].origin) {
             deltaCount += 1;
             message["flightplan"]["departure"] = data[ScopeData].origin;
@@ -339,11 +339,11 @@ DataManager::MessageType DataManager::deltaScopeToBackend(const std::array<types
             deltaCount += 1;
             message["flightplan"]["arrival"] = data[ScopeData].destination;
         }
-        if (deltaCount == lastDelta) message.removeMember("flightplan");
+        if (deltaCount == lastDelta) message.erase("flightplan");
 
         // patch clearance data
         lastDelta = deltaCount;
-        message["clearance"] = Json::Value();
+        message["clearance"] = nlohmann::json();
         if (data[ScopeData].runway != data[ServerData].runway) {
             deltaCount += 1;
             message["clearance"]["dep_rwy"] = data[ScopeData].runway;
@@ -352,7 +352,7 @@ DataManager::MessageType DataManager::deltaScopeToBackend(const std::array<types
             deltaCount += 1;
             message["clearance"]["sid"] = data[ScopeData].sid;
         }
-        if (deltaCount == lastDelta) message.removeMember("clearance");
+        if (deltaCount == lastDelta) message.erase("clearance");
 
         return deltaCount != 0 ? DataManager::MessageType::Patch : DataManager::MessageType::None;
     }

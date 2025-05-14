@@ -124,15 +124,13 @@ void NeoVACDM::reloadConfiguration(bool initialLoading)
         DisplayMessage(message, "Config");
     } else {
         DisplayMessage(true == initialLoading ? "Loaded the config" : "Reloaded the config", "Config");
-        // !!!!!!!!!!!!!!! jsoncpp CRASH !!!!!!!!!!!!!!!!!!!!!!!!!!! //
-        /*if (this->m_pluginConfig.serverUrl != newConfig.serverUrl)
+        if (this->m_pluginConfig.serverUrl != newConfig.serverUrl)
             this->changeServerUrl(newConfig.serverUrl);
         else
-            this->checkServerConfiguration();*/
+            this->checkServerConfiguration();
 
         this->m_pluginConfig = newConfig;
-        // !!!!!!!!!!!!!!! CRASH !!!!!!!!!!!!!!!!!!!!!!!!!!! //
-        // logger_->info(DataManager::instance().setUpdateCycleSeconds(newConfig.updateCycleSeconds));
+        logger_->info(DataManager::instance().setUpdateCycleSeconds(newConfig.updateCycleSeconds));
         tagitems::Color::updatePluginConfig(newConfig);
     }
 }
