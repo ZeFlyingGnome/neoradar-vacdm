@@ -1,11 +1,12 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <mutex>
 #include <string>
 
-#define CURL_STATICLIB 1
-#include <curl/curl.h>
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#include <httplib.h>
 
 #include <nlohmann/json.hpp>
 
@@ -22,18 +23,10 @@ class Server {
 
    private:
     Server();
-    struct Communication {
-        std::mutex lock;
-        CURL* socket;
-
-        Communication() : lock(), socket(curl_easy_init()) {}
-    };
 
     std::string m_authToken;
-    Communication m_getRequest;
-    Communication m_postRequest;
-    Communication m_patchRequest;
-    Communication m_deleteRequest;
+    std::mutex m_clientMutex;
+    std::unique_ptr<httplib::Client> m_client;
 
     bool m_apiIsChecked;
     bool m_apiIsValid;
@@ -84,5 +77,9 @@ class Server {
     const std::string& errorMessage() const;
     void setMaster(bool master);
     bool getMaster();
+
+   private:
+    // Helper method to initialize/reinitialize the HTTP client
+    void initClient();
 };
 }  // namespace vacdm::com
