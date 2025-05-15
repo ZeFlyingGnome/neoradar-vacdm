@@ -26,25 +26,25 @@ static std::size_t receiveCurlDelete(void* ptr, std::size_t size, std::size_t nm
 static std::size_t receiveCurlGet(void* ptr, std::size_t size, std::size_t nmemb, void* stream) {
     (void)stream;
 
-    std::string serverResult = static_cast<char*>(ptr);
-    __receivedGetData += serverResult;
-    return size * nmemb;
+    std::size_t realsize = size * nmemb;
+    __receivedGetData.append((char*)ptr, realsize);
+    return realsize;
 }
 
 static std::size_t receiveCurlPatch(void* ptr, std::size_t size, std::size_t nmemb, void* stream) {
     (void)stream;
 
-    std::string serverResult = static_cast<char*>(ptr);
-    __receivedPatchData += serverResult;
-    return size * nmemb;
+    std::size_t realsize = size * nmemb;
+    __receivedPatchData.append((char*)ptr, realsize);
+    return realsize;
 }
 
 static std::size_t receiveCurlPost(void* ptr, std::size_t size, std::size_t nmemb, void* stream) {
     (void)stream;
 
-    std::string serverResult = static_cast<char*>(ptr);
-    __receivedPostData += serverResult;
-    return size * nmemb;
+    std::size_t realsize = size * nmemb;
+    __receivedPostData.append((char*)ptr, realsize);
+    return realsize;
 }
 
 Server::Server()
