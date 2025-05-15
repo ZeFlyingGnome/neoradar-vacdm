@@ -1,12 +1,13 @@
 #pragma once
 
-#define CURL_STATICLIB 1
-#include <curl/curl.h>
-#include <json/json.h>
-
 #include <list>
 #include <mutex>
 #include <string>
+
+#define CURL_STATICLIB 1
+#include <curl/curl.h>
+
+#include <nlohmann/json.hpp>
 
 #include "types/Pilot.h"
 
@@ -56,17 +57,17 @@ class Server {
     ServerConfiguration_t getServerConfig();
     std::list<types::Pilot> getPilots(const std::list<std::string> airports);
     void postPilot(types::Pilot);
-    void patchPilot(const Json::Value& root);
+    void patchPilot(const nlohmann::json& root);
 
     /// @brief Sends a post message to the specififed endpoint url with the root as content
     /// @param endpointUrl endpoint url to send the request to
     /// @param root message content
-    void sendPostMessage(const std::string& endpointUrl, const Json::Value& root);
+    void sendPostMessage(const std::string& endpointUrl, const nlohmann::json& root);
 
     /// @brief Sends a patch message to the specified endpoint url with the root as content
     /// @param endpointUrl endpoint url to send the request to
     /// @param root message content
-    void sendPatchMessage(const std::string& endpointUrl, const Json::Value& root);
+    void sendPatchMessage(const std::string& endpointUrl, const nlohmann::json& root);
     void sendDeleteMessage(const std::string& endpointUrl);
 
     void updateExot(const std::string& pilot, const std::chrono::utc_clock::time_point& exot);
