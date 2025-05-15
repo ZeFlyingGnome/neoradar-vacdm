@@ -154,21 +154,18 @@ bool Server::checkWebApi() {
     nlohmann::json root;
     Logger::instance().log(Logger::LogSender::Server, "Received API-version-message: " + __receivedGetData,
                            Logger::LogLevel::Info);
-    try
-    {
+    try {
         root = nlohmann::json::parse(__receivedGetData.c_str());
-        if ( PLUGIN_VERSION_MAJOR != root["major"].get<int>() ) {
+        if (PLUGIN_VERSION_MAJOR != root["major"].get<int>()) {
             this->m_errorCode = "Backend-version is incompatible. Please update the plugin.";
             this->m_apiIsValid = false;
         } else {
             this->m_apiIsValid = true;
         }
 
-    }
-    catch(const std::exception& e)
-    {
+    } catch (const std::exception& e) {
         Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
-                        Logger::LogLevel::Info);
+                               Logger::LogLevel::Info);
         this->m_errorCode = "Invalid backend-version response: " + __receivedGetData;
         this->m_apiIsValid = false;
     }
@@ -194,19 +191,17 @@ Server::ServerConfiguration Server::getServerConfig() {
 
             Logger::instance().log(Logger::LogSender::Server, "Received configuration: " + __receivedGetData,
                                    Logger::LogLevel::Info);
-            try
-            {
+            try {
                 root = nlohmann::json::parse(__receivedGetData.c_str());
                 ServerConfiguration_t config;
                 config.name = root["serverName"].get<std::string>();
                 config.allowMasterInSweatbox = root["allowSimSession"].get<bool>();
                 config.allowMasterAsObserver = root["allowObsMaster"].get<bool>();
                 return config;
-            }
-            catch(const std::exception& e)
-            {
-            Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
-                        Logger::LogLevel::Info);
+            } catch (const std::exception& e) {
+                Logger::instance().log(Logger::LogSender::Server,
+                                       "Failed to parse response JSON: " + std::string(e.what()),
+                                       Logger::LogLevel::Info);
             }
         }
     }
@@ -237,8 +232,7 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
 
             // Logger::instance().log(Logger::LogSender::Server, "Received data" + __receivedGetData,
             //                        Logger::LogLevel::Debug);
-            try
-            {
+            try {
                 root = nlohmann::json::parse(__receivedGetData.c_str());
                 std::list<types::Pilot> pilots;
 
@@ -267,8 +261,8 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                     pilots.back().ctot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ctot"].get<std::string>());
                     pilots.back().ttot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ttot"].get<std::string>());
                     pilots.back().tsat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tsat"].get<std::string>());
-                    pilots.back().exot =
-                        std::chrono::utc_clock::time_point(std::chrono::minutes(pilot["vacdm"]["exot"].get<long int>()));
+                    pilots.back().exot = std::chrono::utc_clock::time_point(
+                        std::chrono::minutes(pilot["vacdm"]["exot"].get<long int>()));
                     pilots.back().asat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asat"].get<std::string>());
                     pilots.back().aobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aobt"].get<std::string>());
                     pilots.back().atot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["atot"].get<std::string>());
@@ -294,11 +288,10 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                 Logger::instance().log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
                                        Logger::LogLevel::Info);
                 return pilots;
-            }
-            catch(const std::exception& e)
-            {
-                Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
-                        Logger::LogLevel::Info);
+            } catch (const std::exception& e) {
+                Logger::instance().log(Logger::LogSender::Server,
+                                       "Failed to parse response JSON: " + std::string(e.what()),
+                                       Logger::LogLevel::Info);
             }
         }
     }

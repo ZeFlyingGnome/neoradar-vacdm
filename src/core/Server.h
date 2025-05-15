@@ -1,12 +1,13 @@
 #pragma once
 
-#define CURL_STATICLIB 1
-#include <curl/curl.h>
-#include <nlohmann/json.hpp>
-
 #include <list>
 #include <mutex>
 #include <string>
+
+#define CURL_STATICLIB 1
+#include <curl/curl.h>
+
+#include <nlohmann/json.hpp>
 
 #include "types/Pilot.h"
 
