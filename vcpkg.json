@@ -1,7 +1,7 @@
 {
   "dependencies": [
-    "curl",
-    "nlohmann-json",
-    "geographiclib"
+    "openssl",
+    "cpp-httplib",
+    "nlohmann-json"
   ]
 }

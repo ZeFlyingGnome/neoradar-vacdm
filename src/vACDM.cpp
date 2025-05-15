@@ -32,8 +32,6 @@ vACDM::vACDM()
     Logger::instance().log(Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
                            Logger::LogLevel::System);
 
-    if (0 != curl_global_init(CURL_GLOBAL_ALL)) DisplayMessage("Unable to initialize the network stack!");
-
     // get the dll-path
     char path[MAX_PATH + 1] = {0};
     GetModuleFileNameA((HINSTANCE)&__ImageBase, path, MAX_PATH);
