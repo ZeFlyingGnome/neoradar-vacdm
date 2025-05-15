@@ -99,6 +99,8 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
     crypt32.lib ws2_32.lib Shlwapi.lib
 )
 
+# TODO: Switch to GeographicLib static with next release (2.6 ?)
+#   (see: https://github.com/geographiclib/geographiclib/issues/37)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
     debug ${CMAKE_SOURCE_DIR}/external/lib/GeographicLib_d.lib
     optimized ${CMAKE_SOURCE_DIR}/external/lib/GeographicLib.lib
