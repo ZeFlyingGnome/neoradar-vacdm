@@ -1,10 +1,9 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <mutex>
 #include <string>
-#include <memory>
-
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <httplib.h>

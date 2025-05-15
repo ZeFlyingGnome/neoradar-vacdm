@@ -69,19 +69,20 @@ bool Server::checkWebApi() {
     }
 
     std::string url = "/api/v1/version";
-    
+
     // Send GET request
     auto result = m_client->Get(url);
     if (!result || result->status != 200) {
-        Logger::instance().log(Logger::LogSender::Server, 
-                              "Failed to connect to API: " + (result ? std::to_string(result->status) : "connection error"),
-                              Logger::LogLevel::Info);
+        Logger::instance().log(
+            Logger::LogSender::Server,
+            "Failed to connect to API: " + (result ? std::to_string(result->status) : "connection error"),
+            Logger::LogLevel::Info);
         this->m_apiIsValid = false;
         return m_apiIsValid;
     }
 
     std::string response = result->body;
-    Logger::instance().log(Logger::LogSender::Server, "Received API-version-message: " + response, 
+    Logger::instance().log(Logger::LogSender::Server, "Received API-version-message: " + response,
                            Logger::LogLevel::Info);
     try {
         auto root = nlohmann::json::parse(response);
@@ -97,24 +98,24 @@ bool Server::checkWebApi() {
         this->m_errorCode = "Invalid backend-version response: " + response;
         this->m_apiIsValid = false;
     }
-    
+
     m_apiIsChecked = true;
     return this->m_apiIsValid;
 }
 
 Server::ServerConfiguration Server::getServerConfig() {
-    if (false == this->m_apiIsChecked || false == this->m_apiIsValid) 
-        return Server::ServerConfiguration();
+    if (false == this->m_apiIsChecked || false == this->m_apiIsValid) return Server::ServerConfiguration();
 
     std::lock_guard guard(m_clientMutex);
     if (m_client) {
         std::string url = "/api/v1/config";
         auto result = m_client->Get(url);
-        
+
         if (result && result->status == 200) {
             nlohmann::json root;
-        
-            Logger::instance().log(Logger::LogSender::Server, "Received configuration: " + result->body, Logger::LogLevel::Info);
+
+            Logger::instance().log(Logger::LogSender::Server, "Received configuration: " + result->body,
+                                   Logger::LogLevel::Info);
 
             try {
                 root = nlohmann::json::parse(result->body);
@@ -123,10 +124,10 @@ Server::ServerConfiguration Server::getServerConfig() {
                 config.allowMasterInSweatbox = root["allowSimSession"].get<bool>();
                 config.allowMasterAsObserver = root["allowObsMaster"].get<bool>();
                 return config;
-            }
-            catch (const std::exception& e) {
-                Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
-                        Logger::LogLevel::Info);
+            } catch (const std::exception& e) {
+                Logger::instance().log(Logger::LogSender::Server,
+                                       "Failed to parse response JSON: " + std::string(e.what()),
+                                       Logger::LogLevel::Info);
             }
         }
     }
@@ -141,17 +142,14 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
     }
 
     std::string url = "/api/v1/pilots";
-    
+
     // Add airport filter if specified
     if (!airports.empty()) {
         url += "?airports=";
-        url += std::accumulate(std::next(airports.begin()), airports.end(), 
-                              *airports.begin(),
-                              [](const std::string& a, const std::string& b) {
-                                  return a + "," + b;
-                              });
+        url += std::accumulate(std::next(airports.begin()), airports.end(), *airports.begin(),
+                               [](const std::string& a, const std::string& b) { return a + "," + b; });
     }
-    
+
     Logger::instance().log(Logger::LogSender::Server, url, Logger::LogLevel::Info);
 
     auto result = m_client->Get(url);
@@ -212,62 +210,59 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                 pilots.back().hasBooking = pilot["hasBooking"].get<bool>();
             }
             Logger::instance().log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
-                                    Logger::LogLevel::Info);
+                                   Logger::LogLevel::Info);
             return pilots;
 
-        }
-        catch(const std::exception& e) {
+        } catch (const std::exception& e) {
             Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
-                        Logger::LogLevel::Info);
+                                   Logger::LogLevel::Info);
         }
     }
     return {};
 }
 
 void Server::sendPostMessage(const std::string& endpointUrl, const nlohmann::json& root) {
-    if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) 
-        return;
+    if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) return;
 
     const auto message = root.dump();
-    
+
     if (root.contains("callsign")) {
         Logger::instance().log(Logger::LogSender::Server,
-                           "Posting " + root["callsign"].get<std::string>() + " with message: " + message,
-                           Logger::LogLevel::Debug);
+                               "Posting " + root["callsign"].get<std::string>() + " with message: " + message,
+                               Logger::LogLevel::Debug);
     }
 
     std::lock_guard guard(m_clientMutex);
     if (m_client) {
         auto result = m_client->Post(endpointUrl, message, "application/json");
-        
+
         if (result && root.contains("callsign")) {
             Logger::instance().log(Logger::LogSender::Server,
-                           "Posted " + root["callsign"].get<std::string>() + " response: " + result->body,
-                           Logger::LogLevel::Debug);
+                                   "Posted " + root["callsign"].get<std::string>() + " response: " + result->body,
+                                   Logger::LogLevel::Debug);
         }
     }
 }
 
 void Server::sendPatchMessage(const std::string& endpointUrl, const nlohmann::json& root) {
-    if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) 
-        return;
+    if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) return;
 
     const auto message = root.dump();
-    
+
     if (root.contains("callsign")) {
         Logger::instance().log(Logger::LogSender::Server,
-                           "Patching " + root["callsign"].get<std::string>() + " with message: " + message,
-                           Logger::LogLevel::Debug);
+                               "Patching " + root["callsign"].get<std::string>() + " with message: " + message,
+                               Logger::LogLevel::Debug);
     }
 
     std::lock_guard guard(m_clientMutex);
     if (m_client) {
         auto result = m_client->Patch(endpointUrl, message, "application/json");
-        
+
         if (result && root.contains("callsign")) {
             Logger::instance().log(Logger::LogSender::Server,
-                           "Patched " + root["callsign"].get<std::string>() + " response: " + result->body,
-                           Logger::LogLevel::Debug);
+                                   "Patched " + root["callsign"].get<std::string>() + " response: " + result->body,
+                                   Logger::LogLevel::Debug);
         }
     }
 }
@@ -401,21 +396,13 @@ void Server::resetTobt(const std::string& callsign, const std::chrono::utc_clock
     sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
-void Server::deletePilot(const std::string& callsign) { 
-    this->sendDeleteMessage("/api/v1/pilots/" + callsign); 
-}
+void Server::deletePilot(const std::string& callsign) { this->sendDeleteMessage("/api/v1/pilots/" + callsign); }
 
-void Server::setMaster(bool master) { 
-    this->m_clientIsMaster = master; 
-}
+void Server::setMaster(bool master) { this->m_clientIsMaster = master; }
 
-bool Server::getMaster() { 
-    return this->m_clientIsMaster; 
-}
+bool Server::getMaster() { return this->m_clientIsMaster; }
 
-const std::string& Server::errorMessage() const { 
-    return this->m_errorCode; 
-}
+const std::string& Server::errorMessage() const { return this->m_errorCode; }
 
 Server& Server::instance() {
     static Server __instance;
