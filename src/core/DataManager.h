@@ -10,7 +10,7 @@
 #include "EuroScopePlugIn.h"
 #pragma warning(pop)
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include "types/Pilot.h"
 
@@ -91,7 +91,7 @@ class DataManager {
     /// @param pilot
     void consolidateData(std::array<types::Pilot, 3> &pilot);
 
-    MessageType deltaEuroscopeToBackend(const std::array<types::Pilot, 3> &data, Json::Value &message);
+    MessageType deltaEuroscopeToBackend(const std::array<types::Pilot, 3> &data, nlohmann::json &message);
 
     struct AsynchronousMessage {
         const MessageType type;

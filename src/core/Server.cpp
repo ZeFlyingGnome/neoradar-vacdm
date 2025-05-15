@@ -150,22 +150,25 @@ bool Server::checkWebApi() {
         return m_apiIsValid;
     }
 
-    Json::CharReaderBuilder builder{};
-    auto reader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
     std::string errors;
-    Json::Value root;
+    nlohmann::json root;
     Logger::instance().log(Logger::LogSender::Server, "Received API-version-message: " + __receivedGetData,
                            Logger::LogLevel::Info);
-    if (reader->parse(__receivedGetData.c_str(), __receivedGetData.c_str() + __receivedGetData.length(), &root,
-                      &errors)) {
-        if (PLUGIN_VERSION_MAJOR != root.get("major", Json::Value(-1)).asInt()) {
+    try
+    {
+        root = nlohmann::json::parse(__receivedGetData.c_str());
+        if ( PLUGIN_VERSION_MAJOR != root["major"].get<int>() ) {
             this->m_errorCode = "Backend-version is incompatible. Please update the plugin.";
             this->m_apiIsValid = false;
         } else {
             this->m_apiIsValid = true;
         }
 
-    } else {
+    }
+    catch(const std::exception& e)
+    {
+        Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+                        Logger::LogLevel::Info);
         this->m_errorCode = "Invalid backend-version response: " + __receivedGetData;
         this->m_apiIsValid = false;
     }
@@ -186,20 +189,24 @@ Server::ServerConfiguration Server::getServerConfig() {
         /* send the command */
         CURLcode result = curl_easy_perform(m_getRequest.socket);
         if (CURLE_OK == result) {
-            Json::CharReaderBuilder builder{};
-            auto reader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
             std::string errors;
-            Json::Value root;
+            nlohmann::json root;
 
             Logger::instance().log(Logger::LogSender::Server, "Received configuration: " + __receivedGetData,
                                    Logger::LogLevel::Info);
-            if (reader->parse(__receivedGetData.c_str(), __receivedGetData.c_str() + __receivedGetData.length(), &root,
-                              &errors)) {
+            try
+            {
+                root = nlohmann::json::parse(__receivedGetData.c_str());
                 ServerConfiguration_t config;
-                config.name = root["serverName"].asString();
-                config.allowMasterInSweatbox = root["allowSimSession"].asBool();
-                config.allowMasterAsObserver = root["allowObsMaster"].asBool();
+                config.name = root["serverName"].get<std::string>();
+                config.allowMasterInSweatbox = root["allowSimSession"].get<bool>();
+                config.allowMasterAsObserver = root["allowObsMaster"].get<bool>();
                 return config;
+            }
+            catch(const std::exception& e)
+            {
+            Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+                        Logger::LogLevel::Info);
             }
         }
     }
@@ -225,72 +232,73 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
         // send GET request
         CURLcode result = curl_easy_perform(m_getRequest.socket);
         if (result == CURLE_OK) {
-            Json::CharReaderBuilder builder{};
-            auto reader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
             std::string errors;
-            Json::Value root;
+            nlohmann::json root;
 
             // Logger::instance().log(Logger::LogSender::Server, "Received data" + __receivedGetData,
             //                        Logger::LogLevel::Debug);
-            if (reader->parse(__receivedGetData.c_str(), __receivedGetData.c_str() + __receivedGetData.length(), &root,
-                              &errors) &&
-                root.isArray()) {
+            try
+            {
+                root = nlohmann::json::parse(__receivedGetData.c_str());
                 std::list<types::Pilot> pilots;
 
                 for (const auto& pilot : std::as_const(root)) {
                     pilots.push_back(types::Pilot());
 
-                    pilots.back().callsign = pilot["callsign"].asString();
-                    pilots.back().lastUpdate = utils::Date::isoStringToTimestamp(pilot["updatedAt"].asString());
-                    pilots.back().inactive = pilot["inactive"].asBool();
+                    pilots.back().callsign = pilot["callsign"].get<std::string>();
+                    pilots.back().lastUpdate = utils::Date::isoStringToTimestamp(pilot["updatedAt"].get<std::string>());
+                    pilots.back().inactive = pilot["inactive"].get<bool>();
 
                     // position data
-                    pilots.back().latitude = pilot["position"]["lat"].asDouble();
-                    pilots.back().longitude = pilot["position"]["lon"].asDouble();
-                    pilots.back().taxizoneIsTaxiout = pilot["vacdm"]["taxizoneIsTaxiout"].asBool();
+                    pilots.back().latitude = pilot["position"]["lat"].get<double>();
+                    pilots.back().longitude = pilot["position"]["lon"].get<double>();
+                    pilots.back().taxizoneIsTaxiout = pilot["vacdm"]["taxizoneIsTaxiout"].get<bool>();
 
                     // flightplan & clearance data
-                    pilots.back().origin = pilot["flightplan"]["departure"].asString();
-                    pilots.back().destination = pilot["flightplan"]["arrival"].asString();
-                    pilots.back().runway = pilot["clearance"]["dep_rwy"].asString();
-                    pilots.back().sid = pilot["clearance"]["sid"].asString();
+                    pilots.back().origin = pilot["flightplan"]["departure"].get<std::string>();
+                    pilots.back().destination = pilot["flightplan"]["arrival"].get<std::string>();
+                    pilots.back().runway = pilot["clearance"]["dep_rwy"].get<std::string>();
+                    pilots.back().sid = pilot["clearance"]["sid"].get<std::string>();
 
                     // ACDM procedure data
-                    pilots.back().eobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["eobt"].asString());
-                    pilots.back().tobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tobt"].asString());
-                    pilots.back().tobt_state = pilot["vacdm"]["tobt_state"].asString();
-                    pilots.back().ctot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ctot"].asString());
-                    pilots.back().ttot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ttot"].asString());
-                    pilots.back().tsat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tsat"].asString());
+                    pilots.back().eobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["eobt"].get<std::string>());
+                    pilots.back().tobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tobt"].get<std::string>());
+                    pilots.back().tobt_state = pilot["vacdm"]["tobt_state"].get<std::string>();
+                    pilots.back().ctot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ctot"].get<std::string>());
+                    pilots.back().ttot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ttot"].get<std::string>());
+                    pilots.back().tsat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tsat"].get<std::string>());
                     pilots.back().exot =
-                        std::chrono::utc_clock::time_point(std::chrono::minutes(pilot["vacdm"]["exot"].asInt64()));
-                    pilots.back().asat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asat"].asString());
-                    pilots.back().aobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aobt"].asString());
-                    pilots.back().atot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["atot"].asString());
-                    pilots.back().asrt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asrt"].asString());
-                    pilots.back().aort = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aort"].asString());
+                        std::chrono::utc_clock::time_point(std::chrono::minutes(pilot["vacdm"]["exot"].get<long int>()));
+                    pilots.back().asat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asat"].get<std::string>());
+                    pilots.back().aobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aobt"].get<std::string>());
+                    pilots.back().atot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["atot"].get<std::string>());
+                    pilots.back().asrt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asrt"].get<std::string>());
+                    pilots.back().aort = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aort"].get<std::string>());
 
                     // ECFMP measures
-                    Json::Value measuresArray = pilot["measures"];
+                    nlohmann::json measuresArray = pilot["measures"];
                     std::vector<types::EcfmpMeasure> parsedMeasures;
                     for (const auto& measureObject : std::as_const(measuresArray)) {
                         vacdm::types::EcfmpMeasure measure;
 
-                        measure.ident = measureObject["ident"].asString();
-                        measure.value = measureObject["value"].asInt();
+                        measure.ident = measureObject["ident"].get<std::string>();
+                        measure.value = measureObject["value"].get<int>();
 
                         parsedMeasures.push_back(measure);
                     }
                     pilots.back().measures = parsedMeasures;
 
                     // event booking data
-                    pilots.back().hasBooking = pilot["hasBooking"].asBool();
+                    pilots.back().hasBooking = pilot["hasBooking"].get<bool>();
                 }
                 Logger::instance().log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
                                        Logger::LogLevel::Info);
                 return pilots;
-            } else {
-                Logger::instance().log(Logger::LogSender::Server, "Error " + errors, Logger::LogLevel::Info);
+            }
+            catch(const std::exception& e)
+            {
+                Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+                        Logger::LogLevel::Info);
             }
         }
     }
@@ -298,14 +306,13 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
     return {};
 }
 
-void Server::sendPostMessage(const std::string& endpointUrl, const Json::Value& root) {
+void Server::sendPostMessage(const std::string& endpointUrl, const nlohmann::json& root) {
     if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) return;
 
-    Json::StreamWriterBuilder builder{};
-    const auto message = Json::writeString(builder, root);
+    const auto message = root.dump();
 
     Logger::instance().log(Logger::LogSender::Server,
-                           "Posting " + root["callsign"].asString() + " with message: " + message,
+                           "Posting " + root["callsign"].get<std::string>() + " with message: " + message,
                            Logger::LogLevel::Debug);
 
     std::lock_guard guard(this->m_postRequest.lock);
@@ -317,20 +324,19 @@ void Server::sendPostMessage(const std::string& endpointUrl, const Json::Value& 
         curl_easy_perform(m_postRequest.socket);
 
         Logger::instance().log(Logger::LogSender::Server,
-                               "Posted " + root["callsign"].asString() + " response: " + __receivedPostData,
+                               "Posted " + root["callsign"].get<std::string>() + " response: " + __receivedPostData,
                                Logger::LogLevel::Debug);
         __receivedPostData.clear();
     }
 }
 
-void Server::sendPatchMessage(const std::string& endpointUrl, const Json::Value& root) {
+void Server::sendPatchMessage(const std::string& endpointUrl, const nlohmann::json& root) {
     if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) return;
 
-    Json::StreamWriterBuilder builder{};
-    const auto message = Json::writeString(builder, root);
+    const auto message = root.dump();
 
     Logger::instance().log(Logger::LogSender::Server,
-                           "Patching " + root["callsign"].asString() + " with message: " + message,
+                           "Patching " + root["callsign"].get<std::string>() + " with message: " + message,
                            Logger::LogLevel::Debug);
 
     std::lock_guard guard(this->m_patchRequest.lock);
@@ -342,7 +348,7 @@ void Server::sendPatchMessage(const std::string& endpointUrl, const Json::Value&
         curl_easy_perform(m_patchRequest.socket);
 
         Logger::instance().log(Logger::LogSender::Server,
-                               "Patched " + root["callsign"].asString() + " response: " + __receivedPatchData,
+                               "Patched " + root["callsign"].get<std::string>() + " response: " + __receivedPatchData,
                                Logger::LogLevel::Debug);
         __receivedPatchData.clear();
     }
@@ -350,8 +356,6 @@ void Server::sendPatchMessage(const std::string& endpointUrl, const Json::Value&
 
 void Server::sendDeleteMessage(const std::string& endpointUrl) {
     if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) return;
-
-    Json::StreamWriterBuilder builder{};
 
     std::lock_guard guard(this->m_deleteRequest.lock);
     if (m_deleteRequest.socket != nullptr) {
@@ -365,24 +369,24 @@ void Server::sendDeleteMessage(const std::string& endpointUrl) {
 }
 
 void Server::postPilot(types::Pilot pilot) {
-    Json::Value root;
+    nlohmann::json root;
 
     root["callsign"] = pilot.callsign;
     root["inactive"] = false;
 
-    root["position"] = Json::Value();
+    root["position"] = nlohmann::json();
     root["position"]["lat"] = pilot.latitude;
     root["position"]["lon"] = pilot.longitude;
 
-    root["flightplan"] = Json::Value();
+    root["flightplan"] = nlohmann::json();
     root["flightplan"]["departure"] = pilot.origin;
     root["flightplan"]["arrival"] = pilot.destination;
 
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["eobt"] = utils::Date::timestampToIsoString(pilot.eobt);
     root["vacdm"]["tobt"] = utils::Date::timestampToIsoString(pilot.tobt);
 
-    root["clearance"] = Json::Value();
+    root["clearance"] = nlohmann::json();
     root["clearance"]["dep_rwy"] = pilot.runway;
     root["clearance"]["sid"] = pilot.sid;
 
@@ -390,10 +394,10 @@ void Server::postPilot(types::Pilot pilot) {
 }
 
 void Server::updateExot(const std::string& callsign, const std::chrono::utc_clock::time_point& exot) {
-    Json::Value root;
+    nlohmann::json root;
 
     root["callsign"] = callsign;
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["exot"] = std::chrono::duration_cast<std::chrono::minutes>(exot.time_since_epoch()).count();
     root["vacdm"]["tsat"] = utils::Date::timestampToIsoString(types::defaultTime);
     root["vacdm"]["ttot"] = utils::Date::timestampToIsoString(types::defaultTime);
@@ -405,13 +409,13 @@ void Server::updateExot(const std::string& callsign, const std::chrono::utc_cloc
 }
 
 void Server::updateTobt(const types::Pilot& pilot, const std::chrono::utc_clock::time_point& tobt, bool manualTobt) {
-    Json::Value root;
+    nlohmann::json root;
 
     bool resetTsat = (tobt == types::defaultTime && true == manualTobt) || tobt >= pilot.tsat;
     root["callsign"] = pilot.callsign;
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
 
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["tobt"] = utils::Date::timestampToIsoString(tobt);
     if (true == resetTsat) root["vacdm"]["tsat"] = utils::Date::timestampToIsoString(types::defaultTime);
     if (false == manualTobt) root["vacdm"]["tobt_state"] = "CONFIRMED";
@@ -425,40 +429,40 @@ void Server::updateTobt(const types::Pilot& pilot, const std::chrono::utc_clock:
 }
 
 void Server::updateAsat(const std::string& callsign, const std::chrono::utc_clock::time_point& asat) {
-    Json::Value root;
+    nlohmann::json root;
 
     root["callsign"] = callsign;
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["asat"] = utils::Date::timestampToIsoString(asat);
 
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
 void Server::updateAsrt(const std::string& callsign, const std::chrono::utc_clock::time_point& asrt) {
-    Json::Value root;
+    nlohmann::json root;
 
     root["callsign"] = callsign;
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["asrt"] = utils::Date::timestampToIsoString(asrt);
 
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
 void Server::updateAobt(const std::string& callsign, const std::chrono::utc_clock::time_point& aobt) {
-    Json::Value root;
+    nlohmann::json root;
 
     root["callsign"] = callsign;
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["aobt"] = utils::Date::timestampToIsoString(aobt);
 
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
 void Server::updateAort(const std::string& callsign, const std::chrono::utc_clock::time_point& aort) {
-    Json::Value root;
+    nlohmann::json root;
 
     root["callsign"] = callsign;
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["aort"] = utils::Date::timestampToIsoString(aort);
 
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
@@ -466,10 +470,10 @@ void Server::updateAort(const std::string& callsign, const std::chrono::utc_cloc
 
 void Server::resetTobt(const std::string& callsign, const std::chrono::utc_clock::time_point& tobt,
                        const std::string& tobtState) {
-    Json::Value root;
+    nlohmann::json root;
 
     root["callsign"] = callsign;
-    root["vacdm"] = Json::Value();
+    root["vacdm"] = nlohmann::json();
     root["vacdm"]["tobt"] = utils::Date::timestampToIsoString(tobt);
     root["vacdm"]["tobt_state"] = tobtState;
     root["vacdm"]["tsat"] = utils::Date::timestampToIsoString(types::defaultTime);
