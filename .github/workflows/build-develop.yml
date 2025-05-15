@@ -53,7 +53,7 @@ jobs:
         run: python .github/workflows/determine_dev_release.py
 
       - name: Install MSVC toolset
-        run: choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+        run: choco upgrade visualstudio2022buildtools
 
       - name: Set up MSVC environment
         shell: pwsh
