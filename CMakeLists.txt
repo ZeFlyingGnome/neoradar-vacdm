@@ -1,4 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
+SET(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 PROJECT(vACDM VERSION "1.3.3")
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -69,17 +70,21 @@ SET(SOURCE_FILES
     src/vACDM.cpp
     src/vACDM.h
     src/main.cpp
-    src/Version.h
 )
 
-ADD_LIBRARY(vACDM SHARED ${SOURCE_FILES})
-TARGET_LINK_LIBRARIES(vACDM ${CMAKE_SOURCE_DIR}/external/lib/EuroScopePlugInDLL.lib crypt32.lib ws2_32.lib Shlwapi.lib)
-TARGET_LINK_LIBRARIES(vACDM debug ${CMAKE_SOURCE_DIR}/external/lib/jsoncpp_d.lib)
-TARGET_LINK_LIBRARIES(vACDM debug ${CMAKE_SOURCE_DIR}/external/lib/libcurl-d.lib)
-TARGET_LINK_LIBRARIES(vACDM debug ${CMAKE_SOURCE_DIR}/external/lib/Geographic_d.lib)
-TARGET_LINK_LIBRARIES(vACDM optimized ${CMAKE_SOURCE_DIR}/external/lib/jsoncpp.lib)
-TARGET_LINK_LIBRARIES(vACDM optimized ${CMAKE_SOURCE_DIR}/external/lib/libcurl.lib)
-TARGET_LINK_LIBRARIES(vACDM optimized ${CMAKE_SOURCE_DIR}/external/lib/Geographic.lib)
+
+FIND_PACKAGE(CURL CONFIG REQUIRED)
+FIND_PACKAGE(jsoncpp CONFIG REQUIRED)
+FIND_PACKAGE(GeographicLib CONFIG REQUIRED)
+
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/lib/EuroScopePlugInDLL.lib crypt32.lib ws2_32.lib Shlwapi.lib)
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
+    CURL::libcurl
+    JsonCpp::JsonCpp
+    ${GeographicLib_LIBRARIES}
+)
 
 # move config file to output dir, allows loading of DLL from output dir
-configure_file(${CMAKE_SOURCE_DIR}/src/config/vacdm.txt ${CMAKE_BINARY_DIR}/vacdm.txt COPY)
+file(COPY ${CMAKE_SOURCE_DIR}/src/config/vacdm.txt DESTINATION ${CMAKE_BINARY_DIR})
