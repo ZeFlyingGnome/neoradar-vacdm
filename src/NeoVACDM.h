@@ -1,6 +1,7 @@
 // NeoVACDM.h
 #pragma once
 #include <memory>
+#include <thread>
 #include "SDK.h"
 # include "config/PluginConfig.h"
 
@@ -23,8 +24,8 @@ public:
 
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
-    /*void OnTimer(int Counter) override;
-    void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
+    void OnTimer(int Counter);
+    /* void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
     void OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) override;*/
     void OnTagAction(const Tag::TagActionEvent *event) override;
     void OnTagDropdownAction(const Tag::DropdownActionEvent *event) override;
@@ -46,7 +47,7 @@ private:
     Aircraft::AircraftAPI *aircraftAPI_ = nullptr;
     Flightplan::FlightplanAPI *flightplanAPI_ = nullptr;
     // ControllerData::ControllerDataAPI *controllerDataAPI_ = nullptr;
-    Logger::LoggerAPI *logger_ = nullptr;
+    PluginSDK::Logger::LoggerAPI *logger_ = nullptr;
 
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 
@@ -97,7 +98,10 @@ private:
 	std::string ResetPilotActionId_;
 
     std::string VACDMMasterActionId_;
-    
+
+    std::thread m_worker;
+    bool m_stop;
+    void run();
 };
 
 }  // namespace vacdm
