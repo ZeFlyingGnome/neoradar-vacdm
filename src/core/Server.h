@@ -25,7 +25,7 @@ class Server {
         std::mutex lock;
         CURL* socket;
 
-        // Communication() : lock(), socket(curl_easy_init()) {}
+        Communication() : lock(), socket(curl_easy_init()) {}
     };
 
     std::string m_authToken;
