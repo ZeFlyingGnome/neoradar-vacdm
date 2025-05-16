@@ -32,6 +32,8 @@ public:
                       int TagData, char sItemString[16], int *pColorCode, COLORREF *pRGB, double *pFontSize) override;
     bool OnCompileCommand(const char *sCommandLine) override;*/
 
+    // COmmand handling
+    void SetMaster();
 
 
     // Airport Management
@@ -96,6 +98,8 @@ private:
 	std::string ResetAOBTActionId_;
 	std::string ResetMenuActionId_;
 	std::string ResetPilotActionId_;
+
+    std::string VACDMMasterActionId_;
     
 };
 

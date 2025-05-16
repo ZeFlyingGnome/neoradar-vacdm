@@ -198,6 +198,12 @@ void NeoVACDM::RegisterTagActions()
    resetDropdown.components.push_back(resetScrollArea);
    coreAPI_->tag().getInterface()->SetActionDropdown(ResetMenuActionId_, resetDropdown);
 
+   // Waiting for command line
+    tagDef.name = "vACDMMaster";
+    tagDef.requiresInput = false;
+    tagDef.description = "vACD MMaster";
+    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    VACDMMasterActionId_ = tagId;
 }
 
 void NeoVACDM::OnTagAction(const PluginSDK::Tag::TagActionEvent *event)
@@ -214,6 +220,10 @@ void NeoVACDM::OnTagAction(const PluginSDK::Tag::TagActionEvent *event)
     logger_->info("NeoVACDM event tagId: " + event->tagId);
     logger_->info("NeoVACDM event callsign: " + event->callsign);
     logger_->info("NeoVACDM event userInput: " + event->userInput);
+
+    if (event->actionId == "plugin:NeoVACDM:ACTION_SetMaster")
+        SetMaster();
+
 }
 void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *event)
 {
