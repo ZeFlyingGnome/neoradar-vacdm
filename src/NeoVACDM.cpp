@@ -1,5 +1,7 @@
 // NeoVACDM.cpp
 #include "NeoVACDM.h"
+#include <numeric>
+
 #include "Version.h"
 #include "config/ConfigParser.h"
 #include "core/CompileCommands.h"
@@ -11,8 +13,6 @@
 #include "utils/Date.h"
 #include "utils/Number.h"
 #include "utils/String.h"
-
-#include <numeric>
 
 using namespace PluginSDK;
 
@@ -41,14 +41,13 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
                            logging::Logger::LogLevel::System);
 
-    if (0 != curl_global_init(CURL_GLOBAL_ALL)) logger_->info("Unable to initialize the network stack!");
 
     try
     {
-        RegisterTagItems();
-        RegisterTagActions();
+        this->RegisterTagItems();
+        this->RegisterTagActions();
 
-        reloadConfiguration(true);
+        this->reloadConfiguration(true);
 
         initialized_ = true;
         logger_->info("NeoVACDM initialized successfully");

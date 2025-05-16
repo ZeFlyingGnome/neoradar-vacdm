@@ -23,10 +23,14 @@ jobs:
     name: "Build plugin"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        shell: bash
+        run: git submodule update --init --recursive vcpkg
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
@@ -49,13 +53,13 @@ jobs:
         run: python .github/workflows/determine_dev_release.py
 
       - name: Install MSVC toolset
-        run: choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+        run: choco upgrade visualstudio2022buildtools
 
       - name: Set up MSVC environment
         shell: pwsh
         run: |
-          Import-Module "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools"
+          Import-Module "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools"
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_CONFIGURATION}} -A Win32 -DDEV_BUILD=ON -DDEV_RELEASE_NUMBER="${{ env.DEV_RELEASE }}"
