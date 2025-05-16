@@ -59,8 +59,8 @@ Server::Server()
       m_clientIsMaster(false),
       m_errorCode() {
     /* configure the get request */
-    curl_easy_setopt(m_getRequest.socket, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(m_getRequest.socket, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(m_getRequest.socket, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(m_getRequest.socket, CURLOPT_SSL_VERIFYHOST, 1L);
     curl_easy_setopt(m_getRequest.socket, CURLOPT_HTTP_VERSION, static_cast<long>(CURL_HTTP_VERSION_1_1));
     curl_easy_setopt(m_getRequest.socket, CURLOPT_HTTPGET, 1L);
     curl_easy_setopt(m_getRequest.socket, CURLOPT_WRITEFUNCTION, receiveCurlGet);
