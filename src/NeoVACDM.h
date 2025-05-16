@@ -22,8 +22,8 @@ public:
     void SetGroundState(const Flightplan::Flightplan flightplan, const std::string groundstate);
 
     // Scope events
-    /*void OnAirportRunwayActivityChanged() override;
-    void OnTimer(int Counter) override;
+    void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
+    /*void OnTimer(int Counter) override;
     void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
     void OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) override;*/
     void OnTagAction(const Tag::TagActionEvent *event) override;
@@ -31,14 +31,11 @@ public:
     /*void OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget, int ItemCode,
                       int TagData, char sItemString[16], int *pColorCode, COLORREF *pRGB, double *pFontSize) override;
     bool OnCompileCommand(const char *sCommandLine) override;*/
+    void OnFlightplanUpdated(const Flightplan::FlightplanUpdatedEvent* event) override;
 
     // COmmand handling
     void SetMaster();
 
-
-    // Airport Management
-    void InitAirportConfigurations();
-    // void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
 
 private:
     bool initialized_ = false;

@@ -81,7 +81,7 @@ void NeoVACDM::checkServerConfiguration() {
         std::string serverName = Server::instance().getServerConfig().name;
         DisplayMessage(("Connected to " + serverName), "Server");
         // set active airports and runways
-        this->InitAirportConfigurations();
+        this->OnAirportConfigurationsUpdated(nullptr);
     }
 }
 
@@ -160,44 +160,10 @@ void vACDM::OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPla
         return;
     }
     DataManager::instance().queueFlightplanUpdate(FlightPlan);
-}
+}*/
 
-void vACDM::OnAirportRunwayActivityChanged() {
-    std::list<std::string> activeAirports;
+void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) {
 
-    EuroScopePlugIn::CSectorElement airport;
-    for (airport = this->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_AIRPORT);
-         airport.IsValid() == true;
-         airport = this->SectorFileElementSelectNext(airport, EuroScopePlugIn::SECTOR_ELEMENT_AIRPORT)) {
-        // skip airport if it is selected as active airport for departures or arrivals
-        if (false == airport.IsElementActive(true, 0) && false == airport.IsElementActive(false, 0)) continue;
-
-        // get the airport ICAO
-        auto airportICAO = utils::String::findIcao(utils::String::trim(airport.GetName()));
-        // skip airport if no ICAO has been found
-        if (airportICAO == "") continue;
-
-        // check if the airport has been added already, add if it does not exist
-        if (std::find(activeAirports.begin(), activeAirports.end(), airportICAO) == activeAirports.end()) {
-            activeAirports.push_back(airportICAO);
-        }
-    }
-
-    if (activeAirports.empty()) {
-        Logger::instance().log(Logger::LogSender::vACDM,
-                               "Airport/Runway Change, no active airports: ", Logger::LogLevel::Info);
-    } else {
-        Logger::instance().log(
-            Logger::LogSender::vACDM,
-            "Airport/Runway Change, active airports: " +
-                std::accumulate(std::next(activeAirports.begin()), activeAirports.end(), activeAirports.front(),
-                                [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
-            Logger::LogLevel::Info);
-    }
-    DataManager::instance().setActiveAirports(activeAirports);
-} */
-
-void NeoVACDM::InitAirportConfigurations() {
     PluginSDK::Airport::AirportAPI *airportApi = &coreAPI_->airport();
     std::list<std::string> activeAirports;
 
@@ -232,6 +198,10 @@ void NeoVACDM::InitAirportConfigurations() {
             logging::Logger::LogLevel::Info);
     }
     DataManager::instance().setActiveAirports(activeAirports);
+}
+
+void NeoVACDM::OnFlightplanUpdated(const Flightplan::FlightplanUpdatedEvent* event){
+    logger_->info("OnFlightplanUpdated: " + event->callsign);
 }
 
 
