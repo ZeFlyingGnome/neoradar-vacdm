@@ -75,11 +75,11 @@ void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sen
 
 void NeoVACDM::checkServerConfiguration() {
     if (Server::instance().checkWebApi() == false) {
-        logger_->info("Server: Connection failed.");
-        logger_->info(Server::instance().errorMessage().c_str());
+        DisplayMessage("Connection failed.", "Server");
+        DisplayMessage(Server::instance().errorMessage().c_str(), "Server");
     } else {
         std::string serverName = Server::instance().getServerConfig().name;
-        logger_->info("Server: Connected to " + serverName);
+        DisplayMessage(("Connected to " + serverName), "Server");
         // set active airports and runways
         this->InitAirportConfigurations();
     }
@@ -114,11 +114,9 @@ void NeoVACDM::runScopeUpdate() {
     flightplan.GetControllerAssignedData().SetScratchPadString(scratchBackup.c_str());
 }*/
 
-void NeoVACDM::reloadConfiguration(bool initialLoading)
-{
+void NeoVACDM::reloadConfiguration(bool initialLoading) {
     PluginConfig newConfig;
     ConfigParser parser;
-
 
     if (false == parser.parse(clientInfo_.documentsPath.string() + this->m_configFileName, newConfig) || false == newConfig.valid) {
         std::string message = "vacdm.txt:" + std::to_string(parser.errorLine()) + ": " + parser.errorMessage();
@@ -131,7 +129,7 @@ void NeoVACDM::reloadConfiguration(bool initialLoading)
             this->checkServerConfiguration();
 
         this->m_pluginConfig = newConfig;
-        logger_->info(DataManager::instance().setUpdateCycleSeconds(newConfig.updateCycleSeconds));
+        DisplayMessage(DataManager::instance().setUpdateCycleSeconds(newConfig.updateCycleSeconds));
         tagitems::Color::updatePluginConfig(newConfig);
     }
 }
@@ -223,13 +221,15 @@ void NeoVACDM::InitAirportConfigurations() {
     }
 
     if (activeAirports.empty()) {
-        logger_->info("Airport/Runway Change, no active airports.");
+        logging::Logger::instance().log(logging::Logger::LogSender::vACDM,
+                               "Airport/Runway Change, no active airports: ", logging::Logger::LogLevel::Info);
     } else {
-        logger_->info(
+        logging::Logger::instance().log(
+            logging::Logger::LogSender::vACDM,
                 "Airport/Runway Change, active airports: " +
                 std::accumulate(std::next(activeAirports.begin()), activeAirports.end(), activeAirports.front(),
-                                [](const std::string &acc, const std::string &str) { return acc + " " + str; })
-            );
+                                [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
+            logging::Logger::LogLevel::Info);
     }
     DataManager::instance().setActiveAirports(activeAirports);
 }
@@ -242,4 +242,5 @@ PluginSDK::PluginMetadata NeoVACDM::GetMetadata() const
 
 std::optional<Aircraft::Aircraft> NeoVACDM::GetAircraftByCallsign(const std::string &callsign) {
     return aircraftAPI_->getByCallsign(callsign);
-}
+    
+}  // namespace vacdm
