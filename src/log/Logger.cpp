@@ -1,91 +1,99 @@
 #include "Logger.h"
 
-#ifdef DEBUG_BUILD
-#include <Windows.h>
-
-#include <iostream>
-#endif
-
 #include <algorithm>
 #include <chrono>
 #include <numeric>
+#include <format>
 
 #include "utils/String.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
-using namespace std::chrono_literals;
 using namespace vacdm::logging;
 
-static const char __loggingTable[] =
-    "CREATE TABLE messages( \
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
-    sender TEXT, \
-    level INT, \
-    message TEXT \
-);";
-static const std::string __insertMessage = "INSERT INTO messages VALUES (CURRENT_TIMESTAMP, @1, @2, @3)";
-
 Logger::Logger() {
-    stream << std::format("{0:%Y%m%d%H%M%S}", std::chrono::utc_clock::now()) << ".vacdm";
-#ifdef DEBUG_BUILD
-    AllocConsole();
-#pragma warning(push)
-#pragma warning(disable : 6031)
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-#pragma warning(pop)
-    this->enableLogging();
-#endif
-    this->m_logWriter = std::thread(&Logger::run, this);
+    // Create log file with timestamp
+    std::string logFilename = std::format("{0:%Y%m%d%H%M%S}.vacdm.log", std::chrono::utc_clock::now());
+
+    // Create a file sink for all builds
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilename, true);
+    file_sink->set_level(spdlog::level::warn); // Default log-level
+
+    // Initialize loggers for different senders
+    for (const auto& setting : logSettings) {
+        // Create logger with both sinks
+        auto logger = std::make_shared<spdlog::logger>(setting.name);
+        
+        // Add file sink for all loggers
+        logger->sinks().push_back(file_sink);
+        
+        // Set the level based on the settings
+        spdlog::level::level_enum level;
+        switch (setting.minimumLevel) {
+            case Debug: level = spdlog::level::debug; break;
+            case Info: level = spdlog::level::info; break;
+            case Warning: level = spdlog::level::warn; break;
+            case Error: level = spdlog::level::err; break;
+            case Critical: level = spdlog::level::critical; break;
+            case System: level = spdlog::level::info; break; // Map system to info
+            case Disabled: level = spdlog::level::off; break;
+            default: level = spdlog::level::info;
+        }
+        
+        logger->set_level(level);
+        logger->flush_on(spdlog::level::warn); // Flush on warning and above
+        spdlog::register_logger(logger);
+        loggers.push_back(logger);
+    }
+    
+    enableLogging();
 }
 
 Logger::~Logger() {
-    this->m_stop = true;
-    this->m_logWriter.join();
-
-    if (nullptr != this->m_database) sqlite3_close_v2(this->m_database);
+    // spdlog will clean up loggers and sinks automatically
+    spdlog::shutdown();
 }
 
-void Logger::run() {
-    while (true) {
-        if (m_stop) return;
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-        // obtain a copy of the logs, clear the log list to minimize lock time
-        this->m_logLock.lock();
-        auto logs = m_asynchronousLogs;
-        m_asynchronousLogs.clear();
-        this->m_logLock.unlock();
-
-        auto it = logs.begin();
-        while (it != logs.end()) {
-            auto logsetting = std::find_if(logSettings.begin(), logSettings.end(),
-                                           [it](const LogSetting &setting) { return setting.sender == it->sender; });
-
-            if (logsetting != logSettings.end() && it->loglevel >= logsetting->minimumLevel &&
-                false == this->m_LogAll) {
-#ifdef DEBUG_BUILD
-                std::cout << logsetting->name << ": " << it->message << "\n";
-#endif
-
-                sqlite3_stmt *stmt;
-
-                sqlite3_prepare_v2(this->m_database, __insertMessage.c_str(), __insertMessage.length(), &stmt, nullptr);
-                sqlite3_bind_text(stmt, 1, logsetting->name.c_str(), -1, SQLITE_TRANSIENT);
-                sqlite3_bind_int(stmt, 2, static_cast<int>(it->loglevel));
-                sqlite3_bind_text(stmt, 3, it->message.c_str(), -1, SQLITE_TRANSIENT);
-
-                sqlite3_step(stmt);
-                sqlite3_clear_bindings(stmt);
-                sqlite3_reset(stmt);
-            }
-            it = logs.erase(it);
-        }
+std::shared_ptr<spdlog::logger> Logger::getLogger(const LogSender& sender) {
+    auto logsetting = std::find_if(logSettings.begin(), logSettings.end(),
+                        [sender](const LogSetting &setting) { return setting.sender == sender; });
+    
+    if (logsetting != logSettings.end()) {
+        return spdlog::get(logsetting->name);
     }
+    
+    // Return default logger if not found
+    return spdlog::default_logger();
 }
 
 void Logger::log(const LogSender &sender, const std::string &message, const LogLevel loglevel) {
     std::lock_guard guard(this->m_logLock);
-    if (true == this->loggingEnabled) m_asynchronousLogs.push_back({sender, message, loglevel});
+    if (!loggingEnabled) return;
+    
+    auto logger = getLogger(sender);
+    if (!logger) return;
+    
+    switch (loglevel) {
+        case Debug:
+            logger->debug(message);
+            break;
+        case Info:
+            logger->info(message);
+            break;
+        case Warning:
+            logger->warn(message);
+            break;
+        case Error:
+            logger->error(message);
+            break;
+        case Critical:
+            logger->critical(message);
+            break;
+        case System:
+            logger->info("[SYSTEM] {}", message);
+            break;
+        default:
+            break;
+    }
 }
 
 std::string Logger::handleLogCommand(std::string command) {
@@ -104,9 +112,28 @@ std::string Logger::handleLogCommand(std::string command) {
         std::lock_guard guard(this->m_logLock);
         if (false == this->m_LogAll) {
             this->m_LogAll = true;
+            // Set all loggers to debug level
+            for (const auto& logger : loggers) {
+                logger->set_level(spdlog::level::debug);
+            }
             return "Set all log levels to DEBUG";
         } else {
             this->m_LogAll = false;
+            // Reset loggers to their previous settings
+            for (size_t i = 0; i < loggers.size() && i < logSettings.size(); ++i) {
+                spdlog::level::level_enum level;
+                switch (logSettings[i].minimumLevel) {
+                    case Debug: level = spdlog::level::debug; break;
+                    case Info: level = spdlog::level::info; break;
+                    case Warning: level = spdlog::level::warn; break;
+                    case Error: level = spdlog::level::err; break;
+                    case Critical: level = spdlog::level::critical; break;
+                    case System: level = spdlog::level::info; break;
+                    case Disabled: level = spdlog::level::off; break;
+                    default: level = spdlog::level::info;
+                }
+                loggers[i]->set_level(level);
+            }
             return "Reset log levels, using previous settings";
         }
     }
@@ -142,34 +169,46 @@ std::string Logger::handleLogLevelCommand(std::string command) {
 
     // Modify logsetting by reference
     auto &logSettingRef = *logsetting;
+    auto logger = spdlog::get(logSettingRef.name);
+    if (!logger) return "Logger not found";
 
 #pragma warning(push)
 #pragma warning(disable : 4244)
     std::transform(newLevel.begin(), newLevel.end(), newLevel.begin(), ::toupper);
 #pragma warning(pop)
 
+    spdlog::level::level_enum spdLogLevel;
     if (newLevel == "DEBUG") {
         logSettingRef.minimumLevel = LogLevel::Debug;
+        spdLogLevel = spdlog::level::debug;
     } else if (newLevel == "INFO") {
         logSettingRef.minimumLevel = LogLevel::Info;
+        spdLogLevel = spdlog::level::info;
     } else if (newLevel == "WARNING") {
         logSettingRef.minimumLevel = LogLevel::Warning;
+        spdLogLevel = spdlog::level::warn;
     } else if (newLevel == "ERROR") {
         logSettingRef.minimumLevel = LogLevel::Error;
+        spdLogLevel = spdlog::level::err;
     } else if (newLevel == "CRITICAL") {
         logSettingRef.minimumLevel = LogLevel::Critical;
+        spdLogLevel = spdlog::level::critical;
     } else if (newLevel == "SYSTEM") {
         logSettingRef.minimumLevel = LogLevel::System;
+        spdLogLevel = spdlog::level::info;
     } else if (newLevel == "DISABLED") {
         logSettingRef.minimumLevel = LogLevel::Disabled;
+        spdLogLevel = spdlog::level::off;
     } else {
         return "Invalid log level: " + newLevel;
     }
 
+    logger->set_level(spdLogLevel);
+
     // check if at least one sender is set to log
     bool enableLogging = false;
     for (auto logSetting : logSettings) {
-        if (logsetting->minimumLevel != LogLevel::Disabled) {
+        if (logSetting.minimumLevel != LogLevel::Disabled) {
             enableLogging = true;
             break;
         }
@@ -180,8 +219,6 @@ std::string Logger::handleLogLevelCommand(std::string command) {
 }
 
 void Logger::enableLogging() {
-    if (false == this->logFileCreated) createLogFile();
-
     std::lock_guard guard(this->m_logLock);
     this->loggingEnabled = true;
 }
@@ -189,13 +226,6 @@ void Logger::enableLogging() {
 void Logger::disableLogging() {
     std::lock_guard guard(this->m_logLock);
     this->loggingEnabled = false;
-}
-
-void Logger::createLogFile() {
-    sqlite3_open(stream.str().c_str(), &this->m_database);
-    sqlite3_exec(this->m_database, __loggingTable, nullptr, nullptr, nullptr);
-    sqlite3_exec(this->m_database, "PRAGMA journal_mode = MEMORY", nullptr, nullptr, nullptr);
-    logFileCreated = true;
 }
 
 Logger &Logger::instance() {
