@@ -234,75 +234,251 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
         // send GET request
         CURLcode result = curl_easy_perform(m_getRequest.socket);
         if (result == CURLE_OK) {
-            std::string errors;
             nlohmann::json root;
 
-            // Logger::instance().log(Logger::LogSender::Server, "Received data" + __receivedGetData,
-            //                        Logger::LogLevel::Debug);
+            Logger::instance().log(Logger::LogSender::Server, "Received data:" + __receivedGetData,
+                                   Logger::LogLevel::Debug);
 
             try
             {
                 root = nlohmann::json::parse(__receivedGetData.c_str());
-                std::list<types::Pilot> pilots;
-
-                for (const auto& pilot : std::as_const(root)) {
-                    pilots.push_back(types::Pilot());
-
-                    pilots.back().callsign = pilot["callsign"].get<std::string>();
-                    pilots.back().lastUpdate = utils::Date::isoStringToTimestamp(pilot["updatedAt"].get<std::string>());
-                    pilots.back().inactive = pilot["inactive"].get<bool>();
-
-                    // position data
-                    pilots.back().latitude = pilot["position"]["lat"].get<double>();
-                    pilots.back().longitude = pilot["position"]["lon"].get<double>();
-                    pilots.back().taxizoneIsTaxiout = pilot["vacdm"]["taxizoneIsTaxiout"].get<bool>();
-
-                    // flightplan & clearance data
-                    pilots.back().origin = pilot["flightplan"]["departure"].get<std::string>();
-                    pilots.back().destination = pilot["flightplan"]["arrival"].get<std::string>();
-                    pilots.back().runway = pilot["clearance"]["dep_rwy"].get<std::string>();
-                    pilots.back().sid = pilot["clearance"]["sid"].get<std::string>();
-
-                    // ACDM procedure data
-                    pilots.back().eobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["eobt"].get<std::string>());
-                    pilots.back().tobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tobt"].get<std::string>());
-                    pilots.back().tobt_state = pilot["vacdm"]["tobt_state"].get<std::string>();
-                    pilots.back().ctot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ctot"].get<std::string>());
-                    pilots.back().ttot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ttot"].get<std::string>());
-                    pilots.back().tsat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tsat"].get<std::string>());
-                    pilots.back().exot =
-                        std::chrono::utc_clock::time_point(std::chrono::minutes(pilot["vacdm"]["exot"].get<long int>()));
-                    pilots.back().asat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asat"].get<std::string>());
-                    pilots.back().aobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aobt"].get<std::string>());
-                    pilots.back().atot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["atot"].get<std::string>());
-                    pilots.back().asrt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asrt"].get<std::string>());
-                    pilots.back().aort = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aort"].get<std::string>());
-
-                    // ECFMP measures
-                    nlohmann::json measuresArray = pilot["measures"];
-                    std::vector<types::EcfmpMeasure> parsedMeasures;
-                    for (const auto& measureObject : std::as_const(measuresArray)) {
-                        vacdm::types::EcfmpMeasure measure;
-
-                        measure.ident = measureObject["ident"].get<std::string>();
-                        measure.value = measureObject["value"].get<int>();
-
-                        parsedMeasures.push_back(measure);
-                    }
-                    pilots.back().measures = parsedMeasures;
-
-                    // event booking data
-                    pilots.back().hasBooking = pilot["hasBooking"].get<bool>();
-                }
-                Logger::instance().log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
-                                       Logger::LogLevel::Info);
-                return pilots;
             }
             catch(const std::exception& e)
             {
                 Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
                         Logger::LogLevel::Info);
             }
+
+            std::list<types::Pilot> pilots;
+
+            for (const auto& pilot : std::as_const(root)) {
+                pilots.push_back(types::Pilot());
+
+                try
+                {
+                    pilots.back().callsign = pilot["callsign"].get<std::string>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: callsign:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().lastUpdate = utils::Date::isoStringToTimestamp(pilot["updatedAt"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: updatedAt:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().inactive = pilot["inactive"].get<bool>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: inactive:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+
+                // position data
+                try
+                {
+                    pilots.back().latitude = pilot["position"]["lat"].get<double>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: lat:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().longitude = pilot["position"]["lon"].get<double>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: lon:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().taxizoneIsTaxiout = pilot["vacdm"]["taxizoneIsTaxiout"].get<bool>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: vacdm:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+
+                // flightplan & clearance data
+                try
+                {
+                    pilots.back().origin = pilot["flightplan"]["departure"].get<std::string>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: departure:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().destination = pilot["flightplan"]["arrival"].get<std::string>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: arrival:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().runway = pilot["clearance"]["dep_rwy"].get<std::string>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: dep_rwy:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().sid = pilot["clearance"]["sid"].get<std::string>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: sid:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+
+                // ACDM procedure data
+                try
+                {
+                    pilots.back().eobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["eobt"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: eobt:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }                    
+                try
+                {
+                    pilots.back().tobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tobt"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: tobt:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }                        
+                try
+                {
+                    pilots.back().tobt_state = pilot["vacdm"]["tobt_state"].get<std::string>();
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: tobt_state:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().ctot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ctot"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: ctot:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().ttot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ttot"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: ttot:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().tsat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tsat"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: tsat:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().exot =
+                    std::chrono::utc_clock::time_point(std::chrono::minutes(pilot["vacdm"]["exot"].get<long int>()));
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: exot:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().asat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asat"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: asat:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().aobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aobt"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: aobt:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().atot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["atot"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: atot:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().asrt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asrt"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: asrt:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+                try
+                {
+                    pilots.back().aort = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aort"].get<std::string>());
+                }
+                catch(const std::exception& e)
+                {
+                    Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: aort:" + std::string(e.what()),
+                            Logger::LogLevel::Info);
+                }
+
+                // ECFMP measures
+                nlohmann::json measuresArray = pilot["measures"];
+                std::vector<types::EcfmpMeasure> parsedMeasures;
+                for (const auto& measureObject : std::as_const(measuresArray)) {
+                    vacdm::types::EcfmpMeasure measure;
+
+                    measure.ident = measureObject["ident"].get<std::string>();
+                    measure.value = measureObject["value"].get<int>();
+
+                    parsedMeasures.push_back(measure);
+                }
+                pilots.back().measures = parsedMeasures;
+
+                // event booking data
+                pilots.back().hasBooking = pilot["hasBooking"].get<bool>();
+            }
+            Logger::instance().log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
+                               Logger::LogLevel::Info);
+            return pilots;
         }
     }
 
