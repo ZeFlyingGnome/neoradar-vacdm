@@ -1,37 +1,73 @@
-cmake_minimum_required(VERSION 3.14)
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-project(NeoVACDM VERSION "1.3.3")
+CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
+SET(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+SET(VCPKG_TARGET_TRIPLET "x86-windows-static" CACHE STRING "")
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+PROJECT(vACDM VERSION "1.4.0")
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+SET(CMAKE_CXX_STANDARD 20)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
+SET(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 
-#if (NOT PLUGIN_VERSION)
-#    SET(PLUGIN_VERSION "custom-build")
-#endif()
-#add_compile_definitions(
-#    PLUGIN_VERSION="${PLUGIN_VERSION}"
-#)
-#message(STATUS "Plugin version: ${PLUGIN_VERSION}")
+# Use static runtime libraries
+SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-configure_file(
+IF (MSVC)
+    IF (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        STRING(REGEX REPLACE "/W[0-4]" "/W4 /wd4100" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    ELSE ()
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    ENDIF ()
+    IF (NOT CMAKE_CXX_FLAGS MATCHES "/MP")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+        SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /MP")
+    ENDIF ()
+
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /sdl /permissive- /DNOMINMAX")
+    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /sdl /permissive- /DNOMINMAX")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFESTUAC:NO /ignore:4099")
+    ADD_DEFINITIONS(/D_USRDLL)
+
+    FOREACH(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE)
+        IF(${flag_var} MATCHES "/MD")
+            STRING(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+        ENDIF()
+    ENDFOREACH()
+ENDIF ()
+
+if(DEV_BUILD)
+    ADD_DEFINITIONS(-DDEV_BUILD)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    ADD_DEFINITIONS(-DDEBUG_BUILD=1) # enables log output to console window
+    ADD_DEFINITIONS(-DDEV_BUILD)
+endif()
+
+CONFIGURE_FILE(
     ${CMAKE_SOURCE_DIR}/src/Version.h.in
     ${CMAKE_BINARY_DIR}/Version.h
 )
 
-# Add SDK include directory
-include_directories(
+INCLUDE_DIRECTORIES(
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/external/include
     ${CMAKE_SOURCE_DIR}/sdk
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/external/include
 )
 
-# Find external dependencies
-find_package(CURL REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+ADD_DEFINITIONS(
+    -D_CRT_SECURE_NO_WARNINGS
+    -DSQLITE_THREADSAFE=0
+    -DSQLITE_DEFAULT_FILE_FORMAT=4
+    -DSQLITE_DEFAULT_SYNCHRONOUS=0
+    -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=0
+    -DSQLITE_WIN32_MALLOC
+    -DSQLITE_THREADSAFE=0
+    -DWIN32_LEAN_AND_MEAN
+)
 
-# Source files
-set(SOURCES
+set(SOURCE_FILES
     src/config/ConfigParser.cpp
     src/core/DataManager.cpp
     src/core/Server.cpp
@@ -42,25 +78,25 @@ set(SOURCES
     src/main.cpp
 )
 
-# Define the plugin library
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
-# Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    CURL::libcurl 
+FIND_PACKAGE(OpenSSL CONFIG REQUIRED)
+FIND_PACKAGE(httplib CONFIG REQUIRED)
+FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
+
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
+    OpenSSL::SSL OpenSSL::Crypto
+    httplib::httplib
     nlohmann_json::nlohmann_json
 )
 
-# Set output directory and properties
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    PREFIX ""  # Remove "lib" prefix on Unix-like systems
+# TODO: Switch to GeographicLib static with next release (2.6 ?)
+#   (see: https://github.com/geographiclib/geographiclib/issues/37)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
+    debug ${CMAKE_SOURCE_DIR}/external/lib/GeographicLib_d.lib
+    optimized ${CMAKE_SOURCE_DIR}/external/lib/GeographicLib.lib
 )
 
-# Install the plugin
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/plugins"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/plugins"
-)
+# move config file to output dir, allows loading of DLL from output dir
+file(COPY ${CMAKE_SOURCE_DIR}/src/config/vacdm.txt DESTINATION ${CMAKE_BINARY_DIR})
