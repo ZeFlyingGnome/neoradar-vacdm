@@ -34,67 +34,67 @@ void NeoVACDM::RegisterTagItems()
     PluginSDK::Tag::TagItemDefinition tagDef;
 
     tagDef.name = "EOBT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     std::string tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     EOBTTagID_ = tagId;
 
     tagDef.name = "TOBT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     TOBTTagID_ = tagId;
 
     tagDef.name = "TSAT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     TSATTagID_ = tagId;
 
     tagDef.name = "TTOT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     TTOTTagID_ = tagId;
 
     tagDef.name = "EXOT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     EXOTTagID_ = tagId;
 
     tagDef.name = "ASAT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     ASATTagID_ = tagId;
 
     tagDef.name = "AOBT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     AOBTTagID_ = tagId;
 
     tagDef.name = "ATOT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     ATOTTagID_ = tagId;
 
     tagDef.name = "ASRT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     ASRTTagID_ = tagId;
 
     tagDef.name = "AORT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     AORTTagID_ = tagId;
 
     tagDef.name = "CTOT";
-    tagDef.defaultValue = "0000";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     CTOTTagID_ = tagId;
 
     tagDef.name = "EventBooking";
-    tagDef.defaultValue = "-";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     EventBookingTagID_ = tagId;
 
     tagDef.name = "ECFMPMeasures";
-    tagDef.defaultValue = "--";
+    tagDef.defaultValue = "";
     tagId = coreAPI_->tag().getInterface()->RegisterTagItem(tagDef);
     ECFMPMeasuresTagID_ = tagId;
 
