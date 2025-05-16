@@ -85,7 +85,36 @@ void Logger::run() {
 
 void Logger::log(const LogSender &sender, const std::string &message, const LogLevel loglevel) {
     std::lock_guard guard(this->m_logLock);
-    if (true == this->loggingEnabled) m_asynchronousLogs.push_back({sender, message, loglevel});
+
+    if (true == this->loggingEnabled) 
+    {
+        m_asynchronousLogs.push_back({sender, message, loglevel});
+        if (vacdmLogger_)
+        {
+            vacdmLogger_->info(sender + ": " + message);
+            switch (loglevel)
+            {
+                case Info:
+                    vacdmLogger_->info(sender + ": " + message);
+                    break;
+                case Debug:
+                    vacdmLogger_->debug(sender + ": " + message);
+                    break;
+                case Warning:
+                    vacdmLogger_->warning(sender + ": " + message);
+                    break;
+                case Error:
+                    vacdmLogger_->error(sender + ": " + message);
+                    break;
+                case Critical:
+                    vacdmLogger_->fatal(sender + ": " + message);
+                    break;
+                case System:
+                    vacdmLogger_->verbose(sender + ": " + message);
+                    break;
+            }
+        } 
+    }
 }
 
 std::string Logger::handleLogCommand(std::string command) {

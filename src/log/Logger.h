@@ -8,6 +8,8 @@
 
 #include "sqlite3.h"
 
+#include "SDK.h"
+
 namespace vacdm::logging {
 class Logger {
    public:
@@ -74,6 +76,8 @@ class Logger {
     bool logFileCreated = false;
     void createLogFile();
 
+    PluginSDK::Logger::LoggerAPI *vacdmLogger_ = nullptr;;
+
    public:
     ~Logger();
     /// @brief queues a log message to be processed asynchronously
@@ -81,6 +85,7 @@ class Logger {
     /// @param message the message to be displayed
     /// @param loglevel the severity, must be greater than m_minimumLogLevel to be logged
     void log(const LogSender &sender, const std::string &message, const LogLevel loglevel);
+    void setLogger(PluginSDK::Logger::LoggerAPI *vacdmLogger) { vacdmLogger_ = vacdmLogger; vacdmLogger_->info("setLogger: logger set");};
     std::string handleLogCommand(std::string command);
     std::string handleLogLevelCommand(std::string command);
     static Logger &instance();
