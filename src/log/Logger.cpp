@@ -2,11 +2,11 @@
 
 #include <algorithm>
 #include <chrono>
-#include <numeric>
 #include <format>
+#include <numeric>
 
-#include "utils/String.h"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "utils/String.h"
 
 using namespace vacdm::logging;
 
@@ -16,35 +16,50 @@ Logger::Logger() {
 
     // Create a file sink for all builds
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilename, true);
-    file_sink->set_level(spdlog::level::warn); // Default log-level
+    file_sink->set_level(spdlog::level::warn);  // Default log-level
 
     // Initialize loggers for different senders
-    for (const auto& setting : logSettings) {
+    for (const auto &setting : logSettings) {
         // Create logger with both sinks
         auto logger = std::make_shared<spdlog::logger>(setting.name);
-        
+
         // Add file sink for all loggers
         logger->sinks().push_back(file_sink);
-        
+
         // Set the level based on the settings
         spdlog::level::level_enum level;
         switch (setting.minimumLevel) {
-            case Debug: level = spdlog::level::debug; break;
-            case Info: level = spdlog::level::info; break;
-            case Warning: level = spdlog::level::warn; break;
-            case Error: level = spdlog::level::err; break;
-            case Critical: level = spdlog::level::critical; break;
-            case System: level = spdlog::level::info; break; // Map system to info
-            case Disabled: level = spdlog::level::off; break;
-            default: level = spdlog::level::info;
+            case Debug:
+                level = spdlog::level::debug;
+                break;
+            case Info:
+                level = spdlog::level::info;
+                break;
+            case Warning:
+                level = spdlog::level::warn;
+                break;
+            case Error:
+                level = spdlog::level::err;
+                break;
+            case Critical:
+                level = spdlog::level::critical;
+                break;
+            case System:
+                level = spdlog::level::info;
+                break;  // Map system to info
+            case Disabled:
+                level = spdlog::level::off;
+                break;
+            default:
+                level = spdlog::level::info;
         }
-        
+
         logger->set_level(level);
-        logger->flush_on(spdlog::level::warn); // Flush on warning and above
+        logger->flush_on(spdlog::level::warn);  // Flush on warning and above
         spdlog::register_logger(logger);
         loggers.push_back(logger);
     }
-    
+
     enableLogging();
 }
 
@@ -53,14 +68,14 @@ Logger::~Logger() {
     spdlog::shutdown();
 }
 
-std::shared_ptr<spdlog::logger> Logger::getLogger(const LogSender& sender) {
+std::shared_ptr<spdlog::logger> Logger::getLogger(const LogSender &sender) {
     auto logsetting = std::find_if(logSettings.begin(), logSettings.end(),
-                        [sender](const LogSetting &setting) { return setting.sender == sender; });
-    
+                                   [sender](const LogSetting &setting) { return setting.sender == sender; });
+
     if (logsetting != logSettings.end()) {
         return spdlog::get(logsetting->name);
     }
-    
+
     // Return default logger if not found
     return spdlog::default_logger();
 }
@@ -68,10 +83,10 @@ std::shared_ptr<spdlog::logger> Logger::getLogger(const LogSender& sender) {
 void Logger::log(const LogSender &sender, const std::string &message, const LogLevel loglevel) {
     std::lock_guard guard(this->m_logLock);
     if (!loggingEnabled) return;
-    
+
     auto logger = getLogger(sender);
     if (!logger) return;
-    
+
     switch (loglevel) {
         case Debug:
             logger->debug(message);
@@ -113,7 +128,7 @@ std::string Logger::handleLogCommand(std::string command) {
         if (false == this->m_LogAll) {
             this->m_LogAll = true;
             // Set all loggers to debug level
-            for (const auto& logger : loggers) {
+            for (const auto &logger : loggers) {
                 logger->set_level(spdlog::level::debug);
             }
             return "Set all log levels to DEBUG";
@@ -123,14 +138,29 @@ std::string Logger::handleLogCommand(std::string command) {
             for (size_t i = 0; i < loggers.size() && i < logSettings.size(); ++i) {
                 spdlog::level::level_enum level;
                 switch (logSettings[i].minimumLevel) {
-                    case Debug: level = spdlog::level::debug; break;
-                    case Info: level = spdlog::level::info; break;
-                    case Warning: level = spdlog::level::warn; break;
-                    case Error: level = spdlog::level::err; break;
-                    case Critical: level = spdlog::level::critical; break;
-                    case System: level = spdlog::level::info; break;
-                    case Disabled: level = spdlog::level::off; break;
-                    default: level = spdlog::level::info;
+                    case Debug:
+                        level = spdlog::level::debug;
+                        break;
+                    case Info:
+                        level = spdlog::level::info;
+                        break;
+                    case Warning:
+                        level = spdlog::level::warn;
+                        break;
+                    case Error:
+                        level = spdlog::level::err;
+                        break;
+                    case Critical:
+                        level = spdlog::level::critical;
+                        break;
+                    case System:
+                        level = spdlog::level::info;
+                        break;
+                    case Disabled:
+                        level = spdlog::level::off;
+                        break;
+                    default:
+                        level = spdlog::level::info;
                 }
                 loggers[i]->set_level(level);
             }
@@ -153,10 +183,8 @@ std::string Logger::handleLogLevelCommand(std::string command) {
     std::lock_guard guard(this->m_logLock);
     auto logsetting = std::find_if(logSettings.begin(), logSettings.end(), [sender](const LogSetting &setting) {
         std::string uppercaseName = setting.name;
-#pragma warning(push)
-#pragma warning(disable : 4244)
-        std::transform(uppercaseName.begin(), uppercaseName.end(), uppercaseName.begin(), ::toupper);
-#pragma warning(pop)
+        std::transform(uppercaseName.begin(), uppercaseName.end(), uppercaseName.begin(),
+                       [](unsigned char c) { return std::toupper(c); });
         return uppercaseName == sender;
     });
 
@@ -172,10 +200,7 @@ std::string Logger::handleLogLevelCommand(std::string command) {
     auto logger = spdlog::get(logSettingRef.name);
     if (!logger) return "Logger not found";
 
-#pragma warning(push)
-#pragma warning(disable : 4244)
-    std::transform(newLevel.begin(), newLevel.end(), newLevel.begin(), ::toupper);
-#pragma warning(pop)
+    std::transform(newLevel.begin(), newLevel.end(), newLevel.begin(), [](unsigned char c) { return std::toupper(c); });
 
     spdlog::level::level_enum spdLogLevel;
     if (newLevel == "DEBUG") {

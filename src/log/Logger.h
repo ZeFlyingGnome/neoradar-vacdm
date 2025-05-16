@@ -1,17 +1,17 @@
 #pragma once
 
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
-#include <memory>
 
-#include "spdlog/spdlog.h"
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/spdlog.h"
 
 namespace vacdm::logging {
 
 class Logger {
-public:
+   public:
     enum LogSender {
         vACDM,
         DataManager,
@@ -36,23 +36,13 @@ public:
         LogLevel minimumLevel;
     };
 
-private:
+   private:
     Logger();
-    std::shared_ptr<spdlog::logger> getLogger(const LogSender& sender);
+    std::shared_ptr<spdlog::logger> getLogger(const LogSender &sender);
     std::vector<LogSetting> logSettings = {
-#ifdef DEBUG_BUILD
-        {vACDM, "vACDM", Debug},
-        {DataManager, "DataManager", Info},
-        {Server, "Server", Debug},
-        {ConfigParser, "ConfigParser", Debug},
-        {Utils, "Utils", Debug},
-#else
-        {vACDM, "vACDM", Disabled},
-        {DataManager, "DataManager", Disabled},
-        {Server, "Server", Disabled},
-        {ConfigParser, "ConfigParser", Disabled},
+        {vACDM, "vACDM", Disabled},   {DataManager, "DataManager", Disabled},
+        {Server, "Server", Disabled}, {ConfigParser, "ConfigParser", Disabled},
         {Utils, "Utils", Disabled},
-#endif
     };
     bool m_LogAll = false;
 
@@ -63,7 +53,7 @@ private:
     void enableLogging();
     void disableLogging();
 
-public:
+   public:
     ~Logger();
     void log(const LogSender &sender, const std::string &message, const LogLevel loglevel);
     std::string handleLogCommand(std::string command);
@@ -71,4 +61,4 @@ public:
     static Logger &instance();
 };
 
-} // namespace vacdm::logging
+}  // namespace vacdm::logging
