@@ -219,6 +219,9 @@ void NeoVACDM::run() {
         if (true == this->m_stop) return;
         
         this->OnTimer(counter);
+
+        // Update tags every five seconds
+        if (counter % 5 ==0) UpdateTagItems();
     }
     return;
 }

@@ -107,94 +107,76 @@ std::string formatTime(const std::chrono::utc_clock::time_point timepoint) {
         return "";
 }
 
-/*void vACDM::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget,
-                         int ItemCode, int TagData, char sItemString[16], int *pColorCode, COLORREF *pRGB,
-                         double *pFontSize) {
-    std::ignore = RadarTarget;
-    std::ignore = TagData;
-    std::ignore = pRGB;
-    std::ignore = pFontSize;
+void NeoVACDM::UpdateTagItems() {
+    std::vector<std::string> callsigns = DataManager::instance().getPilots();
 
-    *pColorCode = EuroScopePlugIn::TAG_COLOR_RGB_DEFINED;
-    if (nullptr == FlightPlan.GetFlightPlanData().GetPlanType() ||
-        0 == std::strlen(FlightPlan.GetFlightPlanData().GetPlanType()))
-        return;
-    // skip non IFR flights
-    if (std::string_view("I") != FlightPlan.GetFlightPlanData().GetPlanType()) {
-        return;
+    for (std::string callsign : callsigns) {
+
+        auto pilot = DataManager::instance().getPilot(callsign);
+        std::string text;
+        std::optional<std::array<unsigned int, 3>> color;
+        Tag::TagContext context;
+        context.callsign = callsign;
+
+        text = formatTime(pilot.eobt);
+        context.colour = Color::colorizeEobt(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(EOBTTagID_, text, context);
+
+        text = formatTime(pilot.tobt);
+        context.colour = Color::colorizeTobt(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(TOBTTagID_, text, context);
+
+        text = formatTime(pilot.tsat);
+        context.colour = Color::colorizeTsat(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(TSATTagID_, text, context);
+
+        text = formatTime(pilot.ttot);
+        context.colour = Color::colorizeTtot(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(TTOTTagID_, text, context);
+
+        if (pilot.exot.time_since_epoch().count() > 0) {
+            text = std::format("{:%M}", pilot.exot);
+            context.colour = std::nullopt;
+            coreAPI_->tag().getInterface()->UpdateTagValue(EXOTTagID_, text, context);
+        }
+
+        text = formatTime(pilot.asat);
+        context.colour = Color::colorizeAsat(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(ASATTagID_, text, context);
+
+        text = formatTime(pilot.aobt);
+        context.colour = Color::colorizeAobt(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(AOBTTagID_, text, context);
+
+        text = formatTime(pilot.atot);
+        context.colour = Color::colorizeAtot(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(ATOTTagID_, text, context);
+
+        text = formatTime(pilot.asrt);
+        context.colour = Color::colorizeAsrt(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(ASRTTagID_, text, context);
+
+        text = formatTime(pilot.aort);
+        context.colour = Color::colorizeAort(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(AORTTagID_, text, context);
+
+        text = formatTime(pilot.ctot);
+        context.colour = Color::colorizeCtot(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(CTOTTagID_, text, context);
+
+        if (false == pilot.measures.empty()) {
+            const std::int64_t measureMinutes = pilot.measures[0].value / 60;
+            const std::int64_t measureSeconds = pilot.measures[0].value % 60;
+
+            text = std::format("{:02}:{:02}", measureMinutes, measureSeconds);
+            context.colour = Color::colorizeEcfmpMeasure(pilot);
+            coreAPI_->tag().getInterface()->UpdateTagValue(ECFMPMeasuresTagID_, text, context);
+        }
+
+        text = (pilot.hasBooking ? "B" : "");
+        context.colour = Color::colorizeEventBooking(pilot);
+        coreAPI_->tag().getInterface()->UpdateTagValue(EventBookingTagID_, text, context);
+
     }
-    std::string callsign = FlightPlan.GetCallsign();
-
-    if (false == DataManager::instance().checkPilotExists(callsign)) return;
-
-    auto pilot = DataManager::instance().getPilot(callsign);
-
-    std::stringstream outputText;
-
-    switch (static_cast<itemType>(ItemCode)) {
-        case itemType::EOBT:
-            outputText << formatTime(pilot.eobt);
-            *pRGB = Color::colorizeEobt(pilot);
-            break;
-        case itemType::TOBT:
-            outputText << formatTime(pilot.tobt);
-            *pRGB = Color::colorizeTobt(pilot);
-            break;
-        case itemType::TSAT:
-            outputText << formatTime(pilot.tsat);
-            *pRGB = Color::colorizeTsat(pilot);
-            break;
-        case itemType::TTOT:
-            outputText << formatTime(pilot.ttot);
-            *pRGB = Color::colorizeTtot(pilot);
-            break;
-        case itemType::EXOT:
-            if (pilot.exot.time_since_epoch().count() > 0) {
-                outputText << std::format("{:%M}", pilot.exot);
-                *pColorCode = Color::colorizeExot(pilot);
-            }
-            break;
-        case itemType::ASAT:
-            outputText << formatTime(pilot.asat);
-            *pRGB = Color::colorizeAsat(pilot);
-            break;
-        case itemType::AOBT:
-            outputText << formatTime(pilot.aobt);
-            *pRGB = Color::colorizeAobt(pilot);
-            break;
-        case itemType::ATOT:
-            outputText << formatTime(pilot.atot);
-            *pRGB = Color::colorizeAtot(pilot);
-            break;
-        case itemType::ASRT:
-            outputText << formatTime(pilot.asrt);
-            *pRGB = Color::colorizeAsrt(pilot);
-            break;
-        case itemType::AORT:
-            outputText << formatTime(pilot.aort);
-            *pRGB = Color::colorizeAort(pilot);
-            break;
-        case itemType::CTOT:
-            outputText << formatTime(pilot.ctot);
-            *pRGB = Color::colorizeCtot(pilot);
-            break;
-        case itemType::ECFMP_MEASURES:
-            if (false == pilot.measures.empty()) {
-                const std::int64_t measureMinutes = pilot.measures[0].value / 60;
-                const std::int64_t measureSeconds = pilot.measures[0].value % 60;
-
-                outputText << std::format("{:02}:{:02}", measureMinutes, measureSeconds);
-                *pRGB = Color::colorizeEcfmpMeasure(pilot);
-            }
-            break;
-        case itemType::EVENT_BOOKING:
-            outputText << (pilot.hasBooking ? "B" : "");
-            *pRGB = Color::colorizeEventBooking(pilot);
-            break;
-        default:
-            break;
-    }
-
-    std::strcpy(sItemString, outputText.str().c_str());
-}*/
+}
 }  // namespace vacdm

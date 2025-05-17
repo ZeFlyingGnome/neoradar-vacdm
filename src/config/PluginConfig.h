@@ -1,27 +1,24 @@
 #pragma once
 
 #include <string>
+#include <array>
+#include <optional>
 
 namespace vacdm {
-
-struct VACDMCOLOR {
-    int r, g, b;
-};    
-
 struct PluginConfig {
     bool valid = true;
     std::string serverUrl = "https://app.vacdm.net";
     int updateCycleSeconds = 5;
-    VACDMCOLOR lightgreen = {127, 252, 73};
-    VACDMCOLOR lightblue = {53, 218, 235};
-    VACDMCOLOR green = {0, 181, 27};
-    VACDMCOLOR blue = {0, 0, 255};
-    VACDMCOLOR lightyellow = {255, 255, 191};
-    VACDMCOLOR yellow = {255, 255, 0};
-    VACDMCOLOR orange = {255, 153, 0};
-    VACDMCOLOR red = {255, 0, 0};
-    VACDMCOLOR grey = {153, 153, 153};
-    VACDMCOLOR white = {255, 255, 255};
-    VACDMCOLOR debug = {255, 0, 255};
+    std::optional<std::array<unsigned int, 3>> lightgreen = std::make_optional<std::array<unsigned int, 3>>({127, 252, 73});
+    std::optional<std::array<unsigned int, 3>> lightblue = std::make_optional<std::array<unsigned int, 3>>({53, 218, 235});
+    std::optional<std::array<unsigned int, 3>> green = std::make_optional<std::array<unsigned int, 3>>({0, 181, 27});
+    std::optional<std::array<unsigned int, 3>> blue = std::make_optional<std::array<unsigned int, 3>>({0, 0, 255});
+    std::optional<std::array<unsigned int, 3>> lightyellow = std::make_optional<std::array<unsigned int, 3>>({255, 255, 191});
+    std::optional<std::array<unsigned int, 3>> yellow = std::make_optional<std::array<unsigned int, 3>>({255, 255, 0});
+    std::optional<std::array<unsigned int, 3>> orange = std::make_optional<std::array<unsigned int, 3>>({255, 153, 0});
+    std::optional<std::array<unsigned int, 3>> red = std::make_optional<std::array<unsigned int, 3>>({255, 0, 0});
+    std::optional<std::array<unsigned int, 3>> grey = std::make_optional<std::array<unsigned int, 3>>({153, 153, 153});
+    std::optional<std::array<unsigned int, 3>> white = std::make_optional<std::array<unsigned int, 3>>({255, 255, 255});
+    std::optional<std::array<unsigned int, 3>> debug = std::make_optional<std::array<unsigned int, 3>>({255, 0, 255});
 };
 }  // namespace vacdm

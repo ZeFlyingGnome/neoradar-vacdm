@@ -18,11 +18,11 @@ class Color {
     static types::Pilot pilotT;
     static void updatePluginConfig(PluginConfig newPluginConfig) { pluginConfig = newPluginConfig; }
 
-    static VACDMCOLOR colorizeEobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
+    static std::optional<std::array<unsigned int, 3>> colorizeEobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
 
-    static VACDMCOLOR colorizeTobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
+    static std::optional<std::array<unsigned int, 3>> colorizeTobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }
 
-    static VACDMCOLOR colorizeTsat(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeTsat(const types::Pilot &pilot) {
         if (pilot.asat != types::defaultTime || pilot.tsat == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -54,7 +54,7 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static VACDMCOLOR colorizeTtot(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeTtot(const types::Pilot &pilot) {
         if (pilot.ttot == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -103,7 +103,7 @@ class Color {
         return 0;
     }
 
-    static VACDMCOLOR colorizeAsat(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeAsat(const types::Pilot &pilot) {
         if (pilot.asat == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -135,17 +135,17 @@ class Color {
         return pluginConfig.orange;
     }
 
-    static VACDMCOLOR colorizeAobt(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeAobt(const types::Pilot &pilot) {
         std::ignore = pilot;
         return pluginConfig.grey;
     }
 
-    static VACDMCOLOR colorizeAtot(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeAtot(const types::Pilot &pilot) {
         std::ignore = pilot;
         return pluginConfig.grey;
     }
 
-    static VACDMCOLOR colorizeAsrt(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeAsrt(const types::Pilot &pilot) {
         if (pilot.asat.time_since_epoch().count() > 0) {
             return pluginConfig.grey;
         }
@@ -167,7 +167,7 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static VACDMCOLOR colorizeAort(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeAort(const types::Pilot &pilot) {
         if (pilot.aort == types::defaultTime) {
             return pluginConfig.grey;
         }
@@ -193,11 +193,11 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static VACDMCOLOR colorizeCtot(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
+    static std::optional<std::array<unsigned int, 3>> colorizeCtot(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
 
-    static VACDMCOLOR colorizeCtotTimer(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
+    static std::optional<std::array<unsigned int, 3>> colorizeCtotTimer(const types::Pilot &pilot) { return colorizeCtotandCtottimer(pilot); }
 
-    static VACDMCOLOR colorizeAsatTimer(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeAsatTimer(const types::Pilot &pilot) {
         // aort set
         if (pilot.aort.time_since_epoch().count() > 0) {
             return pluginConfig.grey;
@@ -235,16 +235,16 @@ class Color {
 
     // other:
 
-    static VACDMCOLOR colorizeEcfmpMeasure(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeEcfmpMeasure(const types::Pilot &pilot) {
         return pilot.measures.empty() ? pluginConfig.grey : pluginConfig.green;
     }
 
-    static VACDMCOLOR colorizeEventBooking(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeEventBooking(const types::Pilot &pilot) {
         return pilot.hasBooking ? pluginConfig.green : pluginConfig.grey;
     }
 
    private:
-    static VACDMCOLOR colorizeEobtAndTobt(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeEobtAndTobt(const types::Pilot &pilot) {
         const auto now = std::chrono::utc_clock::now();
         const auto timeSinceTobt = std::chrono::duration_cast<std::chrono::seconds>(now - pilot.tobt).count();
         const auto timeSinceTsat = std::chrono::duration_cast<std::chrono::seconds>(now - pilot.tsat).count();
@@ -283,7 +283,7 @@ class Color {
         return pluginConfig.debug;
     }
 
-    static VACDMCOLOR colorizeCtotandCtottimer(const types::Pilot &pilot) {
+    static std::optional<std::array<unsigned int, 3>> colorizeCtotandCtottimer(const types::Pilot &pilot) {
         if (pilot.ctot == types::defaultTime) {
             return pluginConfig.grey;
         }

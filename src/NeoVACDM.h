@@ -29,9 +29,8 @@ public:
     void OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) override;*/
     void OnTagAction(const Tag::TagActionEvent *event) override;
     void OnTagDropdownAction(const Tag::DropdownActionEvent *event) override;
-    /*void OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget, int ItemCode,
-                      int TagData, char sItemString[16], int *pColorCode, COLORREF *pRGB, double *pFontSize) override;
-    bool OnCompileCommand(const char *sCommandLine) override;*/
+    void UpdateTagItems();
+    /*    bool OnCompileCommand(const char *sCommandLine) override;*/
     void OnFlightplanUpdated(const Flightplan::FlightplanUpdatedEvent* event) override;
 
     // COmmand handling
