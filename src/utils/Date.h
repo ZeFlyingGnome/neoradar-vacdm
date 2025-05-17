@@ -7,8 +7,6 @@
 #include "EuroScopePlugIn.h"
 #pragma warning(pop)
 
-#include "log/Logger.h"
-
 namespace vacdm::utils {
 
 class Date {

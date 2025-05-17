@@ -7,7 +7,7 @@
 
 #include "core/DataManager.h"
 #include "core/Server.h"
-#include "log/Logger.h"
+#include "log/SpdLogger.h"
 #include "utils/Number.h"
 #include "utils/String.h"
 #include "vACDM.h"
@@ -53,7 +53,7 @@ bool vACDM::OnCompileCommand(const char *sCommandLine) {
             DisplayMessage("All pilot data cleared");
 
             DisplayMessage("Executing vACDM as the MASTER");
-            Logger::instance().log(Logger::LogSender::vACDM, "Switched to MASTER", Logger::LogLevel::Info);
+            SpdLogger::log(SpdLogger::LogSender::vACDM, "Switched to MASTER", SpdLogger::LogLevel::Info);
             com::Server::instance().setMaster(true);
 
             return true;
@@ -64,7 +64,7 @@ bool vACDM::OnCompileCommand(const char *sCommandLine) {
         return true;
     } else if (std::string::npos != command.find("SLAVE")) {
         DisplayMessage("Executing vACDM as the SLAVE");
-        Logger::instance().log(Logger::LogSender::vACDM, "Switched to SLAVE", Logger::LogLevel::Info);
+        SpdLogger::log(SpdLogger::LogSender::vACDM, "Switched to SLAVE", SpdLogger::LogLevel::Info);
         com::Server::instance().setMaster(false);
 
         // Clear all pilot data when switching to slave mode
@@ -77,9 +77,9 @@ bool vACDM::OnCompileCommand(const char *sCommandLine) {
         return true;
     } else if (std::string::npos != command.find("LOG")) {
         if (std::string::npos != command.find("LOGLEVEL")) {
-            DisplayMessage(Logger::instance().handleLogLevelCommand(command));
+            DisplayMessage(SpdLogger::handleLogLevelCommand(command));
         } else {
-            DisplayMessage(Logger::instance().handleLogCommand(command));
+            DisplayMessage(SpdLogger::handleLogCommand(command));
         }
         return true;
     } else if (std::string::npos != command.find("UPDATERATE")) {

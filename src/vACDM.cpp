@@ -12,7 +12,7 @@
 #include "core/Server.h"
 #include "core/TagFunctions.h"
 #include "core/TagItems.h"
-#include "log/Logger.h"
+#include "log/SpdLogger.h"
 #include "utils/Date.h"
 #include "utils/Number.h"
 #include "utils/String.h"
@@ -29,8 +29,8 @@ namespace vacdm {
 vACDM::vACDM()
     : CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE, PLUGIN_NAME, PLUGIN_VERSION, PLUGIN_AUTHOR, PLUGIN_LICENSE) {
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
-    Logger::instance().log(Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
-                           Logger::LogLevel::System);
+    SpdLogger::log(SpdLogger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
+                   SpdLogger::LogLevel::System);
 
     // get the dll-path
     char path[MAX_PATH + 1] = {0};
@@ -112,10 +112,9 @@ void vACDM::changeServerUrl(const std::string &url) {
     DataManager::instance().pause();
     Server::instance().changeServerAddress(url);
     this->checkServerConfiguration();
-
     DataManager::instance().resume();
     DisplayMessage("Changed URL to " + url);
-    Logger::instance().log(Logger::LogSender::vACDM, "Changed URL to " + url, Logger::LogLevel::Info);
+    SpdLogger::log(SpdLogger::LogSender::vACDM, "Changed URL to " + url, SpdLogger::LogLevel::Info);
 }
 
 // Euroscope Events:
@@ -160,15 +159,15 @@ void vACDM::OnAirportRunwayActivityChanged() {
     }
 
     if (activeAirports.empty()) {
-        Logger::instance().log(Logger::LogSender::vACDM,
-                               "Airport/Runway Change, no active airports: ", Logger::LogLevel::Info);
+        SpdLogger::log(SpdLogger::LogSender::vACDM,
+                       "Airport/Runway Change, no active airports: ", SpdLogger::LogLevel::Info);
     } else {
-        Logger::instance().log(
-            Logger::LogSender::vACDM,
+        SpdLogger::log(
+            SpdLogger::LogSender::vACDM,
             "Airport/Runway Change, active airports: " +
                 std::accumulate(std::next(activeAirports.begin()), activeAirports.end(), activeAirports.front(),
                                 [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
-            Logger::LogLevel::Info);
+            SpdLogger::LogLevel::Info);
     }
     DataManager::instance().setActiveAirports(activeAirports);
 }
