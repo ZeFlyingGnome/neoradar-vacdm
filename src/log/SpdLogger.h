@@ -77,7 +77,6 @@ inline std::shared_ptr<spdlog::logger> getLogger(LogSender sender) {
  */
 inline void log(LogSender sender, const std::string& message, LogLevel level) {
     std::lock_guard<std::mutex> guard(logMutex);
-    spdlog::critical(message);
     
     if (!loggingEnabled) return;
 

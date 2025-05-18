@@ -5,23 +5,28 @@
 #include <numeric>
 #include <vector>
 
-#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 #include "utils/String.h"
 
 namespace vacdm::logging {
 
 // Initialize static members
+#ifdef DEV_BUILD
 bool SpdLogger::loggingEnabled = true;
+bool SpdLogger::debugMode = true;
+#else
+bool SpdLogger::loggingEnabled = false;
 bool SpdLogger::debugMode = false;
+#endif
 std::vector<SpdLogger::LoggerSetting> SpdLogger::loggerSettings;
 std::mutex SpdLogger::logMutex;
 
 void SpdLogger::initialize() {
-    std::string logFilename = std::format("{0:%Y%m%d%H%M%S}.vacdm.log", std::chrono::utc_clock::now());
+    std::string logFilename = "vacdm.log";
 
     // Create a common file sink for all loggers
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilename, true);
-    file_sink->set_level(spdlog::level::warn);  // Default level
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFilename,  1048576 * 5, 3, true);
+    file_sink->set_level(spdlog::level::info);  // Default level
 
     // Initialize logger settings
     loggerSettings.clear();
