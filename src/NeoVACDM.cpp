@@ -205,10 +205,6 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
     DataManager::instance().setActiveAirports(activeAirports);
 }
 
-void NeoVACDM::OnFlightplanUpdated(const Flightplan::FlightplanUpdatedEvent* event){
-    logger_->info("OnFlightplanUpdated: " + event->callsign);
-}
-
 void NeoVACDM::run() {
     DisplayMessage("Main Run", "NeoVACDM");
     int counter = 1;

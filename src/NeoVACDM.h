@@ -31,10 +31,10 @@ public:
     void OnTagDropdownAction(const Tag::DropdownActionEvent *event) override;
     void UpdateTagItems();
     /*    bool OnCompileCommand(const char *sCommandLine) override;*/
-    void OnFlightplanUpdated(const Flightplan::FlightplanUpdatedEvent* event) override;
 
     // COmmand handling
     void SetMaster();
+    void TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput = "");
 
 
 private:
@@ -90,7 +90,7 @@ private:
 	
 	std::string ResetTOBTActionId_;
 	std::string ResetASATActionId_;
-	std::string ResetTOBTConfirmActionId_;
+	std::string ResetTOBTConfirmedActionId_;
 	std::string ResetAORTActionId_;
 	std::string ResetAOBTActionId_;
 	std::string ResetMenuActionId_;
