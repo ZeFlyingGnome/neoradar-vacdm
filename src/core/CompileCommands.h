@@ -88,8 +88,8 @@ bool vACDM::OnCompileCommand(const char *sCommandLine) {
             DisplayMessage("Usage: .vacdm UPDATERATE value");
             return true;
         }
-        if (false == isNumber(elements[2]) ||
-            std::stoi(elements[2]) < minUpdateCycleSeconds && std::stoi(elements[2]) > maxUpdateCycleSeconds) {
+        if ((false == isNumber(elements[2])) ||
+            (std::stoi(elements[2]) < minUpdateCycleSeconds || std::stoi(elements[2]) > maxUpdateCycleSeconds)) {
             DisplayMessage("Usage: .vacdm UPDATERATE value");
             DisplayMessage("Value must be number between " + std::to_string(minUpdateCycleSeconds) + " and " +
                            std::to_string(maxUpdateCycleSeconds));

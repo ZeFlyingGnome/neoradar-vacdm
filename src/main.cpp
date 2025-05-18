@@ -18,6 +18,5 @@ void __declspec(dllexport) EuroScopePlugInInit(EuroScopePlugIn::CPlugIn **ppPlug
 }
 
 void __declspec(dllexport) EuroScopePlugInExit(void) {
-    // Shutdown logger
-    vacdm::logging::SpdLogger::shutdown();
+    Plugin.release();
 }

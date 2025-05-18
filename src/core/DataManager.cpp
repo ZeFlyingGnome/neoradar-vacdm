@@ -385,7 +385,7 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
         for (auto updateIt = backendPilots.begin(); updateIt != backendPilots.end(); ++updateIt) {
             if (updateIt->callsign == pilot->second[EuroscopeData].callsign) {
                 SpdLogger::log(SpdLogger::LogSender::DataManager,
-                               "Updating " + pilot->second[EuroscopeData].callsign + " with" + updateIt->callsign,
+                               "Updating " + pilot->second[EuroscopeData].callsign + " with " + updateIt->callsign,
                                SpdLogger::LogLevel::Info);
                 pilot->second[ServerData] = *updateIt;
                 DataManager::consolidateData(pilot->second);

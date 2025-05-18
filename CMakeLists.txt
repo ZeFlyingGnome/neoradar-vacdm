@@ -49,10 +49,14 @@ CONFIGURE_FILE(
     ${CMAKE_BINARY_DIR}/Version.h
 )
 
+# No warnings for external libraries (EuroScopePlugIn.h)
+INCLUDE_DIRECTORIES(
+    SYSTEM ${CMAKE_SOURCE_DIR}/external/include
+)
+
 INCLUDE_DIRECTORIES(
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/src/
-    ${CMAKE_SOURCE_DIR}/external/include
     ${CMAKE_SOURCE_DIR}
 )
 
@@ -84,7 +88,7 @@ FIND_PACKAGE(spdlog CONFIG REQUIRED)
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
-   ${CMAKE_SOURCE_DIR}/external/lib/EuroScopePlugInDLL.lib
+    ${CMAKE_SOURCE_DIR}/external/lib/EuroScopePlugInDLL.lib
     OpenSSL::SSL OpenSSL::Crypto
     httplib::httplib
     nlohmann_json::nlohmann_json
