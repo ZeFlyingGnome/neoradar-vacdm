@@ -122,7 +122,7 @@ bool ConfigParser::parse(const std::string &filename, PluginConfig &config) {
             parsed = this->parseColor(values[1], config.debug, lineOffset);
         } else {
             this->m_errorLine = lineOffset;
-            this->m_errorMessage = "Unknown file entry: " + value[0];
+            this->m_errorMessage = "Unknown file entry: " + values[0];
             return false;
         }
 

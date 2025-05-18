@@ -49,21 +49,19 @@ CONFIGURE_FILE(
     ${CMAKE_BINARY_DIR}/Version.h
 )
 
+# No warnings for external libraries (EuroScopePlugIn.h)
+INCLUDE_DIRECTORIES(
+    SYSTEM ${CMAKE_SOURCE_DIR}/external/include
+)
+
 INCLUDE_DIRECTORIES(
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/src/
-    ${CMAKE_SOURCE_DIR}/external/include
     ${CMAKE_SOURCE_DIR}
 )
 
 ADD_DEFINITIONS(
     -D_CRT_SECURE_NO_WARNINGS
-    -DSQLITE_THREADSAFE=0
-    -DSQLITE_DEFAULT_FILE_FORMAT=4
-    -DSQLITE_DEFAULT_SYNCHRONOUS=0
-    -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=0
-    -DSQLITE_WIN32_MALLOC
-    -DSQLITE_THREADSAFE=0
     -DWIN32_LEAN_AND_MEAN
 )
 
@@ -74,11 +72,8 @@ SET(SOURCE_FILES
     src/core/DataManager.h
     src/core/Server.cpp
     src/core/Server.h
-    src/log/Logger.cpp
-    src/log/Logger.h
-    src/log/sqlite3.c
-    src/log/sqlite3.h
-    src/log/sqlite3ext.h
+    src/log/SpdLogger.cpp
+    src/log/SpdLogger.h
     src/vACDM.cpp
     src/vACDM.h
     src/main.cpp
@@ -88,14 +83,16 @@ SET(SOURCE_FILES
 FIND_PACKAGE(OpenSSL CONFIG REQUIRED)
 FIND_PACKAGE(httplib CONFIG REQUIRED)
 FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
+FIND_PACKAGE(spdlog CONFIG REQUIRED)
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
-   ${CMAKE_SOURCE_DIR}/external/lib/EuroScopePlugInDLL.lib
+    ${CMAKE_SOURCE_DIR}/external/lib/EuroScopePlugInDLL.lib
     OpenSSL::SSL OpenSSL::Crypto
     httplib::httplib
     nlohmann_json::nlohmann_json
+    spdlog::spdlog_header_only
     crypt32.lib ws2_32.lib Shlwapi.lib
 )
 

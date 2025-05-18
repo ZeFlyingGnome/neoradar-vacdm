@@ -1,7 +1,7 @@
 #include "DataManager.h"
 
 #include "core/Server.h"
-#include "log/Logger.h"
+#include "log/SpdLogger.h"
 #include "utils/Date.h"
 
 using namespace vacdm::com;
@@ -47,13 +47,11 @@ void DataManager::clearAllPilotData() {
 
     // Also clear any pending updates
     std::lock_guard guardUpdates(this->m_euroscopeUpdatesLock);
-    this->m_euroscopeFlightplanUpdates.clear();
-
-    // Clear any pending messages
+    this->m_euroscopeFlightplanUpdates.clear();  // Clear any pending messages
     std::lock_guard guardMessages(this->m_asyncMessagesLock);
     this->m_asynchronousMessages.clear();
 
-    Logger::instance().log(Logger::LogSender::DataManager, "All pilot data cleared", Logger::LogLevel::Info);
+    SpdLogger::log(SpdLogger::LogSender::DataManager, "All pilot data cleared", SpdLogger::LogLevel::Info);
 }
 
 std::string DataManager::setUpdateCycleSeconds(const int newUpdateCycleSeconds) {
@@ -186,11 +184,10 @@ void DataManager::processAsynchronousMessages(std::map<std::string, std::array<t
                     default:
                         break;
                 }
-
-                Logger::instance().log(Logger::LogSender::DataManager,
-                                       "Sending " + messageType + " update: " + callsign + " - " +
-                                           utils::Date::timestampToIsoString(message.value),
-                                       Logger::LogLevel::Info);
+                SpdLogger::log(SpdLogger::LogSender::DataManager,
+                               "Sending " + messageType + " update: " + callsign + " - " +
+                                   utils::Date::timestampToIsoString(message.value),
+                               SpdLogger::LogLevel::Info);
 
                 break;
             }
@@ -387,10 +384,9 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
         bool removeFlight = pilot->second[ServerData].inactive == true;
         for (auto updateIt = backendPilots.begin(); updateIt != backendPilots.end(); ++updateIt) {
             if (updateIt->callsign == pilot->second[EuroscopeData].callsign) {
-                Logger::instance().log(
-                    Logger::LogSender::DataManager,
-                    "Updating " + pilot->second[EuroscopeData].callsign + " with" + updateIt->callsign,
-                    Logger::LogLevel::Info);
+                SpdLogger::log(SpdLogger::LogSender::DataManager,
+                               "Updating " + pilot->second[EuroscopeData].callsign + " with " + updateIt->callsign,
+                               SpdLogger::LogLevel::Info);
                 pilot->second[ServerData] = *updateIt;
                 DataManager::consolidateData(pilot->second);
                 removeFlight = false;
@@ -439,14 +435,13 @@ void DataManager::consolidateData(std::array<types::Pilot, 3>& pilot) {
         pilot[ConsolidatedData].destination = pilot[EuroscopeData].destination;
         pilot[ConsolidatedData].runway = pilot[EuroscopeData].runway;
         pilot[ConsolidatedData].sid = pilot[EuroscopeData].sid;
-
-        logging::Logger::instance().log(Logger::LogSender::DataManager, "Consolidated " + pilot[ServerData].callsign,
-                                        logging::Logger::LogLevel::Info);
+        logging::SpdLogger::log(SpdLogger::LogSender::DataManager, "Consolidated " + pilot[ServerData].callsign,
+                                SpdLogger::LogLevel::Info);
     } else {
-        logging::Logger::instance().log(Logger::LogSender::DataManager,
-                                        "Callsign mismatch during consolidation: " + pilot[EuroscopeData].callsign +
-                                            ", " + pilot[ServerData].callsign,
-                                        logging::Logger::LogLevel::Critical);
+        logging::SpdLogger::log(SpdLogger::LogSender::DataManager,
+                                "Callsign mismatch during consolidation: " + pilot[EuroscopeData].callsign + ", " +
+                                    pilot[ServerData].callsign,
+                                SpdLogger::LogLevel::Critical);
     }
 }
 
@@ -467,8 +462,8 @@ void DataManager::processEuroScopeUpdates(std::map<std::string, std::array<types
         // find pilot in list
         for (auto& pair : pilots) {
             if (pilot.callsign == pair.first) {
-                Logger::instance().log(Logger::LogSender::DataManager, "Updated data of " + pilot.callsign,
-                                       Logger::LogLevel::Info);
+                SpdLogger::log(SpdLogger::LogSender::DataManager, "Updated data of " + pilot.callsign,
+                               SpdLogger::LogLevel::Info);
 
                 pair.second[EuroscopeData] = pilot;
                 found = true;
@@ -477,7 +472,7 @@ void DataManager::processEuroScopeUpdates(std::map<std::string, std::array<types
         }
 
         if (false == found) {
-            Logger::instance().log(Logger::LogSender::DataManager, "Added " + pilot.callsign, Logger::LogLevel::Info);
+            SpdLogger::log(SpdLogger::LogSender::DataManager, "Added " + pilot.callsign, SpdLogger::LogLevel::Info);
             pilots.insert({pilot.callsign, {pilot, pilot, types::Pilot()}});
         }
     }
@@ -509,19 +504,19 @@ void DataManager::consolidateFlightplanUpdates(std::list<EuroscopeFlightplanUpda
             if (currentUpdate.timeIssued > it->timeIssued) {
                 // Update with the newer data
                 *it = currentUpdate;
-                Logger::instance().log(Logger::LogSender::DataManager,
-                                       "Updated: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info);
+                SpdLogger::log(SpdLogger::LogSender::DataManager,
+                               "Updated: " + std::string(currentUpdate.data.callsign), SpdLogger::LogLevel::Info);
             } else {
                 // Existing data is already newer, no update needed
-                Logger::instance().log(Logger::LogSender::DataManager,
-                                       "Skipped old update for: " + std::string(currentUpdate.data.callsign),
-                                       Logger::LogLevel::Info);
+                SpdLogger::log(SpdLogger::LogSender::DataManager,
+                               "Skipped old update for: " + std::string(currentUpdate.data.callsign),
+                               SpdLogger::LogLevel::Info);
             }
         } else {
             // Flight plan with the callsign doesn't exist, add it to the result list
             resultList.push_back(currentUpdate);
-            Logger::instance().log(Logger::LogSender::DataManager,
-                                   "Update added: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info);
+            SpdLogger::log(SpdLogger::LogSender::DataManager,
+                           "Update added: " + std::string(currentUpdate.data.callsign), SpdLogger::LogLevel::Info);
         }
     }
 

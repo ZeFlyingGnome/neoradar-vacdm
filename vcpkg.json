@@ -1,7 +1,8 @@
 {
   "dependencies": [
-    "openssl",
     "cpp-httplib",
-    "nlohmann-json"
+    "nlohmann-json",
+    "openssl",
+    "spdlog"
   ]
 }
