@@ -25,7 +25,7 @@ void SpdLogger::initialize() {
     std::string logFilename = "vacdm.log";
 
     // Create a common file sink for all loggers
-    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFilename,  1048576 * 5, 3, true);
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFilename, 1048576 * 5, 3, true);
     file_sink->set_level(spdlog::level::info);  // Default level
 
     // Initialize logger settings

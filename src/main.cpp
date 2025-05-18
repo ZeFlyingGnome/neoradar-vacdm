@@ -17,6 +17,4 @@ void __declspec(dllexport) EuroScopePlugInInit(EuroScopePlugIn::CPlugIn **ppPlug
     *ppPlugInInstance = Plugin.get();
 }
 
-void __declspec(dllexport) EuroScopePlugInExit(void) {
-    Plugin.release();
-}
+void __declspec(dllexport) EuroScopePlugInExit(void) { Plugin.release(); }

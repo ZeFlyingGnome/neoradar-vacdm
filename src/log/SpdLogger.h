@@ -77,7 +77,7 @@ inline std::shared_ptr<spdlog::logger> getLogger(LogSender sender) {
  */
 inline void log(LogSender sender, const std::string& message, LogLevel level) {
     std::lock_guard<std::mutex> guard(logMutex);
-    
+
     if (!loggingEnabled) return;
 
     auto logger = getLogger(sender);
@@ -203,4 +203,3 @@ inline LoggerWrapper& instance() {
 }  // namespace Logger
 
 }  // namespace vacdm::logging
-

@@ -258,10 +258,8 @@ class Color {
         }
         // TOBT in past && TSAT expired, i.e. 5min past TSAT || TOBT >= +1h || TSAT does not exist && TOBT in past
         // -> TOBT in past && (TSAT expired || TSAT does not exist) || TOBT >= now + 1h
-        if (timeSinceTobt > 0 && 
-            ((timeSinceTsat >= 5 * 60 || pilot.tsat == types::defaultTime) ||
-             pilot.tobt >= now + std::chrono::hours(1)))
-        {
+        if (timeSinceTobt > 0 && ((timeSinceTsat >= 5 * 60 || pilot.tsat == types::defaultTime) ||
+                                  pilot.tobt >= now + std::chrono::hours(1))) {
             return pluginConfig.orange;
         }
         // Diff TOBT TSAT >= 5min && unconfirmed
