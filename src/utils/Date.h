@@ -5,8 +5,6 @@
 
 #include "SDK.h"
 
-#include "log/Logger.h"
-
 namespace vacdm::utils {
 
 class Date {

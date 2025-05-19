@@ -3,7 +3,7 @@
 #include <numeric>
 
 #include "Version.h"
-#include "log/Logger.h"
+#include "log/SpdLogger.h"
 #include "utils/Date.h"
 
 using namespace vacdm;
@@ -73,17 +73,16 @@ bool Server::checkWebApi() {
     // Send GET request
     auto result = m_client->Get(url);
     if (!result || result->status != 200) {
-        Logger::instance().log(
-            Logger::LogSender::Server,
-            "Failed to connect to API: " + (result ? std::to_string(result->status) : "connection error"),
-            Logger::LogLevel::Info);
+        SpdLogger::log(SpdLogger::LogSender::Server,
+                       "Failed to connect to API: " + (result ? std::to_string(result->status) : "connection error"),
+                       SpdLogger::LogLevel::Info);
         this->m_apiIsValid = false;
         return m_apiIsValid;
     }
 
     std::string response = result->body;
-    Logger::instance().log(Logger::LogSender::Server, "Received API-version-message: " + response,
-                           Logger::LogLevel::Info);
+    SpdLogger::log(SpdLogger::LogSender::Server, "Received API-version-message: " + response,
+                   SpdLogger::LogLevel::Info);
     try {
         auto root = nlohmann::json::parse(response);
         if (PLUGIN_VERSION_MAJOR != root["major"].get<int>()) {
@@ -93,8 +92,8 @@ bool Server::checkWebApi() {
             this->m_apiIsValid = true;
         }
     } catch (const std::exception& e) {
-        Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
-                               Logger::LogLevel::Info);
+        SpdLogger::log(SpdLogger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+                       SpdLogger::LogLevel::Info);
         this->m_errorCode = "Invalid backend-version response: " + response;
         this->m_apiIsValid = false;
     }
@@ -113,9 +112,8 @@ Server::ServerConfiguration Server::getServerConfig() {
 
         if (result && result->status == 200) {
             nlohmann::json root;
-
-            Logger::instance().log(Logger::LogSender::Server, "Received configuration: " + result->body,
-                                   Logger::LogLevel::Info);
+            SpdLogger::log(SpdLogger::LogSender::Server, "Received configuration: " + result->body,
+                           SpdLogger::LogLevel::Info);
 
             try {
                 root = nlohmann::json::parse(result->body);
@@ -125,9 +123,8 @@ Server::ServerConfiguration Server::getServerConfig() {
                 config.allowMasterAsObserver = root["allowObsMaster"].get<bool>();
                 return config;
             } catch (const std::exception& e) {
-                Logger::instance().log(Logger::LogSender::Server,
-                                       "Failed to parse response JSON: " + std::string(e.what()),
-                                       Logger::LogLevel::Info);
+                SpdLogger::log(SpdLogger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+                               SpdLogger::LogLevel::Info);
             }
         }
     }
@@ -150,7 +147,7 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                                [](const std::string& a, const std::string& b) { return a + "," + b; });
     }
 
-    Logger::instance().log(Logger::LogSender::Server, url, Logger::LogLevel::Info);
+    SpdLogger::log(SpdLogger::LogSender::Server, url, SpdLogger::LogLevel::Info);
 
     auto result = m_client->Get(url);
     if (result && result->status == 200) {
@@ -209,13 +206,12 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                 // event booking data
                 pilots.back().hasBooking = pilot["hasBooking"].get<bool>();
             }
-            Logger::instance().log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
-                                   Logger::LogLevel::Info);
+            SpdLogger::log(SpdLogger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
+                           SpdLogger::LogLevel::Info);
             return pilots;
-
         } catch (const std::exception& e) {
-            Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
-                                   Logger::LogLevel::Info);
+            SpdLogger::log(SpdLogger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+                           SpdLogger::LogLevel::Info);
         }
     }
     return {};
@@ -225,21 +221,19 @@ void Server::sendPostMessage(const std::string& endpointUrl, const nlohmann::jso
     if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) return;
 
     const auto message = root.dump();
-
     if (root.contains("callsign")) {
-        Logger::instance().log(Logger::LogSender::Server,
-                               "Posting " + root["callsign"].get<std::string>() + " with message: " + message,
-                               Logger::LogLevel::Debug);
+        SpdLogger::log(SpdLogger::LogSender::Server,
+                       "Posting " + root["callsign"].get<std::string>() + " with message: " + message,
+                       SpdLogger::LogLevel::Debug);
     }
 
     std::lock_guard guard(m_clientMutex);
     if (m_client) {
         auto result = m_client->Post(endpointUrl, message, "application/json");
-
         if (result && root.contains("callsign")) {
-            Logger::instance().log(Logger::LogSender::Server,
-                                   "Posted " + root["callsign"].get<std::string>() + " response: " + result->body,
-                                   Logger::LogLevel::Debug);
+            SpdLogger::log(SpdLogger::LogSender::Server,
+                           "Posted " + root["callsign"].get<std::string>() + " response: " + result->body,
+                           SpdLogger::LogLevel::Debug);
         }
     }
 }
@@ -248,21 +242,19 @@ void Server::sendPatchMessage(const std::string& endpointUrl, const nlohmann::js
     if (this->m_apiIsChecked == false || this->m_apiIsValid == false || this->m_clientIsMaster == false) return;
 
     const auto message = root.dump();
-
     if (root.contains("callsign")) {
-        Logger::instance().log(Logger::LogSender::Server,
-                               "Patching " + root["callsign"].get<std::string>() + " with message: " + message,
-                               Logger::LogLevel::Debug);
+        SpdLogger::log(SpdLogger::LogSender::Server,
+                       "Patching " + root["callsign"].get<std::string>() + " with message: " + message,
+                       SpdLogger::LogLevel::Debug);
     }
 
     std::lock_guard guard(m_clientMutex);
     if (m_client) {
         auto result = m_client->Patch(endpointUrl, message, "application/json");
-
         if (result && root.contains("callsign")) {
-            Logger::instance().log(Logger::LogSender::Server,
-                                   "Patched " + root["callsign"].get<std::string>() + " response: " + result->body,
-                                   Logger::LogLevel::Debug);
+            SpdLogger::log(SpdLogger::LogSender::Server,
+                           "Patched " + root["callsign"].get<std::string>() + " response: " + result->body,
+                           SpdLogger::LogLevel::Debug);
         }
     }
 }

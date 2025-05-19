@@ -3,7 +3,7 @@
 
 #include "core/DataManager.h"
 #include "core/Server.h"
-#include "log/Logger.h"
+#include "log/SpdLogger.h"
 #include "utils/Number.h"
 #include "utils/String.h"
 #include "NeoVACDM.h"
@@ -51,7 +51,7 @@ void NeoVACDM::SetMaster() {
             DisplayMessage("All pilot data cleared");
 
             DisplayMessage("Executing vACDM as the MASTER");
-            logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
+            SpdLogger::log(SpdLogger::LogSender::vACDM, "Switched to MASTER", SpdLogger::LogLevel::Info);
             com::Server::instance().setMaster(true);
 
             return;
@@ -62,7 +62,7 @@ void NeoVACDM::SetMaster() {
         return;*/
     /*} else if (std::string::npos != command.find("SLAVE")) {
         DisplayMessage("Executing vACDM as the SLAVE");
-        Logger::instance().log(Logger::LogSender::vACDM, "Switched to SLAVE", Logger::LogLevel::Info);
+        SpdLogger::log(SpdLogger::LogSender::vACDM, "Switched to SLAVE", SpdLogger::LogLevel::Info);
         com::Server::instance().setMaster(false);
 
         // Clear all pilot data when switching to slave mode
@@ -75,9 +75,9 @@ void NeoVACDM::SetMaster() {
         return true;
     } else if (std::string::npos != command.find("LOG")) {
         if (std::string::npos != command.find("LOGLEVEL")) {
-            DisplayMessage(Logger::instance().handleLogLevelCommand(command));
+            DisplayMessage(SpdLogger::handleLogLevelCommand(command));
         } else {
-            DisplayMessage(Logger::instance().handleLogCommand(command));
+            DisplayMessage(SpdLogger::handleLogCommand(command));
         }
         return true;
     } else if (std::string::npos != command.find("UPDATERATE")) {
@@ -86,8 +86,8 @@ void NeoVACDM::SetMaster() {
             DisplayMessage("Usage: .vacdm UPDATERATE value");
             return true;
         }
-        if (false == isNumber(elements[2]) ||
-            std::stoi(elements[2]) < minUpdateCycleSeconds && std::stoi(elements[2]) > maxUpdateCycleSeconds) {
+        if ((false == isNumber(elements[2])) ||
+            (std::stoi(elements[2]) < minUpdateCycleSeconds || std::stoi(elements[2]) > maxUpdateCycleSeconds)) {
             DisplayMessage("Usage: .vacdm UPDATERATE value");
             DisplayMessage("Value must be number between " + std::to_string(minUpdateCycleSeconds) + " and " +
                            std::to_string(maxUpdateCycleSeconds));

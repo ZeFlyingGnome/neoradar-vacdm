@@ -49,6 +49,11 @@ CONFIGURE_FILE(
     ${CMAKE_BINARY_DIR}/Version.h
 )
 
+# No warnings for external libraries (EuroScopePlugIn.h)
+INCLUDE_DIRECTORIES(
+    SYSTEM ${CMAKE_SOURCE_DIR}/external/include
+)
+
 INCLUDE_DIRECTORIES(
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/sdk
@@ -57,12 +62,6 @@ INCLUDE_DIRECTORIES(
 
 ADD_DEFINITIONS(
     -D_CRT_SECURE_NO_WARNINGS
-    -DSQLITE_THREADSAFE=0
-    -DSQLITE_DEFAULT_FILE_FORMAT=4
-    -DSQLITE_DEFAULT_SYNCHRONOUS=0
-    -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=0
-    -DSQLITE_WIN32_MALLOC
-    -DSQLITE_THREADSAFE=0
     -DWIN32_LEAN_AND_MEAN
 )
 
@@ -70,9 +69,7 @@ set(SOURCE_FILES
     src/config/ConfigParser.cpp
     src/core/DataManager.cpp
     src/core/Server.cpp
-    src/log/Logger.cpp
-    src/log/sqlite3.c
-    src/log/sqlite3.h
+    src/log/SpdLogger.cpp
     src/NeoVACDM.cpp
     src/main.cpp
 )
@@ -81,6 +78,7 @@ set(SOURCE_FILES
 FIND_PACKAGE(OpenSSL CONFIG REQUIRED)
 FIND_PACKAGE(httplib CONFIG REQUIRED)
 FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
+FIND_PACKAGE(spdlog CONFIG REQUIRED)
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
@@ -88,6 +86,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
     OpenSSL::SSL OpenSSL::Crypto
     httplib::httplib
     nlohmann_json::nlohmann_json
+    spdlog::spdlog_header_only
 )
 
 # TODO: Switch to GeographicLib static with next release (2.6 ?)

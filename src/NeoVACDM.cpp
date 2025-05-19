@@ -9,7 +9,7 @@
 #include "core/Server.h"
 #include "core/TagFunctions.h"
 #include "core/TagItems.h"
-#include "log/Logger.h"
+#include "log/SpdLogger.h"
 #include "utils/Date.h"
 #include "utils/Number.h"
 #include "utils/String.h"
@@ -38,8 +38,8 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     logging::Logger::instance().setLogger(logger_);
 
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
-    logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
-                           logging::Logger::LogLevel::System);
+    SpdLogger::log(SpdLogger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
+                   SpdLogger::LogLevel::System);
 
 
     try
@@ -145,10 +145,9 @@ void NeoVACDM::changeServerUrl(const std::string &url) {
     DataManager::instance().pause();
     Server::instance().changeServerAddress(url);
     this->checkServerConfiguration();
-
     DataManager::instance().resume();
     DisplayMessage("Changed URL to " + url);
-    logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Changed URL to " + url, logging::Logger::LogLevel::Info);
+    SpdLogger::log(SpdLogger::LogSender::vACDM, "Changed URL to " + url, SpdLogger::LogLevel::Info);
 }
 
 void NeoVACDM::OnTimer(int Counter) {
@@ -194,15 +193,15 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
     }
 
     if (activeAirports.empty()) {
-        logging::Logger::instance().log(logging::Logger::LogSender::vACDM,
-                               "Airport/Runway Change, no active airports: ", logging::Logger::LogLevel::Info);
+        SpdLogger::log(SpdLogger::LogSender::vACDM,
+                       "Airport/Runway Change, no active airports: ", SpdLogger::LogLevel::Info);
     } else {
-        logging::Logger::instance().log(
-            logging::Logger::LogSender::vACDM,
+        SpdLogger::log(
+            SpdLogger::LogSender::vACDM,
                 "Airport/Runway Change, active airports: " +
                 std::accumulate(std::next(activeAirports.begin()), activeAirports.end(), activeAirports.front(),
                                 [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
-            logging::Logger::LogLevel::Info);
+            SpdLogger::LogLevel::Info);
     }
     DataManager::instance().setActiveAirports(activeAirports);
 }
