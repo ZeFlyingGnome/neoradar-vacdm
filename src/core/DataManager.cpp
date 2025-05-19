@@ -39,6 +39,20 @@ const types::Pilot DataManager::getPilot(const std::string& callsign) {
     return this->m_pilots.find(callsign)->second[ConsolidatedData];
 }
 
+std::vector<std::string> DataManager::getPilots() {
+    this->m_pilotLock.lock();
+    auto pilotMaps = this->m_pilots;
+    this->m_pilotLock.unlock();
+    
+    std::vector<std::string> pilots;
+
+    for (auto& pilotMap : pilotMaps)
+        pilots.push_back(pilotMap.second[ConsolidatedData].callsign);
+
+    return pilots;
+}
+
+
 void DataManager::pause() { this->m_pause = true; }
 
 void DataManager::resume() { this->m_pause = false; }

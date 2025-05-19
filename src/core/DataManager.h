@@ -109,6 +109,7 @@ class DataManager {
 
     bool checkPilotExists(const std::string &callsign);
     const types::Pilot getPilot(const std::string &callsign);
+    std::vector<std::string> getPilots();
     void pause();
     void resume();
     void clearAllPilotData();

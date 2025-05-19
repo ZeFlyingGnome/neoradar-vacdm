@@ -19,6 +19,7 @@ using namespace PluginSDK;
 using namespace vacdm;
 using namespace vacdm::com;
 using namespace vacdm::core;
+using namespace std::chrono_literals;
 
 NeoVACDM::NeoVACDM() = default;
 NeoVACDM::~NeoVACDM() = default;
@@ -34,7 +35,6 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     // controllerDataAPI_ = &coreAPI_->controllerData();
     logger_ = &coreAPI_->logger();
 
-    logger_->info("Initializing NeoVACDM " + metadata.version);
     logging::Logger::instance().setLogger(logger_);
 
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
@@ -50,12 +50,14 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
         this->reloadConfiguration(true);
 
         initialized_ = true;
-        logger_->info("NeoVACDM initialized successfully");
     }
     catch (const std::exception &e)
     {
         logger_->error("Failed to initialize NeoVACDM: " + std::string(e.what()));
     }
+
+    this->m_stop = false;
+    this->m_worker = std::thread(&NeoVACDM::run, this);
 }
 
 void NeoVACDM::Shutdown()
@@ -65,11 +67,17 @@ void NeoVACDM::Shutdown()
         initialized_ = false;
         logger_->info("NeoVACDM shutdown complete");
     }
-    
+
+    this->m_stop = true;
+    this->m_worker.join();
 }
 
 void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sender) {
-    logger_->info(sender + ": " + message);
+    TextMessage::ClientTextMessageEvent textMessage;
+    textMessage.sentFrom = "NeoVACDM";
+    textMessage.message = sender + ": " + message;
+
+    coreAPI_->textMessage().SendClientMessage(textMessage);
 }
 
 void NeoVACDM::checkServerConfiguration() {
@@ -90,7 +98,7 @@ void NeoVACDM::runScopeUpdate() {
     for (const auto &flightplan : flightplans)
     {
         auto aircraft = GetAircraftByCallsign(flightplan.callsign);
-        DataManager::instance().queueFlightplanUpdate(flightplan, *aircraft);
+        if (aircraft) DataManager::instance().queueFlightplanUpdate(flightplan, *aircraft);
     }
 }
 
@@ -143,11 +151,11 @@ void NeoVACDM::changeServerUrl(const std::string &url) {
     logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Changed URL to " + url, logging::Logger::LogLevel::Info);
 }
 
-/* void vACDM::OnTimer(int Counter) {
-    if (Counter % 5 == 0) this->runEuroscopeUpdate();
+void NeoVACDM::OnTimer(int Counter) {
+    if (Counter % 5 == 0) this->runScopeUpdate();
 }
 
-void vACDM::OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) {
+/* void vACDM::OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) {
     DataManager::instance().queueFlightplanUpdate(FlightPlan);
 }
 
@@ -199,10 +207,22 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
     DataManager::instance().setActiveAirports(activeAirports);
 }
 
-void NeoVACDM::OnFlightplanUpdated(const Flightplan::FlightplanUpdatedEvent* event){
-    logger_->info("OnFlightplanUpdated: " + event->callsign);
-}
+void NeoVACDM::run() {
+    DisplayMessage("Main Run", "NeoVACDM");
+    int counter = 1;
+    while (true) {
+        counter += 1;
+        std::this_thread::sleep_for(1s);
 
+        if (true == this->m_stop) return;
+        
+        this->OnTimer(counter);
+
+        // Update tags every five seconds
+        if (counter % 5 ==0) UpdateTagItems();
+    }
+    return;
+}
 
 PluginSDK::PluginMetadata NeoVACDM::GetMetadata() const
 {

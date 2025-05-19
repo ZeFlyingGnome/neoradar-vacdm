@@ -1,6 +1,7 @@
 // NeoVACDM.h
 #pragma once
 #include <memory>
+#include <thread>
 #include "SDK.h"
 # include "config/PluginConfig.h"
 
@@ -18,23 +19,22 @@ public:
     void Shutdown() override;
     PluginMetadata GetMetadata() const override;
 
-    void DisplayMessage(const std::string &message, const std::string &sender = "vACDM");
+    void DisplayMessage(const std::string &message, const std::string &sender = "");
     void SetGroundState(const Flightplan::Flightplan flightplan, const std::string groundstate);
 
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
-    /*void OnTimer(int Counter) override;
-    void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
+    void OnTimer(int Counter);
+    /* void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
     void OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) override;*/
     void OnTagAction(const Tag::TagActionEvent *event) override;
     void OnTagDropdownAction(const Tag::DropdownActionEvent *event) override;
-    /*void OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget, int ItemCode,
-                      int TagData, char sItemString[16], int *pColorCode, COLORREF *pRGB, double *pFontSize) override;
-    bool OnCompileCommand(const char *sCommandLine) override;*/
-    void OnFlightplanUpdated(const Flightplan::FlightplanUpdatedEvent* event) override;
+    void UpdateTagItems();
+    /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
     // COmmand handling
     void SetMaster();
+    void TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput = "");
 
 
 private:
@@ -46,7 +46,7 @@ private:
     Aircraft::AircraftAPI *aircraftAPI_ = nullptr;
     Flightplan::FlightplanAPI *flightplanAPI_ = nullptr;
     // ControllerData::ControllerDataAPI *controllerDataAPI_ = nullptr;
-    Logger::LoggerAPI *logger_ = nullptr;
+    PluginSDK::Logger::LoggerAPI *logger_ = nullptr;
 
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 
@@ -90,14 +90,17 @@ private:
 	
 	std::string ResetTOBTActionId_;
 	std::string ResetASATActionId_;
-	std::string ResetTOBTConfirmActionId_;
+	std::string ResetTOBTConfirmedActionId_;
 	std::string ResetAORTActionId_;
 	std::string ResetAOBTActionId_;
 	std::string ResetMenuActionId_;
 	std::string ResetPilotActionId_;
 
     std::string VACDMMasterActionId_;
-    
+
+    std::thread m_worker;
+    bool m_stop;
+    void run();
 };
 
 }  // namespace vacdm

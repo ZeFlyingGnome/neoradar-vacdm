@@ -85,7 +85,7 @@ class Logger {
     /// @param message the message to be displayed
     /// @param loglevel the severity, must be greater than m_minimumLogLevel to be logged
     void log(const LogSender &sender, const std::string &message, const LogLevel loglevel);
-    void setLogger(PluginSDK::Logger::LoggerAPI *vacdmLogger) { vacdmLogger_ = vacdmLogger; vacdmLogger_->info("setLogger: logger set");};
+    void setLogger(PluginSDK::Logger::LoggerAPI *vacdmLogger) { vacdmLogger_ = vacdmLogger; };
     std::string handleLogCommand(std::string command);
     std::string handleLogLevelCommand(std::string command);
     static Logger &instance();
