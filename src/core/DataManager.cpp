@@ -403,7 +403,7 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
         for (auto updateIt = backendPilots.begin(); updateIt != backendPilots.end(); ++updateIt) {
             if (updateIt->callsign == pilot->second[ScopeData].callsign) {
                 SpdLogger::log(SpdLogger::LogSender::DataManager,
-                               "Updating " + pilot->second[EuroscopeData].callsign + " with " + updateIt->callsign,
+                               "Updating " + pilot->second[ScopeData].callsign + " with " + updateIt->callsign,
                                SpdLogger::LogLevel::Info);
                 pilot->second[ServerData] = *updateIt;
                 DataManager::consolidateData(pilot->second);
@@ -457,7 +457,7 @@ void DataManager::consolidateData(std::array<types::Pilot, 3>& pilot) {
                                 SpdLogger::LogLevel::Info);
     } else {
         logging::SpdLogger::log(SpdLogger::LogSender::DataManager,
-                                "Callsign mismatch during consolidation: " + pilot[EuroscopeData].callsign + ", " +
+                                "Callsign mismatch during consolidation: " + pilot[ScopeData].callsign + ", " +
                                     pilot[ServerData].callsign,
                                 SpdLogger::LogLevel::Critical);
     }

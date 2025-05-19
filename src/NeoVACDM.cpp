@@ -35,8 +35,6 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     // controllerDataAPI_ = &coreAPI_->controllerData();
     logger_ = &coreAPI_->logger();
 
-    logging::Logger::instance().setLogger(logger_);
-
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
     SpdLogger::log(SpdLogger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
                    SpdLogger::LogLevel::System);
