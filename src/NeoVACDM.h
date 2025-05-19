@@ -19,7 +19,7 @@ public:
     void Shutdown() override;
     PluginMetadata GetMetadata() const override;
 
-    void DisplayMessage(const std::string &message, const std::string &sender = "vACDM");
+    void DisplayMessage(const std::string &message, const std::string &sender = "");
     void SetGroundState(const Flightplan::Flightplan flightplan, const std::string groundstate);
 
     // Scope events

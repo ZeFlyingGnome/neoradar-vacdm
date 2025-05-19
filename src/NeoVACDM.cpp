@@ -35,7 +35,6 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     // controllerDataAPI_ = &coreAPI_->controllerData();
     logger_ = &coreAPI_->logger();
 
-    logger_->info("Initializing NeoVACDM " + metadata.version);
     logging::Logger::instance().setLogger(logger_);
 
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
@@ -51,7 +50,6 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
         this->reloadConfiguration(true);
 
         initialized_ = true;
-        logger_->info("NeoVACDM initialized successfully");
     }
     catch (const std::exception &e)
     {
