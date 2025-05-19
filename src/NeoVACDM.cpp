@@ -75,7 +75,11 @@ void NeoVACDM::Shutdown()
 }
 
 void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sender) {
-    logger_->info(sender + ": " + message);
+    TextMessage::ClientTextMessageEvent textMessage;
+    textMessage.sentFrom = "NeoVACDM";
+    textMessage.message = sender + ": " + message;
+
+    coreAPI_->textMessage().SendClientMessage(textMessage);
 }
 
 void NeoVACDM::checkServerConfiguration() {

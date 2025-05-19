@@ -218,11 +218,7 @@ void NeoVACDM::OnTagAction(const PluginSDK::Tag::TagActionEvent *event)
         SetMaster();
 
     // do not handle functions if client is not master
-    if (false == Server::instance().getMaster())
-    { 
-        DisplayMessage("Not Master");
-        return;
-    }
+    if (false == Server::instance().getMaster()) return;
 
     TagProcessing(event->callsign, event->actionId, event->userInput);
 }
@@ -365,7 +361,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
                                                       types::defaultTime);
     }
     else
-        DisplayMessage("TagProcessing: No processing for " + actionId, "NeoVACDM");
+        logger_->info("NeoVACDM TagProcessing: No processing for " + actionId);
 }
 
 }  // namespace vacdm
