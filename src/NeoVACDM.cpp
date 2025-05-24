@@ -10,11 +10,7 @@
 #include "core/TagFunctions.h"
 #include "core/TagItems.h"
 #include "log/Logger.h"
-#include "utils/Date.h"
-#include "utils/Number.h"
 #include "utils/String.h"
-
-using namespace PluginSDK;
 
 using namespace vacdm;
 using namespace vacdm::com;

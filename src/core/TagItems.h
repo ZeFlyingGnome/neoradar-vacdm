@@ -7,9 +7,12 @@
 #include <string>
 
 #include "TagItemsColor.h"
+#include "core/DataManager.h"
 #include "types/Pilot.h"
 #include "NeoVACDM.h"
 
+
+using namespace vacdm::core;
 using namespace vacdm::tagitems;
 
 namespace vacdm {

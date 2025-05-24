@@ -3,7 +3,7 @@
 #include <memory>
 #include <thread>
 #include "SDK.h"
-# include "config/PluginConfig.h"
+#include "config/PluginConfig.h"
 
 using namespace PluginSDK;
 
