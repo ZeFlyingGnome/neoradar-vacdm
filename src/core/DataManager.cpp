@@ -1,12 +1,12 @@
 #include "DataManager.h"
 
-#include "core/Server.h"
-#include "log/Logger.h"
+/* #include "core/Server.h" */
+/* #include "log/Logger.h" */
 #include "utils/Date.h"
 
-using namespace vacdm::com;
+/* using namespace vacdm::com; */
 using namespace vacdm::core;
-using namespace vacdm::logging;
+/* using namespace vacdm::logging; */
 using namespace std::chrono_literals;
 using namespace PluginSDK::Aircraft;
 using namespace PluginSDK::Flightplan;
@@ -69,7 +69,7 @@ void DataManager::clearAllPilotData() {
     std::lock_guard guardMessages(this->m_asyncMessagesLock);
     this->m_asynchronousMessages.clear();
 
-    Logger::instance().log(Logger::LogSender::DataManager, "All pilot data cleared", Logger::LogLevel::Info);
+/*     Logger::instance().log(Logger::LogSender::DataManager, "All pilot data cleared", Logger::LogLevel::Info); */
 }
 
 std::string DataManager::setUpdateCycleSeconds(const int newUpdateCycleSeconds) {
@@ -83,14 +83,15 @@ std::string DataManager::setUpdateCycleSeconds(const int newUpdateCycleSeconds) 
 }
 
 void DataManager::run() {
-    std::size_t counter = 1;
+    /* std::size_t counter = 1; */
     while (true) {
-        std::this_thread::sleep_for(1s);
+        /* std::this_thread::sleep_for(1s); */
         if (true == this->m_stop) return;
-        if (true == this->m_pause) continue;
+    // ISSUE HERE
+       /*  if (true == this->m_pause) continue; */
 
         // run every updateCycleSeconds seconds
-        if (counter++ % updateCycleSeconds != 0) continue;
+        /* if (counter++ % updateCycleSeconds != 0) continue;
 
         // obtain a copy of the pilot data, work with the copy to minimize lock time
         this->m_pilotLock.lock();
@@ -124,7 +125,7 @@ void DataManager::run() {
         // replace the pilot data with the updated copy
         this->m_pilotLock.lock();
         this->m_pilots = pilots;
-        this->m_pilotLock.unlock();
+        this->m_pilotLock.unlock(); */
     }
 }
 
@@ -140,7 +141,7 @@ void DataManager::processAsynchronousMessages(std::map<std::string, std::array<t
             if (callsign == message.callsign) {
                 std::string messageType;
 
-                switch (message.type) {
+/*                 switch (message.type) {
                     case MessageType::UpdateEXOT:
                         Server::instance().updateExot(message.callsign, message.value);
                         messageType = "EXOT";
@@ -201,12 +202,12 @@ void DataManager::processAsynchronousMessages(std::map<std::string, std::array<t
 
                     default:
                         break;
-                }
+                } */
 
-                Logger::instance().log(Logger::LogSender::DataManager,
+/*                 Logger::instance().log(Logger::LogSender::DataManager,
                                        "Sending " + messageType + " update: " + callsign + " - " +
                                            utils::Date::timestampToIsoString(message.value),
-                                       Logger::LogLevel::Info);
+                                       Logger::LogLevel::Info); */
 
                 break;
             }
@@ -217,7 +218,7 @@ void DataManager::processAsynchronousMessages(std::map<std::string, std::array<t
 void DataManager::handleTagFunction(MessageType type, const std::string callsign,
                                     const std::chrono::utc_clock::time_point value) {
     // do not handle the tag function if the aircraft does not exist or the client is not master
-    if (false == this->checkPilotExists(callsign) || false == Server::instance().getMaster()) return;
+/*     if (false == this->checkPilotExists(callsign) || false == Server::instance().getMaster()) return; */
 
     // queue the update message which will be sent to the backend
     {
@@ -396,7 +397,7 @@ void DataManager::queueFlightplanUpdate(Flightplan flightplan, Aircraft aircraft
 
 void DataManager::consolidateWithBackend(std::map<std::string, std::array<types::Pilot, 3U>>& pilots) {
     // retrieving backend data
-    auto backendPilots = Server::instance().getPilots(this->m_activeAirports);
+    /* auto backendPilots = Server::instance().getPilots(this->m_activeAirports);
 
     for (auto pilot = pilots.begin(); pilots.end() != pilot;) {
         // update backend data & consolidate
@@ -421,7 +422,7 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
         } else {
             ++pilot;
         }
-    }
+    } */
 }
 
 void DataManager::consolidateData(std::array<types::Pilot, 3>& pilot) {
@@ -456,13 +457,13 @@ void DataManager::consolidateData(std::array<types::Pilot, 3>& pilot) {
         pilot[ConsolidatedData].runway = pilot[ScopeData].runway;
         pilot[ConsolidatedData].sid = pilot[ScopeData].sid;
 
-        logging::Logger::instance().log(Logger::LogSender::DataManager, "Consolidated " + pilot[ServerData].callsign,
-                                        logging::Logger::LogLevel::Info);
+        /* logging::Logger::instance().log(Logger::LogSender::DataManager, "Consolidated " + pilot[ServerData].callsign,
+                                        logging::Logger::LogLevel::Info); */
     } else {
-        logging::Logger::instance().log(Logger::LogSender::DataManager,
+        /* logging::Logger::instance().log(Logger::LogSender::DataManager,
                                         "Callsign mismatch during consolidation: " + pilot[ScopeData].callsign +
                                             ", " + pilot[ServerData].callsign,
-                                        logging::Logger::LogLevel::Critical);
+                                        logging::Logger::LogLevel::Critical); */
     }
 }
 
@@ -483,8 +484,8 @@ void DataManager::processScopeUpdates(std::map<std::string, std::array<types::Pi
         // find pilot in list
         for (auto& pair : pilots) {
             if (pilot.callsign == pair.first) {
-                Logger::instance().log(Logger::LogSender::DataManager, "Updated data of " + pilot.callsign,
-                                       Logger::LogLevel::Info);
+                /* Logger::instance().log(Logger::LogSender::DataManager, "Updated data of " + pilot.callsign,
+                                       Logger::LogLevel::Info); */
 
                 pair.second[ScopeData] = pilot;
                 found = true;
@@ -493,8 +494,8 @@ void DataManager::processScopeUpdates(std::map<std::string, std::array<types::Pi
         }
 
         if (false == found) {
-            Logger::instance().log(Logger::LogSender::DataManager, "Added " + pilot.callsign, Logger::LogLevel::Info);
-            pilots.insert({pilot.callsign, {pilot, pilot, types::Pilot()}});
+            /* Logger::instance().log(Logger::LogSender::DataManager, "Added " + pilot.callsign, Logger::LogLevel::Info);
+            pilots.insert({pilot.callsign, {pilot, pilot, types::Pilot()}}); */
         }
     }
 }
@@ -525,19 +526,19 @@ void DataManager::consolidateFlightplanUpdates(std::list<ScopeFlightplanUpdate>&
             if (currentUpdate.timeIssued > it->timeIssued) {
                 // Update with the newer data
                 *it = currentUpdate;
-                Logger::instance().log(Logger::LogSender::DataManager,
-                                       "Updated: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info);
+                /* Logger::instance().log(Logger::LogSender::DataManager,
+                                       "Updated: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info); */
             } else {
                 // Existing data is already newer, no update needed
-                Logger::instance().log(Logger::LogSender::DataManager,
+                /* Logger::instance().log(Logger::LogSender::DataManager,
                                        "Skipped old update for: " + std::string(currentUpdate.data.callsign),
-                                       Logger::LogLevel::Info);
+                                       Logger::LogLevel::Info); */
             }
         } else {
             // Flight plan with the callsign doesn't exist, add it to the result list
             resultList.push_back(currentUpdate);
-            Logger::instance().log(Logger::LogSender::DataManager,
-                                   "Update added: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info);
+            /* Logger::instance().log(Logger::LogSender::DataManager,
+                                   "Update added: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info); */
         }
     }
 

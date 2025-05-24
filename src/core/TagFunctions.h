@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/DataManager.h"
-#include "core/Server.h"
+/* #include "core/DataManager.h" */
+/* #include "core/Server.h" */
 #include "types/Pilot.h"
 #include "utils/Date.h"
 #include "utils/Number.h"
@@ -9,7 +9,7 @@
 
 using namespace vacdm;
 using namespace vacdm::core;
-using namespace vacdm::com;
+/* using namespace vacdm::com; */
 
 namespace vacdm {
 
@@ -218,7 +218,7 @@ void NeoVACDM::OnTagAction(const PluginSDK::Tag::TagActionEvent *event)
         SetMaster();
 
     // do not handle functions if client is not master
-    if (false == Server::instance().getMaster()) return;
+    /* if (false == Server::instance().getMaster()) return; */
 
     TagProcessing(event->callsign, event->actionId, event->userInput);
 }
@@ -231,7 +231,7 @@ void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *ev
     }
 
     // do not handle functions if client is not master
-    if (false == Server::instance().getMaster()) return;
+    /* if (false == Server::instance().getMaster()) return; */
 
     std::string actionId = "plugin:NeoVACDM:ACTION_" + event->componentId;
     TagProcessing(event->callsign, actionId);    

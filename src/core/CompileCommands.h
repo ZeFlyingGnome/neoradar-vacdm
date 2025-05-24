@@ -2,14 +2,14 @@
 #include <string>
 
 #include "core/DataManager.h"
-#include "core/Server.h"
-#include "log/Logger.h"
+/* #include "core/Server.h" */
+/* #include "log/Logger.h" */
 #include "utils/Number.h"
 #include "utils/String.h"
 #include "NeoVACDM.h"
 
 using namespace vacdm;
-using namespace vacdm::logging;
+/* using namespace vacdm::logging; */
 using namespace vacdm::core;
 using namespace vacdm::utils;
 
@@ -51,8 +51,8 @@ void NeoVACDM::SetMaster() {
             DisplayMessage("All pilot data cleared");
 
             DisplayMessage("Executing vACDM as the MASTER");
-            logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
-            com::Server::instance().setMaster(true);
+            /* logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
+            com::Server::instance().setMaster(true); */
 
             return;
         }

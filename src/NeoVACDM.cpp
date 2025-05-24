@@ -6,10 +6,10 @@
 #include "config/ConfigParser.h"
 #include "core/CompileCommands.h"
 #include "core/DataManager.h"
-#include "core/Server.h"
+/* #include "core/Server.h" */
 #include "core/TagFunctions.h"
 #include "core/TagItems.h"
-#include "log/Logger.h"
+/* #include "log/Logger.h" */
 #include "utils/Date.h"
 #include "utils/Number.h"
 #include "utils/String.h"
@@ -17,8 +17,8 @@
 using namespace PluginSDK;
 
 using namespace vacdm;
-using namespace vacdm::com;
-using namespace vacdm::core;
+/* using namespace vacdm::com; */
+/* using namespace vacdm::core; */
 using namespace std::chrono_literals;
 
 NeoVACDM::NeoVACDM() = default;
@@ -35,11 +35,11 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     // controllerDataAPI_ = &coreAPI_->controllerData();
     logger_ = &coreAPI_->logger();
 
-    logging::Logger::instance().setLogger(logger_);
+/*     logging::Logger::instance().setLogger(logger_); */ // Prevents DLL from unloading
 
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
-    logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
-                           logging::Logger::LogLevel::System);
+/*     logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
+                           logging::Logger::LogLevel::System); */
 
 
     try
@@ -81,7 +81,7 @@ void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sen
 }
 
 void NeoVACDM::checkServerConfiguration() {
-    if (Server::instance().checkWebApi() == false) {
+    /* if (Server::instance().checkWebApi() == false) {
         DisplayMessage("Connection failed.", "Server");
         DisplayMessage(Server::instance().errorMessage().c_str(), "Server");
     } else {
@@ -89,7 +89,7 @@ void NeoVACDM::checkServerConfiguration() {
         DisplayMessage(("Connected to " + serverName), "Server");
         // set active airports and runways
         this->OnAirportConfigurationsUpdated(nullptr);
-    }
+    } */
 }
 
 void NeoVACDM::runScopeUpdate() {
@@ -98,8 +98,8 @@ void NeoVACDM::runScopeUpdate() {
     for (const auto &flightplan : flightplans)
     {
         auto aircraft = GetAircraftByCallsign(flightplan.callsign);
-        if (aircraft) DataManager::instance().queueFlightplanUpdate(flightplan, *aircraft);
-    }
+/*         if (aircraft) DataManager::instance().queueFlightplanUpdate(flightplan, *aircraft);
+ */    }
 }
 
 /*void vACDM::SetGroundState(const EuroScopePlugIn::CFlightPlan flightplan, const std::string groundstate) {
@@ -142,14 +142,14 @@ void NeoVACDM::reloadConfiguration(bool initialLoading) {
 }
 
 void NeoVACDM::changeServerUrl(const std::string &url) {
-    DataManager::instance().pause();
-    Server::instance().changeServerAddress(url);
+/*     DataManager::instance().pause(); */
+/*     Server::instance().changeServerAddress(url); */
     this->checkServerConfiguration();
 
-    DataManager::instance().resume();
+/*     DataManager::instance().resume(); */
     DisplayMessage("Changed URL to " + url);
-    logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Changed URL to " + url, logging::Logger::LogLevel::Info);
-}
+/*     logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Changed URL to " + url, logging::Logger::LogLevel::Info);
+ */}
 
 void NeoVACDM::OnTimer(int Counter) {
     if (Counter % 5 == 0) this->runScopeUpdate();
@@ -194,17 +194,17 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
     }
 
     if (activeAirports.empty()) {
-        logging::Logger::instance().log(logging::Logger::LogSender::vACDM,
-                               "Airport/Runway Change, no active airports: ", logging::Logger::LogLevel::Info);
+/*         logging::Logger::instance().log(logging::Logger::LogSender::vACDM,
+                               "Airport/Runway Change, no active airports: ", logging::Logger::LogLevel::Info); */
     } else {
-        logging::Logger::instance().log(
+/*         logging::Logger::instance().log(
             logging::Logger::LogSender::vACDM,
                 "Airport/Runway Change, active airports: " +
                 std::accumulate(std::next(activeAirports.begin()), activeAirports.end(), activeAirports.front(),
                                 [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
-            logging::Logger::LogLevel::Info);
+            logging::Logger::LogLevel::Info); */
     }
-    DataManager::instance().setActiveAirports(activeAirports);
+/*     DataManager::instance().setActiveAirports(activeAirports); */
 }
 
 void NeoVACDM::run() {
