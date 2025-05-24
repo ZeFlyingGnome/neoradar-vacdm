@@ -73,11 +73,11 @@ void NeoVACDM::Shutdown()
 }
 
 void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sender) {
-    TextMessage::ClientTextMessageEvent textMessage;
+    Chat::ClientTextMessageEvent textMessage;
     textMessage.sentFrom = "NeoVACDM";
     textMessage.message = sender + ": " + message;
 
-    coreAPI_->textMessage().SendClientMessage(textMessage);
+    coreAPI_->chat().sendClientMessage(textMessage);
 }
 
 void NeoVACDM::checkServerConfiguration() {
