@@ -99,34 +99,34 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
     if (arg0 == "master")
     {
         std::string userIsNotEligibleMessage;
+        bool userIsConnected = false;
+        bool userIsInSweatbox = false;
+        bool userIsObserver = false;
         auto connectionInfo = fsdAPI_->getConnection();
         if (connectionInfo) {
-            bool userIsConnected = (*connectionInfo).isConnected;
-            bool userIsInSweatbox = (*connectionInfo).serverType == Fsd::ServerType::Sweatbox;
-            bool userIsObserver = (*connectionInfo).facility == Fsd::NetworkFacility::OBS;
-            bool serverAllowsObsAsMaster = com::Server::instance().getServerConfig().allowMasterAsObserver;
-            bool serverAllowsSweatboxAsMaster = com::Server::instance().getServerConfig().allowMasterInSweatbox;
-
-            if (!userIsConnected) {
-                userIsNotEligibleMessage = "You are not logged in to the VATSIM network";
-            } else if (userIsObserver && !serverAllowsObsAsMaster) {
-                userIsNotEligibleMessage = "You are logged in as Observer and Server does not allow Observers to be Master";
-            } else if (userIsInSweatbox && !serverAllowsSweatboxAsMaster) {
-                userIsNotEligibleMessage =
-                    "You are logged in on a Sweatbox Server and Server does not allow Sweatbox connections";
-            } else {
-                // Clear all pilot data when switching to master mode
-                DataManager::instance().clearAllPilotData();
-                neoVACDM_->DisplayMessage("All pilot data cleared");
-
-                neoVACDM_->DisplayMessage("Executing vACDM as the MASTER");
-                logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
-                com::Server::instance().setMaster(true);
-                return {true, std::nullopt};
-            }
+            userIsConnected = (*connectionInfo).isConnected;
+            userIsInSweatbox = (*connectionInfo).serverType == Fsd::ServerType::Sweatbox;
+            userIsObserver = (*connectionInfo).facility == Fsd::NetworkFacility::OBS;
         }
-        else {
-            userIsNotEligibleMessage = "Not able to retrieve connection information";
+        bool serverAllowsObsAsMaster = com::Server::instance().getServerConfig().allowMasterAsObserver;
+        bool serverAllowsSweatboxAsMaster = com::Server::instance().getServerConfig().allowMasterInSweatbox;
+
+        if (!connectionInfo || !userIsConnected) {
+            userIsNotEligibleMessage = "You are not logged in to the VATSIM network";
+        } else if (userIsObserver && !serverAllowsObsAsMaster) {
+            userIsNotEligibleMessage = "You are logged in as Observer and Server does not allow Observers to be Master";
+        } else if (userIsInSweatbox && !serverAllowsSweatboxAsMaster) {
+            userIsNotEligibleMessage =
+                "You are logged in on a Sweatbox Server and Server does not allow Sweatbox connections";
+        } else {
+            // Clear all pilot data when switching to master mode
+            DataManager::instance().clearAllPilotData();
+            neoVACDM_->DisplayMessage("All pilot data cleared");
+
+            neoVACDM_->DisplayMessage("Executing vACDM as the MASTER");
+            logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
+            com::Server::instance().setMaster(true);
+            return {true, std::nullopt};
         }
 
         neoVACDM_->DisplayMessage("Cannot upgrade to Master");
