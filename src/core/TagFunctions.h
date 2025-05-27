@@ -19,103 +19,103 @@ void NeoVACDM::RegisterTagActions()
     tagDef.name = "EXOTModify";
     tagDef.requiresInput = true;
     tagDef.description = "Modify EXOT";
-    std::string tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    std::string tagId = tagInterface_->RegisterTagAction(tagDef);
     EXOTModifyActionId_ = tagId;
 
     tagDef.name = "TOBTNow";
     tagDef.requiresInput = false;
     tagDef.description = "TOBT Now";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     TOBTNowActionId_ = tagId;
 
     tagDef.name = "TOBTManual";
     tagDef.requiresInput = true;
     tagDef.description = "Set TOBT";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     TOBTManualActionId_ = tagId;
 
     tagDef.name = "TOBTConfirm";
     tagDef.requiresInput = false;
     tagDef.description = "TOBT confirm";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     TOBTConfirmActionId_ = tagId;    
 
     tagDef.name = "TOBTMenu";
     tagDef.requiresInput = false;
     tagDef.description = "TOBT menu";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     TOBTMenuActionId_ = tagId;    
 
     tagDef.name = "ASATNow";
     tagDef.requiresInput = false;
     tagDef.description = "ASAT Now";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ASATNowActionId_ = tagId;
 
     tagDef.name = "ASATNowAndStartup";
     tagDef.requiresInput = false;
     tagDef.description = "ASAT now and startup state";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ASATNowAndStartupActionId_ = tagId;
 
     tagDef.name = "StartupRequest";
     tagDef.requiresInput = false;
     tagDef.description = "Startup Request";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     StartupRequestActionId_ = tagId;
 
     tagDef.name = "OffblockRequest";
     tagDef.requiresInput = false;
     tagDef.description = "Request Offblock";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     OffblockRequestActionId_ = tagId;
 
     tagDef.name = "AOBTNowAndState";
     tagDef.requiresInput = false;
     tagDef.description = "Set AOBT and Groundstate";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     AOBTNowAndStateActionId_ = tagId;
 
     tagDef.name = "ResetTOBT";
     tagDef.requiresInput = false;
     tagDef.description = "Reset TOBT";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ResetTOBTActionId_ = tagId;
 
     tagDef.name = "ResetASAT";
     tagDef.requiresInput = false;
     tagDef.description = "Reset ASAT";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ResetASATActionId_ = tagId;
 
     tagDef.name = "ResetTOBTConfirmed";
     tagDef.requiresInput = false;
     tagDef.description = "Reset confirmed TOBT";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ResetTOBTConfirmedActionId_ = tagId;
 
     tagDef.name = "ResetAORT";
     tagDef.requiresInput = false;
     tagDef.description = "Reset Offblock Request";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ResetAORTActionId_ = tagId;
 
     tagDef.name = "ResetAOBT";
     tagDef.requiresInput = false;
     tagDef.description = "Reset AOBT";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ResetAOBTActionId_ = tagId;
 
     tagDef.name = "ResetMenu";
     tagDef.requiresInput = false;
     tagDef.description = "Reset Menu";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ResetMenuActionId_ = tagId;
 
     tagDef.name = "ResetPilot";
     tagDef.requiresInput = false;
     tagDef.description = "Reset TOBT";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     ResetPilotActionId_ = tagId;
 
     // TOBT Menu
@@ -146,7 +146,7 @@ void NeoVACDM::RegisterTagActions()
     TOBTScrollArea.children.push_back(TOBTBtn);
 
     TOBTdropdown.components.push_back(TOBTScrollArea);
-    coreAPI_->tag().getInterface()->SetActionDropdown(TOBTMenuActionId_, TOBTdropdown);
+    tagInterface_->SetActionDropdown(TOBTMenuActionId_, TOBTdropdown);
 
    // Reset Menu
    Tag::DropdownDefinition resetDropdown;
@@ -196,13 +196,13 @@ void NeoVACDM::RegisterTagActions()
    resetScrollArea.children.push_back(resetBtn);   
 
    resetDropdown.components.push_back(resetScrollArea);
-   coreAPI_->tag().getInterface()->SetActionDropdown(ResetMenuActionId_, resetDropdown);
+   tagInterface_->SetActionDropdown(ResetMenuActionId_, resetDropdown);
 
    // Waiting for command line
     tagDef.name = "vACDMMaster";
     tagDef.requiresInput = false;
     tagDef.description = "vACD MMaster";
-    tagId = coreAPI_->tag().getInterface()->RegisterTagAction(tagDef);
+    tagId = tagInterface_->RegisterTagAction(tagDef);
     VACDMMasterActionId_ = tagId;
 }
 

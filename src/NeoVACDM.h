@@ -32,7 +32,7 @@ public:
     void UpdateTagItems();
     /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
-    // COmmand handling
+    // Command handling
     void SetMaster();
     void TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput = "");
 
@@ -41,12 +41,12 @@ private:
     bool initialized_ = false;
     PluginMetadata metadata_;
     ClientInformation clientInfo_;
-    CoreAPI *coreAPI_ = nullptr;
-    // Fsd::FsdAPI *fsdAPI_ = nullptr;
     Aircraft::AircraftAPI *aircraftAPI_ = nullptr;
+    Airport::AirportAPI *airportAPI_ = nullptr;
+    Chat::ChatAPI *chatAPI_ = nullptr;
     Flightplan::FlightplanAPI *flightplanAPI_ = nullptr;
-    // ControllerData::ControllerDataAPI *controllerDataAPI_ = nullptr;
     PluginSDK::Logger::LoggerAPI *logger_ = nullptr;
+    Tag::TagInterface *tagInterface_ = nullptr;
 
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 

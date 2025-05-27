@@ -24,12 +24,13 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
 {
     metadata_ = metadata;
     clientInfo_ = info;
-    coreAPI_ = coreAPI;
-    // fsdAPI_ = &coreAPI_->fsd();
-    aircraftAPI_ = &coreAPI_->aircraft();
-    flightplanAPI_ = &coreAPI_->flightplan();
-    // controllerDataAPI_ = &coreAPI_->controllerData();
-    logger_ = &coreAPI_->logger();
+    CoreAPI *lcoreAPI = coreAPI;
+    aircraftAPI_ = &lcoreAPI->aircraft();
+    airportAPI_ = &lcoreAPI->airport();
+    chatAPI_ = &lcoreAPI->chat();
+    flightplanAPI_ = &lcoreAPI->flightplan();
+    logger_ = &lcoreAPI->logger();
+    tagInterface_ = lcoreAPI->tag().getInterface();
 
     logging::Logger::instance().setLogger(logger_);
 
@@ -73,7 +74,7 @@ void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sen
     textMessage.sentFrom = "NeoVACDM";
     textMessage.message = sender + ": " + message;
 
-    coreAPI_->chat().sendClientMessage(textMessage);
+    chatAPI_->sendClientMessage(textMessage);
 }
 
 void NeoVACDM::checkServerConfiguration() {
@@ -167,10 +168,9 @@ void vACDM::OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPla
 
 void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) {
 
-    PluginSDK::Airport::AirportAPI *airportApi = &coreAPI_->airport();
     std::list<std::string> activeAirports;
 
-    std::vector<PluginSDK::Airport::AirportConfig> airportConfigurations = airportApi->getConfigurations();
+    std::vector<PluginSDK::Airport::AirportConfig> airportConfigurations = airportAPI_->getConfigurations();
     for (const auto &airportConfiguration : airportConfigurations)
     {
         /* // skip airport if it is selected as active airport for departures or arrivals
