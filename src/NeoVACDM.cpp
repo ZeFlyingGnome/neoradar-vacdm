@@ -76,7 +76,8 @@ void NeoVACDM::Shutdown()
 void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sender) {
     Chat::ClientTextMessageEvent textMessage;
     textMessage.sentFrom = "NeoVACDM";
-    textMessage.message = sender + ": " + message;
+    (sender.empty()) ? textMessage.message = message : textMessage.message = sender + ": " + message;
+    textMessage.useDedicatedChannel = true;
 
     chatAPI_->sendClientMessage(textMessage);
 }
@@ -208,7 +209,6 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
 }
 
 void NeoVACDM::run() {
-    DisplayMessage("Main Run", "NeoVACDM");
     int counter = 1;
     while (true) {
         counter += 1;
