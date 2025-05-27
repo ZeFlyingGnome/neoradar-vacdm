@@ -29,6 +29,7 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     airportAPI_ = &lcoreAPI->airport();
     chatAPI_ = &lcoreAPI->chat();
     flightplanAPI_ = &lcoreAPI->flightplan();
+    fsdAPI_ = &lcoreAPI->fsd();
     logger_ = &lcoreAPI->logger();
     tagInterface_ = lcoreAPI->tag().getInterface();
 
@@ -68,6 +69,8 @@ void NeoVACDM::Shutdown()
 
     this->m_stop = true;
     this->m_worker.join();
+
+    chatAPI_->unregisterCommand(commandId_);
 }
 
 void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sender) {

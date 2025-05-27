@@ -10,6 +10,8 @@ using namespace PluginSDK;
 
 namespace vacdm {
 
+class NeoVACDMCommandProvider;
+
 class NeoVACDM : public BasePlugin
 {
 public:
@@ -35,7 +37,7 @@ public:
 
     // Command handling
     void TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput = "");
-
+    void reloadConfiguration(bool initialLoading = false);
 
 private:
     bool initialized_ = false;
@@ -45,6 +47,7 @@ private:
     Airport::AirportAPI *airportAPI_ = nullptr;
     Chat::ChatAPI *chatAPI_ = nullptr;
     Flightplan::FlightplanAPI *flightplanAPI_ = nullptr;
+    Fsd::FsdAPI *fsdAPI_ = nullptr;
     PluginSDK::Logger::LoggerAPI *logger_ = nullptr;
     Tag::TagInterface *tagInterface_ = nullptr;
 
@@ -57,7 +60,6 @@ private:
 
     void runScopeUpdate();
     void checkServerConfiguration();
-    void reloadConfiguration(bool initialLoading = false);
 
     void RegisterTagItems();
     void RegisterTagActions();

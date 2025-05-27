@@ -63,7 +63,6 @@ ADD_DEFINITIONS(
 set(SOURCE_FILES
     src/config/ConfigParser.cpp
     src/core/DataManager.cpp
-    src/core/NeoVACDMCommandProvider.cpp
     src/core/Server.cpp
     src/log/Logger.cpp
     src/log/sqlite3.c
