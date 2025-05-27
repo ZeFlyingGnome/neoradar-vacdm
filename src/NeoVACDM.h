@@ -4,6 +4,7 @@
 #include <thread>
 #include "SDK.h"
 #include "config/PluginConfig.h"
+#include "core/NeoVACDMCommandProvider.h"
 
 using namespace PluginSDK;
 
@@ -33,7 +34,6 @@ public:
     /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
     // Command handling
-    void SetMaster();
     void TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput = "");
 
 
@@ -61,6 +61,7 @@ private:
 
     void RegisterTagItems();
     void RegisterTagActions();
+    void RegisterCommand();
 
     // IDs
     std::string EOBTTagID_;
@@ -96,11 +97,13 @@ private:
 	std::string ResetMenuActionId_;
 	std::string ResetPilotActionId_;
 
-    std::string VACDMMasterActionId_;
+    std::string commandId_;
 
     std::thread m_worker;
     bool m_stop;
     void run();
+
+    std::shared_ptr<NeoVACDMCommandProvider> CommandProvider_;
 };
 
 }  // namespace vacdm

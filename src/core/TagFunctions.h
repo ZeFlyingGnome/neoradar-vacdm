@@ -197,13 +197,6 @@ void NeoVACDM::RegisterTagActions()
 
    resetDropdown.components.push_back(resetScrollArea);
    tagInterface_->SetActionDropdown(ResetMenuActionId_, resetDropdown);
-
-   // Waiting for command line
-    tagDef.name = "vACDMMaster";
-    tagDef.requiresInput = false;
-    tagDef.description = "vACD MMaster";
-    tagId = tagInterface_->RegisterTagAction(tagDef);
-    VACDMMasterActionId_ = tagId;
 }
 
 void NeoVACDM::OnTagAction(const PluginSDK::Tag::TagActionEvent *event)
@@ -212,13 +205,6 @@ void NeoVACDM::OnTagAction(const PluginSDK::Tag::TagActionEvent *event)
     {
         return;
     }
-
-    // Handling SetMaster in Tags as command line API is not yet available
-    if (event->actionId == "plugin:NeoVACDM:ACTION_SetMaster")
-        SetMaster();
-
-    // do not handle functions if client is not master
-    if (false == Server::instance().getMaster()) return;
 
     TagProcessing(event->callsign, event->actionId, event->userInput);
 }

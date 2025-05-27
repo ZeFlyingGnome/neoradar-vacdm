@@ -43,6 +43,7 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     {
         this->RegisterTagItems();
         this->RegisterTagActions();
+        this->RegisterCommand();
 
         this->reloadConfiguration(true);
 
