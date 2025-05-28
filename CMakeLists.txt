@@ -5,6 +5,11 @@ project(NeoVACDM VERSION "1.4.0")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Force g++14 as g++13 does not implement some C++20 features
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(CMAKE_CXX_COMPILER "g++-14")
+endif()
+
 configure_file(
     ${CMAKE_SOURCE_DIR}/src/Version.h.in
     ${CMAKE_BINARY_DIR}/Version.h
@@ -44,6 +49,8 @@ set(SOURCES
 
 # Define the plugin library
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
+
+#set_property(TARGET ${PROJECT_NAME}  PROPERTY CXX_STANDARD 20)
 
 # Link dependencies
 target_link_libraries(${PROJECT_NAME} PRIVATE 
