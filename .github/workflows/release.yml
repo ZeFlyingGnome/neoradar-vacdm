@@ -91,9 +91,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: CoFrance ${{ steps.compute_version.outputs.version }}
+          name: NeoVACDM ${{ steps.compute_version.outputs.version }}
           prerelease: false
           draft: true
           files: |
-            lib/CoFrance*
-            bin/${{ env.build_type }}/CoFrance.dll
+            lib/NeoVACDM*
+            bin/${{ env.build_type }}/NeoVACDM.dll

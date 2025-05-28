@@ -100,7 +100,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CoFrance-${{ matrix.platform }}-${{ matrix.architecture }}
+          name: NeoVACDM-${{ matrix.platform }}-${{ matrix.architecture }}
           path: |
-            lib/CoFrance*
-            bin\${{ env.build_type }}\CoFrance.dll
+            lib/NeoVACDM*
+            bin\${{ env.build_type }}\NeoVACDM.dll
