@@ -10,6 +10,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_CXX_COMPILER "g++-14")
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_compile_definitions(DIR_SEPARATOR="\\\\")
+else()
+    add_compile_definitions(DIR_SEPARATOR="/")
+endif()
+
 configure_file(
     ${CMAKE_SOURCE_DIR}/src/Version.h.in
     ${CMAKE_BINARY_DIR}/Version.h

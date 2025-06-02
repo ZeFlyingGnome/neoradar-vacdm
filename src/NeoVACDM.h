@@ -54,7 +54,7 @@ private:
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 
     // !!!!! WINDOWS ONLY !!!!!!!
-    std::string m_configFileName = "\\vacdm.txt";
+    std::string m_configFileName = "vacdm.txt";
     PluginConfig m_pluginConfig;
     void changeServerUrl(const std::string &url);
 
