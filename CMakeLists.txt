@@ -10,6 +10,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_CXX_COMPILER "g++-14")
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(XCODE_VERSION "16.3")
+endif()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_compile_definitions(DIR_SEPARATOR="\\\\")
 else()

@@ -24,17 +24,8 @@ jobs:
         # Adds a platform value to the matrix, used later on to run the appropriate
         # package command.
         include:
-          - os: ubuntu-latest
-            platform: linux
           - os: macos-latest
             platform: mac
-          - os: windows-2022
-            platform: win
-        exclude:
-          - os: ubuntu-latest
-            architecture: arm64
-          - os: windows-2022
-            architecture: arm64
 
     steps:
       - name: Export GitHub Actions cache environment variables
