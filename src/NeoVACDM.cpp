@@ -10,11 +10,7 @@
 #include "core/TagFunctions.h"
 #include "core/TagItems.h"
 #include "log/SpdLogger.h"
-#include "utils/Date.h"
-#include "utils/Number.h"
 #include "utils/String.h"
-
-using namespace PluginSDK;
 
 using namespace vacdm;
 using namespace vacdm::com;
@@ -28,12 +24,14 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
 {
     metadata_ = metadata;
     clientInfo_ = info;
-    coreAPI_ = coreAPI;
-    // fsdAPI_ = &coreAPI_->fsd();
-    aircraftAPI_ = &coreAPI_->aircraft();
-    flightplanAPI_ = &coreAPI_->flightplan();
-    // controllerDataAPI_ = &coreAPI_->controllerData();
-    logger_ = &coreAPI_->logger();
+    CoreAPI *lcoreAPI = coreAPI;
+    aircraftAPI_ = &lcoreAPI->aircraft();
+    airportAPI_ = &lcoreAPI->airport();
+    chatAPI_ = &lcoreAPI->chat();
+    flightplanAPI_ = &lcoreAPI->flightplan();
+    fsdAPI_ = &lcoreAPI->fsd();
+    logger_ = &lcoreAPI->logger();
+    tagInterface_ = lcoreAPI->tag().getInterface();
 
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
     SpdLogger::log(SpdLogger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
@@ -44,6 +42,7 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     {
         this->RegisterTagItems();
         this->RegisterTagActions();
+        this->RegisterCommand();
 
         this->reloadConfiguration(true);
 
@@ -68,14 +67,17 @@ void NeoVACDM::Shutdown()
 
     this->m_stop = true;
     this->m_worker.join();
+
+    chatAPI_->unregisterCommand(commandId_);
 }
 
 void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sender) {
-    TextMessage::ClientTextMessageEvent textMessage;
+    Chat::ClientTextMessageEvent textMessage;
     textMessage.sentFrom = "NeoVACDM";
-    textMessage.message = sender + ": " + message;
+    (sender.empty()) ? textMessage.message = message : textMessage.message = sender + ": " + message;
+    textMessage.useDedicatedChannel = true;
 
-    coreAPI_->textMessage().SendClientMessage(textMessage);
+    chatAPI_->sendClientMessage(textMessage);
 }
 
 void NeoVACDM::checkServerConfiguration() {
@@ -123,7 +125,9 @@ void NeoVACDM::reloadConfiguration(bool initialLoading) {
     PluginConfig newConfig;
     ConfigParser parser;
 
-    if (false == parser.parse(clientInfo_.documentsPath.string() + this->m_configFileName, newConfig) || false == newConfig.valid) {
+    std::string settingsPath = clientInfo_.documentsPath.string() + DIR_SEPARATOR + this->m_configFileName;
+
+    if (false == parser.parse(settingsPath, newConfig) || false == newConfig.valid) {
         std::string message = "vacdm.txt:" + std::to_string(parser.errorLine()) + ": " + parser.errorMessage();
         DisplayMessage(message, "Config");
     } else {
@@ -168,20 +172,11 @@ void vACDM::OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPla
 
 void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) {
 
-    PluginSDK::Airport::AirportAPI *airportApi = &coreAPI_->airport();
     std::list<std::string> activeAirports;
 
-    std::vector<PluginSDK::Airport::AirportConfig> airportConfigurations = airportApi->getConfigurations();
+    std::vector<PluginSDK::Airport::AirportConfig> airportConfigurations = airportAPI_->getConfigurations();
     for (const auto &airportConfiguration : airportConfigurations)
     {
-        /* // skip airport if it is selected as active airport for departures or arrivals
-        if (false == airport.IsElementActive(true, 0) && false == airport.IsElementActive(false, 0)) continue;
-
-        // get the airport ICAO
-        auto airportICAO = utils::String::findIcao(utils::String::trim(airport.GetName()));
-        // skip airport if no ICAO has been found
-        if (airportICAO == "") continue; */
-
         std::string airportICAO = airportConfiguration.icao;
 
         // check if the airport has been added already, add if it does not exist
@@ -205,7 +200,6 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
 }
 
 void NeoVACDM::run() {
-    DisplayMessage("Main Run", "NeoVACDM");
     int counter = 1;
     while (true) {
         counter += 1;

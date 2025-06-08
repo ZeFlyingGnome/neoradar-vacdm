@@ -1,9 +1,13 @@
 # NeoVACDM
 VACDM Plugin for NeoRadar
 
-TODO:
-* implement commands (not yet available in NeoRadar)
-* Finish porting vACDM.cpp (including GetDistanceFromOrigin)
-* Correctly find vacdm.txt under the plugins directory and on all platforms
-* disable when connected as OBS
-* Input for TOBTManual in TOBTMenu
+* A sample lists.yaml is provided in src\config\lists.yaml
+* The Set TOBT command does not work in the menu, use the direct command instead by modifying list.yaml. You will need to right-click in the TOBT column to set TOBT.
+    - name: TOBT
+      width: 35
+      tagItem:
+        itemName: plugin:NeoVACDM:TAG_TOBT
+        leftClick: plugin:NeoVACDM:ACTION_TOBTMenu
+        rightClick: plugin:NeoVACDM:ACTION_TOBTManual
+* vacdm.txt config file must be at the root of the NeoRadar folder, an error will be displayed in NeoRadar with the expected file path if it is not found
+* Ground status (STUP, PUSH) is not yet set when setting times.

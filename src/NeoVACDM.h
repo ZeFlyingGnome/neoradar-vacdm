@@ -3,11 +3,14 @@
 #include <memory>
 #include <thread>
 #include "SDK.h"
-# include "config/PluginConfig.h"
+#include "config/PluginConfig.h"
+#include "core/NeoVACDMCommandProvider.h"
 
 using namespace PluginSDK;
 
 namespace vacdm {
+
+class NeoVACDMCommandProvider;
 
 class NeoVACDM : public BasePlugin
 {
@@ -32,35 +35,34 @@ public:
     void UpdateTagItems();
     /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
-    // COmmand handling
-    void SetMaster();
+    // Command handling
     void TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput = "");
-
+    void reloadConfiguration(bool initialLoading = false);
 
 private:
     bool initialized_ = false;
     PluginMetadata metadata_;
     ClientInformation clientInfo_;
-    CoreAPI *coreAPI_ = nullptr;
-    // Fsd::FsdAPI *fsdAPI_ = nullptr;
     Aircraft::AircraftAPI *aircraftAPI_ = nullptr;
+    Airport::AirportAPI *airportAPI_ = nullptr;
+    Chat::ChatAPI *chatAPI_ = nullptr;
     Flightplan::FlightplanAPI *flightplanAPI_ = nullptr;
-    // ControllerData::ControllerDataAPI *controllerDataAPI_ = nullptr;
+    Fsd::FsdAPI *fsdAPI_ = nullptr;
     PluginSDK::Logger::LoggerAPI *logger_ = nullptr;
+    Tag::TagInterface *tagInterface_ = nullptr;
 
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 
-    // !!!!! WINDOWS ONLY !!!!!!!
-    std::string m_configFileName = "\\vacdm.txt";
+    std::string m_configFileName = "vacdm.txt";
     PluginConfig m_pluginConfig;
     void changeServerUrl(const std::string &url);
 
     void runScopeUpdate();
     void checkServerConfiguration();
-    void reloadConfiguration(bool initialLoading = false);
 
     void RegisterTagItems();
     void RegisterTagActions();
+    void RegisterCommand();
 
     // IDs
     std::string EOBTTagID_;
@@ -96,11 +98,13 @@ private:
 	std::string ResetMenuActionId_;
 	std::string ResetPilotActionId_;
 
-    std::string VACDMMasterActionId_;
+    std::string commandId_;
 
     std::thread m_worker;
     bool m_stop;
     void run();
+
+    std::shared_ptr<NeoVACDMCommandProvider> CommandProvider_;
 };
 
 }  // namespace vacdm
