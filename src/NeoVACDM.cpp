@@ -180,14 +180,6 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
     std::vector<PluginSDK::Airport::AirportConfig> airportConfigurations = airportAPI_->getConfigurations();
     for (const auto &airportConfiguration : airportConfigurations)
     {
-        /* // skip airport if it is selected as active airport for departures or arrivals
-        if (false == airport.IsElementActive(true, 0) && false == airport.IsElementActive(false, 0)) continue;
-
-        // get the airport ICAO
-        auto airportICAO = utils::String::findIcao(utils::String::trim(airport.GetName()));
-        // skip airport if no ICAO has been found
-        if (airportICAO == "") continue; */
-
         std::string airportICAO = airportConfiguration.icao;
 
         // check if the airport has been added already, add if it does not exist

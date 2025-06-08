@@ -91,7 +91,6 @@ void Logger::log(const LogSender &sender, const std::string &message, const LogL
         m_asynchronousLogs.push_back({sender, message, loglevel});
         if (vacdmLogger_)
         {
-            vacdmLogger_->info(sender + ": " + message);
             switch (loglevel)
             {
                 case Info:
