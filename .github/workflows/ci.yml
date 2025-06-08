@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - vacdm
   pull_request:
     branches:
       - main
+      - vacdm
 
 jobs:
   build:
