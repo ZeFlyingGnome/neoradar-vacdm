@@ -377,18 +377,15 @@ void DataManager::setActiveAirports(const std::list<std::string> activeAirports)
     this->m_activeAirports = activeAirports;
 }
 
-void DataManager::queueFlightplanUpdate(Flightplan flightplan, Aircraft aircraft) {
+void DataManager::queueFlightplanUpdate(Flightplan flightplan, Aircraft aircraft, double distanceFromOrigin) {
     // skip the update if:
     // - the flightplan or its data is invalid
-    // - or the aircraft is out of range therefore GetSimulated() is true
     //  - More than 10nm away from origin
-    if (false == flightplan.isValid /*|| nullptr == flightplan.GetFlightPlanData().GetPlanType() ||
-        nullptr == flightplan.GetFlightPlanData().GetOrigin() || flightplan.GetSimulated() ||
-        flightplan.GetDistanceFromOrigin() > 10.0*/) {
+    if (false == flightplan.isValid || distanceFromOrigin > 10.0) {
         return;
     }
 
-    auto pilot = this->CFlightPlanToPilot(flightplan, aircraft);
+    auto pilot = this->CFlightPlanToPilot(flightplan, aircraft, distanceFromOrigin);
 
     std::lock_guard guard(this->m_scopeUpdatesLock);
     this->m_scopeFlightplanUpdates.push_back({std::chrono::utc_clock::now(), pilot});
@@ -544,7 +541,7 @@ void DataManager::consolidateFlightplanUpdates(std::list<ScopeFlightplanUpdate>&
     inputList = resultList;
 }
 
-types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flightplan flightplan, const PluginSDK::Aircraft::Aircraft aircraft) {
+types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flightplan flightplan, const PluginSDK::Aircraft::Aircraft aircraft, double distanceFromOrigin) {
     types::Pilot pilot;
 
     pilot.callsign = flightplan.callsign;
@@ -556,7 +553,7 @@ types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flight
     pilot.trueAltitude = aircraft.position.trueAltitude;
     // pilot.distanceFromOrigin = flightplan.GetDistanceFromOrigin();
     // pilot.isSimulated = flightplan.GetSimulated();
-    pilot.distanceFromOrigin = 0.5;
+    pilot.distanceFromOrigin = distanceFromOrigin;
     pilot.isSimulated = false;
 
     // flightplan & clearance data

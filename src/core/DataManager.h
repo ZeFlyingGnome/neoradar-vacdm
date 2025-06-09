@@ -81,7 +81,7 @@ class DataManager {
     /// @param pilots to update
     void processScopeUpdates(std::map<std::string, std::array<types::Pilot, 3U>> &pilots);
     /// @brief gathers all information from Flightplan and Aircraft and converts it to type Pilot
-    types::Pilot CFlightPlanToPilot(const PluginSDK::Flightplan::Flightplan flightplan, const PluginSDK::Aircraft::Aircraft aircraft);
+    types::Pilot CFlightPlanToPilot(const PluginSDK::Flightplan::Flightplan flightplan, const PluginSDK::Aircraft::Aircraft aircraft, double distanceFromOrigin);
     /// @brief updates the local data with the data from the backend
     /// @param pilots to update
     void consolidateWithBackend(std::map<std::string, std::array<types::Pilot, 3U>> &pilots);
@@ -103,7 +103,7 @@ class DataManager {
 
    public:
     void setActiveAirports(const std::list<std::string> activeAirports);
-    void queueFlightplanUpdate(PluginSDK::Flightplan::Flightplan flightplan, PluginSDK::Aircraft::Aircraft aircraft);
+    void queueFlightplanUpdate(PluginSDK::Flightplan::Flightplan flightplan, PluginSDK::Aircraft::Aircraft aircraft, double distanceFromOrigin);
     void handleTagFunction(MessageType message, const std::string callsign,
                            const std::chrono::utc_clock::time_point value);
 

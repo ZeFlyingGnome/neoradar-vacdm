@@ -100,7 +100,13 @@ void NeoVACDM::runScopeUpdate() {
     for (const auto &flightplan : flightplans)
     {
         auto aircraft = GetAircraftByCallsign(flightplan.callsign);
-        if (aircraft) DataManager::instance().queueFlightplanUpdate(flightplan, *aircraft);
+        // if no aircraft found, skip to next flightplan (prefiles ?)
+        if (aircraft) {
+            auto distanceFromOrigin = aircraftAPI_->getDistanceFromOrigin(flightplan.callsign);
+            if (distanceFromOrigin) {
+                DataManager::instance().queueFlightplanUpdate(flightplan, *aircraft, *distanceFromOrigin);
+            }
+        }
     }
 }
 
