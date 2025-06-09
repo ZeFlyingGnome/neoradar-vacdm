@@ -1,6 +1,18 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
 SET(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
 SET(VCPKG_TARGET_TRIPLET "x86-windows-static" CACHE STRING "")
+    add_compile_definitions(DIR_SEPARATOR="\\\\")
+elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    # Force g++14 as g++13 does not implement some C++20 features
+    set(CMAKE_CXX_COMPILER "g++-14")
+    add_compile_definitions(DIR_SEPARATOR="/")
+elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    add_compile_definitions(DIR_SEPARATOR="/")
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_HOST_SYSTEM_NAME}")
+endif()
 
 PROJECT(NeoVACDM VERSION "1.4.0")
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -86,14 +98,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
     OpenSSL::SSL OpenSSL::Crypto
     httplib::httplib
     nlohmann_json::nlohmann_json
-    spdlog::spdlog_header_only
-)
-
-# TODO: Switch to GeographicLib static with next release (2.6 ?)
-#   (see: https://github.com/geographiclib/geographiclib/issues/37)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE
-    debug ${CMAKE_SOURCE_DIR}/external/lib/GeographicLib_d.lib
-    optimized ${CMAKE_SOURCE_DIR}/external/lib/GeographicLib.lib
+    spdlog::spdlog
 )
 
 # move config file to output dir, allows loading of DLL from output dir
