@@ -120,15 +120,15 @@ std::string Logger::handleLogCommand(std::string command) {
     auto elements = vacdm::utils::String::splitString(command, " ");
 
     std::string usageString = "Usage: .vacdm LOG ON/OFF/DEBUG";
-    if (elements.size() != 3) return usageString;
+    if (elements.size() != 2) return usageString;
 
-    if ("ON" == elements[2]) {
+    if ("ON" == elements[1]) {
         this->enableLogging();
         return "Enabled logging";
-    } else if ("OFF" == elements[2]) {
+    } else if ("OFF" == elements[1]) {
         this->disableLogging();
         return "Disabled logging";
-    } else if ("DEBUG" == elements[2]) {
+    } else if ("DEBUG" == elements[1]) {
         std::lock_guard guard(this->m_logLock);
         if (false == this->m_LogAll) {
             this->m_LogAll = true;
@@ -144,12 +144,12 @@ std::string Logger::handleLogCommand(std::string command) {
 
 std::string Logger::handleLogLevelCommand(std::string command) {
     const auto elements = vacdm::utils::String::splitString(command, " ");
-    if (elements.size() != 4) {
+    if (elements.size() != 3) {
         return "Usage: .vacdm LOGLEVEL sender loglevel";
     }
 
-    std::string sender = elements[2];
-    std::string newLevel = elements[3];
+    std::string sender = elements[1];
+    std::string newLevel = elements[2];
 
     std::lock_guard guard(this->m_logLock);
     auto logsetting = std::find_if(logSettings.begin(), logSettings.end(), [sender](const LogSetting &setting) {

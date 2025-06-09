@@ -26,7 +26,7 @@ void NeoVACDM::RegisterCommand() {
         PluginSDK::Chat::CommandDefinition definition;
         definition.name = "vacdm";
         definition.description = "NeoVACDM command";
-        definition.lastParameterHasSpaces = false;
+        definition.lastParameterHasSpaces = true;
 
         Chat::CommandParameter parameter;
         parameter.name = "vacdm";
@@ -90,14 +90,16 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
 
     if (args.empty())
     {
-        return {false, "Argument is required"};
+        std::string error = "Argument is required";
+        neoVACDM_->DisplayMessage(error);
+        return {false, error};
     }
 
-    std::string arg0 = args[0];
-    std::transform(arg0.begin(), arg0.end(), arg0.begin(), ::tolower);
+    std::string command = args[0];
+    std::transform(command.begin(), command.end(), command.begin(), ::toupper);
+    logger_->info("Processing command: " + command);
 
-    if (arg0 == "master")
-    {
+    if (std::string::npos != command.find("MASTER")) {
         std::string userIsNotEligibleMessage;
         bool userIsConnected = false;
         bool userIsInSweatbox = false;
@@ -126,15 +128,14 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
             neoVACDM_->DisplayMessage("Executing vACDM as the MASTER");
             logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
             com::Server::instance().setMaster(true);
+            
             return {true, std::nullopt};
         }
 
         neoVACDM_->DisplayMessage("Cannot upgrade to Master");
         neoVACDM_->DisplayMessage(userIsNotEligibleMessage);
         return {false, userIsNotEligibleMessage};
-    }
-    else if (arg0 == "slave")
-    {
+    } else if (std::string::npos != command.find("SLAVE")) {
         neoVACDM_->DisplayMessage("Executing vACDM as the SLAVE");
         logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to SLAVE", logging::Logger::LogLevel::Info);
         com::Server::instance().setMaster(false);
@@ -142,56 +143,40 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
         // Clear all pilot data when switching to slave mode
         DataManager::instance().clearAllPilotData();
         neoVACDM_->DisplayMessage("All pilot data cleared");
-    }
-    else if (arg0 == "reload")
-    {
+        return {true, std::nullopt};
+    } else if (std::string::npos != command.find("RELOAD")) {
         neoVACDM_->reloadConfiguration();
-    }
-    else if (arg0 == "loglevel" || arg0 == "log")
-    {
-        std::string command = "vacdm ";
-        for (size_t i = 1; i < size; ++i)command += args[i] + " ";
-
-        if (arg0 == "loglevel")
+        return {true, std::nullopt};
+    } else if (std::string::npos != command.find("LOG")) {
+        if (std::string::npos != command.find("LOGLEVEL")) {
             neoVACDM_->DisplayMessage(logging::Logger::instance().handleLogLevelCommand(command));
-        else if (arg0 == "log")
+        } else {
             neoVACDM_->DisplayMessage(logging::Logger::instance().handleLogCommand(command));
-    }
-    else if (arg0 == "updaterate")
-    {
-        if (size != 2) {
+        }
+        return {true, std::nullopt};
+    } else if (std::string::npos != command.find("UPDATERATE")) {
+        const auto elements = vacdm::utils::String::splitString(command, " ");
+        if (elements.size() != 2) {
             std::string error = "Usage: .vacdm UPDATERATE value";
             neoVACDM_->DisplayMessage(error);
             return {false, error};
         }
-        if (false == isNumber(args[1]) ||
-            std::stoi(args[1]) < minUpdateCycleSeconds && std::stoi(args[1]) > maxUpdateCycleSeconds) {
+        if ((false == isNumber(elements[1])) ||
+            (std::stoi(elements[1]) < minUpdateCycleSeconds || std::stoi(elements[1]) > maxUpdateCycleSeconds)) {
             std::string error = "Usage: .vacdm UPDATERATE value\nValue must be number between " + std::to_string(minUpdateCycleSeconds) + " and " +
                            std::to_string(maxUpdateCycleSeconds);
             neoVACDM_->DisplayMessage(error);
             return {false, error};
         }
-
-        neoVACDM_->DisplayMessage(DataManager::instance().setUpdateCycleSeconds(std::stoi(args[1])));
+        neoVACDM_->DisplayMessage(DataManager::instance().setUpdateCycleSeconds(std::stoi(elements[1])));
     }    
     else 
     {
         std::string error = "Unknown argument " + args[0];
-        logger_->info(error);
+        neoVACDM_->DisplayMessage(error);
         return {false, error};
     }
 
     return {true, std::nullopt};;
 }
-
-
-
-//#pragma warning(push)
-//#pragma warning(disable : 4244)
-//    std::transform(command.begin(), command.end(), command.begin(), ::toupper);
-//#pragma warning(pop)
-
-    // only handle commands containing ".vacdm"
-    //if (0 != command.find(".VACDM")) return false;
-
 }  // namespace vacdm

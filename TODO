@@ -1,4 +1,3 @@
 TODO:
 * Input for TOBTManual in TOBTMenu
 * Implement SetGroundState (commands missing in NeoRadar)
-* Handle all commands (multiple arguments)
