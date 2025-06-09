@@ -7,8 +7,6 @@
 #include <thread>
 #include <vector>
 
-#include "sqlite3.h"
-
 #include "SDK.h"
 
 namespace vacdm::logging {
@@ -72,10 +70,8 @@ class Logger {
     void disableLogging();
     bool loggingEnabled = false;
 
-    sqlite3 *m_database;
     std::stringstream stream;
     bool logFileCreated = false;
-    void createLogFile();
 
     PluginSDK::Logger::LoggerAPI *vacdmLogger_ = nullptr;;
 

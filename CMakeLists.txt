@@ -47,8 +47,6 @@ set(SOURCES
     src/core/DataManager.cpp
     src/core/Server.cpp
     src/log/Logger.cpp
-    src/log/sqlite3.c
-    src/log/sqlite3.h
     src/NeoVACDM.cpp
     src/main.cpp
 )

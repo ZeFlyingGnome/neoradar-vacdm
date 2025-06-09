@@ -41,8 +41,6 @@ Logger::Logger() {
 Logger::~Logger() {
     this->m_stop = true;
     this->m_logWriter.join();
-
-    if (nullptr != this->m_database) sqlite3_close_v2(this->m_database);
 }
 
 void Logger::run() {
@@ -66,17 +64,31 @@ void Logger::run() {
 #ifdef DEBUG_BUILD
                 std::cout << logsetting->name << ": " << it->message << "\n";
 #endif
-
-                sqlite3_stmt *stmt;
-
-                sqlite3_prepare_v2(this->m_database, __insertMessage.c_str(), __insertMessage.length(), &stmt, nullptr);
-                sqlite3_bind_text(stmt, 1, logsetting->name.c_str(), -1, SQLITE_TRANSIENT);
-                sqlite3_bind_int(stmt, 2, static_cast<int>(it->loglevel));
-                sqlite3_bind_text(stmt, 3, it->message.c_str(), -1, SQLITE_TRANSIENT);
-
-                sqlite3_step(stmt);
-                sqlite3_clear_bindings(stmt);
-                sqlite3_reset(stmt);
+            
+                if (vacdmLogger_)
+                {
+                    switch (it->loglevel)
+                    {
+                        case Info:
+                            vacdmLogger_->info(it->message.c_str());
+                            break;
+                        case Debug:
+                            vacdmLogger_->debug(it->message.c_str());
+                            break;
+                        case Warning:
+                            vacdmLogger_->warning(it->message.c_str());
+                            break;
+                        case Error:
+                            vacdmLogger_->error(it->message.c_str());
+                            break;
+                        case Critical:
+                            vacdmLogger_->fatal(it->message.c_str());
+                            break;
+                        case System:
+                            vacdmLogger_->verbose(it->message.c_str());
+                            break;
+                    }
+                } 
             }
             it = logs.erase(it);
         }
@@ -89,30 +101,6 @@ void Logger::log(const LogSender &sender, const std::string &message, const LogL
     if (true == this->loggingEnabled) 
     {
         m_asynchronousLogs.push_back({sender, message, loglevel});
-        if (vacdmLogger_)
-        {
-            switch (loglevel)
-            {
-                case Info:
-                    vacdmLogger_->info(sender + ": " + message);
-                    break;
-                case Debug:
-                    vacdmLogger_->debug(sender + ": " + message);
-                    break;
-                case Warning:
-                    vacdmLogger_->warning(sender + ": " + message);
-                    break;
-                case Error:
-                    vacdmLogger_->error(sender + ": " + message);
-                    break;
-                case Critical:
-                    vacdmLogger_->fatal(sender + ": " + message);
-                    break;
-                case System:
-                    vacdmLogger_->verbose(sender + ": " + message);
-                    break;
-            }
-        } 
     }
 }
 
@@ -208,8 +196,6 @@ std::string Logger::handleLogLevelCommand(std::string command) {
 }
 
 void Logger::enableLogging() {
-    if (false == this->logFileCreated) createLogFile();
-
     std::lock_guard guard(this->m_logLock);
     this->loggingEnabled = true;
 }
@@ -217,13 +203,6 @@ void Logger::enableLogging() {
 void Logger::disableLogging() {
     std::lock_guard guard(this->m_logLock);
     this->loggingEnabled = false;
-}
-
-void Logger::createLogFile() {
-    sqlite3_open(stream.str().c_str(), &this->m_database);
-    sqlite3_exec(this->m_database, __loggingTable, nullptr, nullptr, nullptr);
-    sqlite3_exec(this->m_database, "PRAGMA journal_mode = MEMORY", nullptr, nullptr, nullptr);
-    logFileCreated = true;
 }
 
 Logger &Logger::instance() {
