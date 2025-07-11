@@ -117,7 +117,6 @@ void NeoVACDM::UpdateTagItems() {
 
         auto pilot = DataManager::instance().getPilot(callsign);
         std::string text;
-        std::optional<std::array<unsigned int, 3>> color;
         Tag::TagContext context;
         context.callsign = callsign;
 
