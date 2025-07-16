@@ -18,11 +18,6 @@ public:
 	Chat::CommandResult Execute(
         const std::string &commandId,
         const std::vector<std::string> &args) override;
-		
-	Chat::ValidationResult ValidateParameters(
-        const std::string &commandId,
-        const std::vector<std::string> &args,
-        bool strict) override;
 
 private:
     Logger::LoggerAPI *logger_;

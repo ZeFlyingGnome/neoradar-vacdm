@@ -54,33 +54,6 @@ void NeoVACDM::RegisterCommand() {
     }    
 }
 
-Chat::ValidationResult NeoVACDMCommandProvider::ValidateParameters(
-    const std::string &commandId,
-    const std::vector<std::string> &args,
-    bool strict)
-{
-    size_t size = args.size();
-    logger_->info("Validating command with " + std::to_string(size) + " arguments");
-
-    if (args.empty())
-    {
-        return {false, "Argument is required"};
-    }
-
-    std::string arg0 = args[0];
-    std::transform(arg0.begin(), arg0.end(), arg0.begin(), ::tolower);
-
-    if ( size==1 and (arg0 == "master" or arg0 == "slave" or arg0 == "reload") )
-    {
-        return {true, std::nullopt};
-    }
-    else if ( size==2 and (arg0 == "log" or arg0 == "loglevel" or arg0 == "updaterate") )
-    {
-        return {true, std::nullopt};
-    }
-    else return {false, "Unknown argument " + args[0]};
-}
-
 Chat::CommandResult NeoVACDMCommandProvider::Execute(
     const std::string &commandId,
     const std::vector<std::string> &args)
