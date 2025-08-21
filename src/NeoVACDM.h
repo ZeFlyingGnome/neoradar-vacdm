@@ -24,7 +24,6 @@ public:
     PluginMetadata GetMetadata() const override;
 
     void DisplayMessage(const std::string &message, const std::string &sender = "");
-    void SetGroundState(const Flightplan::Flightplan flightplan, const std::string groundstate);
 
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
@@ -47,6 +46,7 @@ private:
     Aircraft::AircraftAPI *aircraftAPI_ = nullptr;
     Airport::AirportAPI *airportAPI_ = nullptr;
     Chat::ChatAPI *chatAPI_ = nullptr;
+    ControllerData::ControllerDataAPI *controllerDataAPI_ = nullptr;
     Flightplan::FlightplanAPI *flightplanAPI_ = nullptr;
     Fsd::FsdAPI *fsdAPI_ = nullptr;
     PluginSDK::Logger::LoggerAPI *logger_ = nullptr;

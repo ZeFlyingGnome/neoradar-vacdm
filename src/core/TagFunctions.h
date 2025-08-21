@@ -279,7 +279,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
                                                         std::chrono::utc_clock::now());
         }
 
-        // SetGroundState(flightplan, "ST-UP"); // Not implemented yet
+        controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::Start);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_StartupRequest") {
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
@@ -295,13 +295,12 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateAOBT, pilot.callsign,
                                                     std::chrono::utc_clock::now());
 
-        // Not implemented yet
         // set status depending on if the aircraft is positioned at a taxi-out position
-        /*if (pilot.taxizoneIsTaxiout) {
-            SetGroundState(flightplan, "TAXI");
+        if (pilot.taxizoneIsTaxiout) {
+            controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::Taxi);
         } else {
-            SetGroundState(flightplan, "PUSH");
-        } */
+        controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::Push);
+        }
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_TOBTConfirm") {
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBTConfirmed, pilot.callsign,
@@ -318,7 +317,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetASAT") {
             DataManager::instance().handleTagFunction(DataManager::MessageType::ResetASAT, pilot.callsign,
                                                       types::defaultTime);
-            // SetGroundState(flightplan, "NSTS");  // Not implemented yet
+            controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::None);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetASRT") {
             DataManager::instance().handleTagFunction(DataManager::MessageType::ResetASRT, pilot.callsign,
@@ -339,7 +338,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetAOBTandState") {
             DataManager::instance().handleTagFunction(DataManager::MessageType::ResetAOBT, pilot.callsign,
                                                       types::defaultTime);
-            // SetGroundState(flightplan, "NSTS");  // Not yet implemented
+            controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::None);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetPilot") {
 
