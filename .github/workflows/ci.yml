@@ -17,15 +17,17 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-2022]
-        architecture: [x86_64, arm64]
+        #os: [ubuntu-latest, macos-latest, windows-2022]
+        #architecture: [x86_64, arm64]
+        os: [ubuntu-latest, windows-2022]
+        architecture: [x86_64]
         # Adds a platform value to the matrix, used later on to run the appropriate
         # package command.
         include:
           - os: ubuntu-latest
             platform: linux
-          - os: macos-latest
-            platform: mac
+        #  - os: macos-latest
+        #    platform: mac
           - os: windows-2022
             platform: win
         exclude:

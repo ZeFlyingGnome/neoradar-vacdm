@@ -28,6 +28,7 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     aircraftAPI_ = &lcoreAPI->aircraft();
     airportAPI_ = &lcoreAPI->airport();
     chatAPI_ = &lcoreAPI->chat();
+    controllerDataAPI_ = &lcoreAPI->controllerData();
     flightplanAPI_ = &lcoreAPI->flightplan();
     fsdAPI_ = &lcoreAPI->fsd();
     logger_ = &lcoreAPI->logger();
@@ -109,25 +110,6 @@ void NeoVACDM::runScopeUpdate() {
         }
     }
 }
-
-/*void vACDM::SetGroundState(const EuroScopePlugIn::CFlightPlan flightplan, const std::string groundstate) {
-    // using GRP and default Euroscope ground states
-    // STATE                    ABBREVIATION    GRP STATE
-    // - No state(departure)    NSTS
-    // - On Freq                ONFREQ              Y
-    // - De - Ice               DE-ICE              Y
-    // - Start - Up             STUP
-    // - Pushback               PUSH
-    // - Taxi                   TAXI
-    // - Line Up                LINEUP              Y
-    // - Taxi In                TXIN
-    // - No state(arrival)      NOSTATE             Y
-    // - Parked                 PARK
-
-    std::string scratchBackup(flightplan.GetControllerAssignedData().GetScratchPadString());
-    flightplan.GetControllerAssignedData().SetScratchPadString(groundstate.c_str());
-    flightplan.GetControllerAssignedData().SetScratchPadString(scratchBackup.c_str());
-}*/
 
 void NeoVACDM::reloadConfiguration(bool initialLoading) {
     PluginConfig newConfig;
