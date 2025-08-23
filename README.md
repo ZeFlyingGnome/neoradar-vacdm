@@ -9,5 +9,5 @@ VACDM Plugin for NeoRadar
         itemName: plugin:NeoVACDM:TAG_TOBT
         leftClick: plugin:NeoVACDM:ACTION_TOBTMenu
         rightClick: plugin:NeoVACDM:ACTION_TOBTManual
-* vacdm.txt config file must be at the root of the NeoRadar folder, an error will be displayed in NeoRadar with the expected file path if it is not found
+* vacdm.txt config file must be the plugins sub-folder of the NeoRadar folder, an error will be displayed in NeoRadar with the expected file path if it is not found
 * Ground status (STUP, PUSH) is not yet set when setting times.

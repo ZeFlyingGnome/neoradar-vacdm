@@ -133,7 +133,7 @@ void NeoVACDM::reloadConfiguration(bool initialLoading) {
     PluginConfig newConfig;
     ConfigParser parser;
 
-    std::string settingsPath = clientInfo_.documentsPath.string() + DIR_SEPARATOR + this->m_configFileName;
+    std::string settingsPath = clientInfo_.documentsPath.string() + DIR_SEPARATOR + "plugins"+ DIR_SEPARATOR + this->m_configFileName;
 
     if (false == parser.parse(settingsPath, newConfig) || false == newConfig.valid) {
         std::string message = "vacdm.txt:" + std::to_string(parser.errorLine()) + ": " + parser.errorMessage();
