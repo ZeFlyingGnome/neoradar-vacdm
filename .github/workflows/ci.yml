@@ -78,12 +78,6 @@ jobs:
           brew update
           brew install utf8proc
 
-      - name: Set Xcode 16.0 (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
-          clang -v
-        
       - name: Configure CMake (Windows and Linux)
         if: matrix.os != 'macos-latest'
         shell: bash
