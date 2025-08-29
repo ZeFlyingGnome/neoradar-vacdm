@@ -18,7 +18,7 @@ std::uint32_t ConfigParser::errorLine() const { return this->m_errorLine; }
 
 const std::string &ConfigParser::errorMessage() const { return this->m_errorMessage; }
 
-bool ConfigParser::parseColor(const std::string &block, std::optional<std::array<unsigned int, 3>> &color, std::uint32_t line) {
+bool ConfigParser::parseColor(const std::string &block, std::array<unsigned int, 3> &color, std::uint32_t line) {
     std::vector<std::string> colorValues = utils::String::splitString(block, ",");
 
     if (3 != colorValues.size()) {

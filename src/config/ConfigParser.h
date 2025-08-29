@@ -12,7 +12,7 @@ class ConfigParser {
    private:
     std::uint32_t m_errorLine;  /* Defines the line number the error has occurred */
     std::string m_errorMessage; /* The error message to print */
-    bool parseColor(const std::string &block, std::optional<std::array<unsigned int, 3>> &color, std::uint32_t line);
+    bool parseColor(const std::string &block, std::array<unsigned int, 3> &color, std::uint32_t line);
 
    public:
     ConfigParser();
