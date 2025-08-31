@@ -2,7 +2,6 @@
 #pragma once
 #include <memory>
 #include <thread>
-#include <vector>
 #include "SDK.h"
 #include "config/PluginConfig.h"
 #include "core/NeoVACDMCommandProvider.h"
