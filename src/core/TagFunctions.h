@@ -133,16 +133,19 @@ void NeoVACDM::RegisterTagActions()
     TOBTBtn.id = "TOBTNow";
     TOBTBtn.type = Tag::DropdownComponentType::Button;
     TOBTBtn.text = "TOBT now";
+    TOBTBtn.requiresInput = false;
     TOBTScrollArea.children.push_back(TOBTBtn);
 
     TOBTBtn.id = "TOBTManual";
     TOBTBtn.type = Tag::DropdownComponentType::Button;
     TOBTBtn.text = "Set TOBT";
+    TOBTBtn.requiresInput = true;
     TOBTScrollArea.children.push_back(TOBTBtn);
 
     TOBTBtn.id = "TOBTConfirm";
     TOBTBtn.type = Tag::DropdownComponentType::Button;
     TOBTBtn.text = "TOBT confirm";
+    TOBTBtn.requiresInput = false;
     TOBTScrollArea.children.push_back(TOBTBtn);
 
     TOBTdropdown.components.push_back(TOBTScrollArea);
@@ -163,36 +166,43 @@ void NeoVACDM::RegisterTagActions()
    resetBtn.id = "ResetTOBT";
    resetBtn.type = Tag::DropdownComponentType::Button;
    resetBtn.text = "Reset TOBT";
+   resetBtn.requiresInput = false;
    resetScrollArea.children.push_back(resetBtn);
 
    resetBtn.id = "ResetASRT";
    resetBtn.type = Tag::DropdownComponentType::Button;
    resetBtn.text = "Reset ASRT";
+   resetBtn.requiresInput = false;
    resetScrollArea.children.push_back(resetBtn);
 
    resetBtn.id = "ResetASAT";
    resetBtn.type = Tag::DropdownComponentType::Button;
    resetBtn.text = "Reset ASAT";
+   resetBtn.requiresInput = false;
    resetScrollArea.children.push_back(resetBtn);
 
    resetBtn.id = "ResetTOBTConfirmed";
    resetBtn.type = Tag::DropdownComponentType::Button;
    resetBtn.text = "Reset confirmed TOBT";
+   resetBtn.requiresInput = false;
    resetScrollArea.children.push_back(resetBtn);
 
    resetBtn.id = "ResetAORT";
    resetBtn.type = Tag::DropdownComponentType::Button;
    resetBtn.text = "Reset AORT";
+   resetBtn.requiresInput = false;
    resetScrollArea.children.push_back(resetBtn);
 
    resetBtn.id = "ResetAOBTandState";
    resetBtn.type = Tag::DropdownComponentType::Button;
    resetBtn.text = "Reset AOBT";
+   resetBtn.requiresInput = false;
    resetScrollArea.children.push_back(resetBtn);
 
    resetBtn.id = "ResetPilot";
    resetBtn.type = Tag::DropdownComponentType::Button;
    resetBtn.text = "Reset Pilot";
+   resetBtn.requiresInput = false;
    resetScrollArea.children.push_back(resetBtn);   
 
    resetDropdown.components.push_back(resetScrollArea);
@@ -220,7 +230,7 @@ void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *ev
     if (false == Server::instance().getMaster()) return;
 
     std::string actionId = "plugin:NeoVACDM:ACTION_" + event->componentId;
-    TagProcessing(event->callsign, actionId);    
+    TagProcessing(event->callsign, actionId, event->userInput);    
 }
 
 void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput)
