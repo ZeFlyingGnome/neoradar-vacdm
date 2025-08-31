@@ -223,7 +223,7 @@ void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *ev
     TagProcessing(event->callsign, actionId);    
 }
 
-void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput)
+void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput)
 {
     if (false == DataManager::instance().checkPilotExists(callsign)) return;
 
@@ -231,8 +231,8 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
 
     if (actionId == "plugin:NeoVACDM:ACTION_EXOTModify")
     {
-        if (true == isNumber(userInput)) {
-            const auto exot = std::chrono::utc_clock::time_point(std::chrono::minutes(std::atoi(userInput.c_str())));
+        if (userInput && isNumber(*userInput)) {
+            const auto exot = std::chrono::utc_clock::time_point(std::chrono::minutes(std::atoi(userInput->c_str())));
             if (exot != pilot.exot)
                 DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateEXOT, pilot.callsign,
                                                             exot);
@@ -245,18 +245,21 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
                                                       std::chrono::utc_clock::now());
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_TOBTManual") {
-        std::string clock(userInput);
-        if (clock.length() == 4 && isNumber(clock)) {
-            const auto hours = std::atoi(clock.substr(0, 2).c_str());
-            const auto minutes = std::atoi(clock.substr(2, 4).c_str());
-            if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60)
-                DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBTConfirmed,
-                                                            pilot.callsign,
-                                                            utils::Date::convertStringToTimePoint(clock));
-            else
+        if (userInput) {
+            std::string clock(*userInput);
+            if (clock.length() == 4 && isNumber(clock)) {
+                const auto hours = std::atoi(clock.substr(0, 2).c_str());
+                const auto minutes = std::atoi(clock.substr(2, 4).c_str());
+                if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60)
+                    DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBT, pilot.callsign,
+                                                                utils::Date::convertStringToTimePoint(clock));
+                else
+                    DisplayMessage("Invalid time format. Expected: HHMM (24 hours)");
+            } else if (clock.length() != 0) {
                 DisplayMessage("Invalid time format. Expected: HHMM (24 hours)");
-        } else if (clock.length() != 0) {
-            DisplayMessage("Invalid time format. Expected: HHMM (24 hours)");
+            }
+        } else {
+            DisplayMessage("No input provided. Expected: HHMM (24 hours)");
         }
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ASATNow") {

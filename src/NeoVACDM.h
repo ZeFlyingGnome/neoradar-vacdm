@@ -35,7 +35,7 @@ public:
     /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
     // Command handling
-    void TagProcessing(const std::string &callsign, const std::string &actionId, const std::string &userInput = "");
+    void TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput = std::nullopt);
     void reloadConfiguration(bool initialLoading = false);
 
 private:
