@@ -3,7 +3,7 @@
 #include <chrono>
 #include <string>
 
-#include "SDK.h"
+#include <NeoRadarSDK/SDK.h>
 
 namespace vacdm::utils {
 

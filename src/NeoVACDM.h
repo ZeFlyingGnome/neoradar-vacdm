@@ -2,7 +2,9 @@
 #pragma once
 #include <memory>
 #include <thread>
-#include "SDK.h"
+
+#include <NeoRadarSDK/SDK.h>
+
 #include "config/PluginConfig.h"
 #include "core/NeoVACDMCommandProvider.h"
 

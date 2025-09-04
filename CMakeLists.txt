@@ -30,9 +30,9 @@ if (DEBUG)
 endif()
 
 # Add SDK include directory
+add_subdirectory(sdk)
 include_directories(
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/sdk
     ${CMAKE_SOURCE_DIR}/src
 )
 
@@ -58,6 +58,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 # Link dependencies
 target_link_libraries(${PROJECT_NAME} PRIVATE 
+    NeoRadarSDK::NeoRadarSDK
     httplib::httplib
     nlohmann_json::nlohmann_json
     OpenSSL::SSL
