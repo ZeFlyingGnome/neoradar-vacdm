@@ -83,7 +83,9 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
             userIsInSweatbox = (*connectionInfo).serverType == Fsd::ServerType::Sweatbox;
             userIsObserver = (*connectionInfo).facility == Fsd::NetworkFacility::OBS;
         }
+#ifndef DEV
         bool serverAllowsObsAsMaster = com::Server::instance().getServerConfig().allowMasterAsObserver;
+#endif // !DEV
         bool serverAllowsSweatboxAsMaster = com::Server::instance().getServerConfig().allowMasterInSweatbox;
 
         if (!connectionInfo || !userIsConnected) {
