@@ -7,7 +7,7 @@
 #include <thread>
 #include <vector>
 
-#include "SDK.h"
+#include <NeoRadarSDK/SDK.h>
 
 namespace vacdm::logging {
 class Logger {
