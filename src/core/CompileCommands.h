@@ -88,8 +88,10 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
 
         if (!connectionInfo || !userIsConnected) {
             userIsNotEligibleMessage = "You are not logged in to the VATSIM network";
+#ifndef DEV
         } else if (userIsObserver && !serverAllowsObsAsMaster) {
             userIsNotEligibleMessage = "You are logged in as Observer and Server does not allow Observers to be Master";
+#endif // !DEV
         } else if (userIsInSweatbox && !serverAllowsSweatboxAsMaster) {
             userIsNotEligibleMessage =
                 "You are logged in on a Sweatbox Server and Server does not allow Sweatbox connections";
