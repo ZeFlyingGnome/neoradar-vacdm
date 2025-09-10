@@ -1,11 +1,5 @@
 #include "Logger.h"
 
-#ifdef DEBUG_BUILD
-#include <Windows.h>
-
-#include <iostream>
-#endif
-
 #include <algorithm>
 #include <chrono>
 #include <numeric>
@@ -26,13 +20,7 @@ static const std::string __insertMessage = "INSERT INTO messages VALUES (CURRENT
 
 Logger::Logger() {
     stream << std::format("{0:%Y%m%d%H%M%S}", std::chrono::utc_clock::now()) << ".vacdm";
-#ifdef DEBUG_BUILD
-    AllocConsole();
-#pragma warning(push)
-#pragma warning(disable : 6031)
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-#pragma warning(pop)
+#ifdef DEV
     this->enableLogging();
 #endif
     this->m_logWriter = std::thread(&Logger::run, this);
@@ -61,9 +49,6 @@ void Logger::run() {
 
             if (logsetting != logSettings.end() && it->loglevel >= logsetting->minimumLevel &&
                 false == this->m_LogAll) {
-#ifdef DEBUG_BUILD
-                std::cout << logsetting->name << ": " << it->message << "\n";
-#endif
             
                 if (vacdmLogger_)
                 {
