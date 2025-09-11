@@ -122,49 +122,60 @@ void NeoVACDM::UpdateTagItems() {
 
         text = formatTime(pilot.eobt);
         context.colour = Color::colorizeEobt(pilot);
-        tagInterface_->UpdateTagValue(EOBTTagID_, text, context);
+        if (tagCache.eobt.text != text || tagCache.eobt.colour != context.colour)
+            tagInterface_->UpdateTagValue(EOBTTagID_, text, context);
 
         text = formatTime(pilot.tobt);
         context.colour = Color::colorizeTobt(pilot);
-        tagInterface_->UpdateTagValue(TOBTTagID_, text, context);
+        if (tagCache.tobt.text != text || tagCache.tobt.colour != context.colour)
+            tagInterface_->UpdateTagValue(TOBTTagID_, text, context);
 
         text = formatTime(pilot.tsat);
         context.colour = Color::colorizeTsat(pilot);
-        tagInterface_->UpdateTagValue(TSATTagID_, text, context);
+        if (tagCache.tsat.text != text || tagCache.tsat.colour != context.colour)
+            tagInterface_->UpdateTagValue(TSATTagID_, text, context);
 
         text = formatTime(pilot.ttot);
         context.colour = Color::colorizeTtot(pilot);
-        tagInterface_->UpdateTagValue(TTOTTagID_, text, context);
+        if (tagCache.ttot.text != text || tagCache.ttot.colour != context.colour)
+            tagInterface_->UpdateTagValue(TTOTTagID_, text, context);
 
         if (pilot.exot.time_since_epoch().count() > 0) {
             text = std::format("{:%M}", pilot.exot);
             context.colour = std::nullopt;
-            tagInterface_->UpdateTagValue(EXOTTagID_, text, context);
+            if (tagCache.exot.text != text || tagCache.exot.colour != context.colour)
+                tagInterface_->UpdateTagValue(EXOTTagID_, text, context);
         }
 
         text = formatTime(pilot.asat);
         context.colour = Color::colorizeAsat(pilot);
-        tagInterface_->UpdateTagValue(ASATTagID_, text, context);
+        if (tagCache.asat.text != text || tagCache.asat.colour != context.colour)
+            tagInterface_->UpdateTagValue(ASATTagID_, text, context);
 
         text = formatTime(pilot.aobt);
         context.colour = Color::colorizeAobt(pilot);
-        tagInterface_->UpdateTagValue(AOBTTagID_, text, context);
+        if (tagCache.aobt.text != text || tagCache.aobt.colour != context.colour)
+            tagInterface_->UpdateTagValue(AOBTTagID_, text, context);
 
         text = formatTime(pilot.atot);
         context.colour = Color::colorizeAtot(pilot);
-        tagInterface_->UpdateTagValue(ATOTTagID_, text, context);
+        if (tagCache.atot.text != text || tagCache.atot.colour != context.colour)
+            tagInterface_->UpdateTagValue(ATOTTagID_, text, context);
 
         text = formatTime(pilot.asrt);
         context.colour = Color::colorizeAsrt(pilot);
-        tagInterface_->UpdateTagValue(ASRTTagID_, text, context);
+        if (tagCache.asrt.text != text || tagCache.asrt.colour != context.colour)
+            tagInterface_->UpdateTagValue(ASRTTagID_, text, context);
 
         text = formatTime(pilot.aort);
         context.colour = Color::colorizeAort(pilot);
-        tagInterface_->UpdateTagValue(AORTTagID_, text, context);
+        if (tagCache.aort.text != text || tagCache.aort.colour != context.colour)
+            tagInterface_->UpdateTagValue(AORTTagID_, text, context);
 
         text = formatTime(pilot.ctot);
         context.colour = Color::colorizeCtot(pilot);
-        tagInterface_->UpdateTagValue(CTOTTagID_, text, context);
+        if (tagCache.ctot.text != text || tagCache.ctot.colour != context.colour)
+            tagInterface_->UpdateTagValue(CTOTTagID_, text, context);
 
         if (false == pilot.measures.empty()) {
             const std::int64_t measureMinutes = pilot.measures[0].value / 60;
@@ -172,12 +183,14 @@ void NeoVACDM::UpdateTagItems() {
 
             text = std::format("{:02}:{:02}", measureMinutes, measureSeconds);
             context.colour = Color::colorizeEcfmpMeasure(pilot);
-            tagInterface_->UpdateTagValue(ECFMPMeasuresTagID_, text, context);
+            if (tagCache.ecfmpMeasures.text != text || tagCache.ecfmpMeasures.colour != context.colour)
+                tagInterface_->UpdateTagValue(ECFMPMeasuresTagID_, text, context);
         }
 
         text = (pilot.hasBooking ? "B" : "");
         context.colour = Color::colorizeEventBooking(pilot);
-        tagInterface_->UpdateTagValue(EventBookingTagID_, text, context);
+        if (tagCache.eventBooking.text != text || tagCache.eventBooking.colour != context.colour)
+            tagInterface_->UpdateTagValue(EventBookingTagID_, text, context);
 
     }
 }
