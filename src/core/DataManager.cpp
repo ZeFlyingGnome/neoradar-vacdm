@@ -559,10 +559,8 @@ types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flight
     // flightplan & clearance data
     pilot.origin = flightplan.origin;
     pilot.destination = flightplan.destination;
-    // pilot.runway = flightplan.GetFlightPlanData().GetDepartureRwy();
-    // pilot.sid = flightplan.GetFlightPlanData().GetSidName();
-    pilot.runway = "08L";
-    pilot.sid = "LGL6H";
+    pilot.runway = flightplan.route.depRunway;
+    pilot.sid = flightplan.route.sid;
 
     // acdm data
     pilot.eobt = utils::Date::convertDepartureTime(flightplan);
