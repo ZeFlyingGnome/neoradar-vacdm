@@ -559,8 +559,14 @@ types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flight
     // flightplan & clearance data
     pilot.origin = flightplan.origin;
     pilot.destination = flightplan.destination;
-    pilot.runway = flightplan.route.depRunway;
-    pilot.sid = flightplan.route.sid;
+    if (flightplan.route.depRunway != "")
+        pilot.runway = flightplan.route.depRunway;
+    else
+        pilot.runway = flightplan.route.suggestedDepRunway;
+    if (flightplan.route.sid != "")
+        pilot.sid = flightplan.route.sid;
+    else
+        pilot.sid = flightplan.route.suggestedSid;
 
     // acdm data
     pilot.eobt = utils::Date::convertDepartureTime(flightplan);
