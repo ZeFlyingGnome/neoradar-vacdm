@@ -14,6 +14,27 @@ namespace vacdm {
 
 class NeoVACDMCommandProvider;
 
+struct TagCacheItem {
+    std::string text;
+    std::optional<std::array<unsigned int, 3Ui64>> colour;
+};
+
+struct TagCache {
+    TagCacheItem eobt = {"", std::nullopt};
+    TagCacheItem tobt = {"", std::nullopt};
+    TagCacheItem tsat = {"", std::nullopt};
+    TagCacheItem ttot = {"", std::nullopt}; 
+    TagCacheItem exot = {"", std::nullopt};
+    TagCacheItem asat = {"", std::nullopt};
+    TagCacheItem aobt = {"", std::nullopt};
+    TagCacheItem atot = {"", std::nullopt};
+    TagCacheItem asrt = {"", std::nullopt};
+    TagCacheItem aort = {"", std::nullopt};
+    TagCacheItem ctot = {"", std::nullopt};
+    TagCacheItem eventBooking = {"", std::nullopt};
+    TagCacheItem ecfmpMeasures = {"", std::nullopt};
+};
+
 class NeoVACDM : public BasePlugin
 {
 public:
@@ -105,6 +126,8 @@ private:
     std::thread m_worker;
     bool m_stop;
     void run();
+
+    TagCache tagCache;
 
     std::shared_ptr<NeoVACDMCommandProvider> CommandProvider_;
 };

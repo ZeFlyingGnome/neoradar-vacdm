@@ -402,7 +402,7 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
             if (updateIt->callsign == pilot->second[ScopeData].callsign) {
                 Logger::instance().log(
                     Logger::LogSender::DataManager,
-                    "Updating " + pilot->second[ScopeData].callsign + " with" + updateIt->callsign,
+                    "Updating " + pilot->second[ScopeData].callsign + " with " + updateIt->callsign,
                     Logger::LogLevel::Info);
                 pilot->second[ServerData] = *updateIt;
                 DataManager::consolidateData(pilot->second);

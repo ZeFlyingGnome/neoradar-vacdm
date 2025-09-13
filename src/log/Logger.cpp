@@ -1,11 +1,5 @@
 #include "Logger.h"
 
-#ifdef DEBUG_BUILD
-#include <Windows.h>
-
-#include <iostream>
-#endif
-
 #include <chrono>
 #include <numeric>
 
@@ -24,13 +18,7 @@ static const char __loggingTable[] =
 static const std::string __insertMessage = "INSERT INTO messages VALUES (CURRENT_TIMESTAMP, @1, @2, @3)";
 
 Logger::Logger() {
-#ifdef DEBUG_BUILD
-    AllocConsole();
-#pragma warning(push)
-#pragma warning(disable : 6031)
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-#pragma warning(pop)
+#ifdef DEV
     this->enableLogging();
 #endif
     this->m_logWriter = std::thread(&Logger::run, this);
@@ -59,9 +47,6 @@ void Logger::run() {
 
             if (logsetting != logSettings.end() && it->loglevel >= logsetting->minimumLevel &&
                 false == this->m_LogAll) {
-#ifdef DEBUG_BUILD
-                std::cout << logsetting->name << ": " << it->message << "\n";
-#endif
             
                 if (vacdmLogger_)
                 {

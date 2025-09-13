@@ -43,7 +43,7 @@ class Logger {
 
    private:
     Logger();
-#ifdef DEBUG_BUILD
+#ifdef DEV
     std::vector<LogSetting> logSettings = {
         {vACDM, "vACDM", Debug},   {DataManager, "DataManager", Info},
         {Server, "Server", Debug}, {ConfigParser, "ConfigParser", Debug},
