@@ -1,6 +1,5 @@
 #include "Logger.h"
 
-#include <algorithm>
 #include <chrono>
 #include <numeric>
 
@@ -19,7 +18,6 @@ static const char __loggingTable[] =
 static const std::string __insertMessage = "INSERT INTO messages VALUES (CURRENT_TIMESTAMP, @1, @2, @3)";
 
 Logger::Logger() {
-    stream << std::format("{0:%Y%m%d%H%M%S}", std::chrono::utc_clock::now()) << ".vacdm";
 #ifdef DEV
     this->enableLogging();
 #endif

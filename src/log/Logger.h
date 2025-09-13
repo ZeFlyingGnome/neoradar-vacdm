@@ -2,7 +2,6 @@
 
 #include <list>
 #include <mutex>
-#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -69,9 +68,6 @@ class Logger {
     void enableLogging();
     void disableLogging();
     bool loggingEnabled = false;
-
-    std::stringstream stream;
-    bool logFileCreated = false;
 
     PluginSDK::Logger::LoggerAPI *vacdmLogger_ = nullptr;;
 
