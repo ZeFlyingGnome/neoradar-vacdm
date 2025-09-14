@@ -5,6 +5,12 @@
 
 #include <NeoRadarSDK/SDK.h>
 
+#ifdef _WIN32
+#define MKTIME_UTC _mkgmtime
+#else
+#define MKTIME_UTC timegm
+#endif
+
 namespace vacdm::utils {
 
 class Date {
@@ -53,9 +59,11 @@ class Date {
     static std::chrono::system_clock::time_point isoStringToTimestamp(const std::string &timestamp) {
         std::chrono::system_clock::time_point retval;
         std::stringstream stream;
+        std::tm timeDate = {};
 
-        stream << timestamp.substr(0, timestamp.length() - 1);
-        std::chrono::from_stream(stream, "%FT%T", retval);
+        stream << timestamp.substr(0, timestamp.length() - 5);
+        stream >> std::get_time(&timeDate, "%Y-%m-%dT%H:%M:%S");
+        retval = std::chrono::system_clock::from_time_t(MKTIME_UTC(&timeDate));
 
         return retval;
     }
@@ -100,8 +108,9 @@ class Date {
         stream << hhmmString;
 
         std::chrono::system_clock::time_point time;
-        std::stringstream input(stream.str());
-        std::chrono::from_stream(stream, "%Y%m%d%H%M", time);
+        std::tm timeDate = {};
+        stream >> std::get_time(&timeDate, "%Y%m%d%H%M");
+        time = std::chrono::system_clock::from_time_t(MKTIME_UTC(&timeDate));  
 
         return time;
     }
