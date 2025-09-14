@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - utc_time
   pull_request:
     branches:
       - main
