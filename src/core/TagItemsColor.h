@@ -27,7 +27,7 @@ class Color {
             return pluginConfig.grey;
         }
         const auto timeSinceTsat =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.tsat).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.tsat).count();
         if (timeSinceTsat <= 5 * 60 && timeSinceTsat >= -5 * 60) {
             // CTOT exists
             if (pilot.ctot.time_since_epoch().count() > 0) {
@@ -59,12 +59,12 @@ class Color {
             return pluginConfig.grey;
         }
 
-        auto now = std::chrono::utc_clock::now();
+        auto now = std::chrono::system_clock::now();
 
         // Round up to the next 10, 20, 30, 40, 50, or 00 minute interval
         auto timeSinceEpoch = pilot.ttot.time_since_epoch();
         auto minutesSinceEpoch = std::chrono::duration_cast<std::chrono::minutes>(timeSinceEpoch);
-        std::chrono::time_point<std::chrono::utc_clock> rounded;
+        std::chrono::time_point<std::chrono::system_clock> rounded;
 
         // Compute the number of minutes remaining to the next highest ten
         auto remainingMinutes = 10 - minutesSinceEpoch.count() % 10;
@@ -78,7 +78,7 @@ class Color {
 
             // Convert back to a time_point object and return
             rounded = std::chrono::time_point_cast<std::chrono::minutes>(
-                std::chrono::utc_clock::time_point(roundedUpMinutes));
+                std::chrono::system_clock::time_point(roundedUpMinutes));
             rounded += std::chrono::seconds(30);
         }
 
@@ -113,9 +113,9 @@ class Color {
         }
 
         const auto timeSinceAsat =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.asat).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.asat).count();
         const auto timeSinceTsat =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.tsat).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.tsat).count();
         if (pilot.taxizoneIsTaxiout == false) {
             if (/* Datalink clearance == true &&*/ timeSinceTsat >= -5 * 60 && timeSinceTsat <= 5 * 60) {
                 return pluginConfig.green;
@@ -150,7 +150,7 @@ class Color {
             return pluginConfig.grey;
         }
         const auto timeSinceAsrt =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.asrt).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.asrt).count();
         if (timeSinceAsrt <= 5 * 60 && timeSinceAsrt >= 0) {
             return pluginConfig.green;
         }
@@ -175,7 +175,7 @@ class Color {
             return pluginConfig.grey;
         }
         const auto timeSinceAort =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.aort).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.aort).count();
 
         if (timeSinceAort <= 5 * 60 && timeSinceAort >= 0) {
             return pluginConfig.green;
@@ -203,14 +203,14 @@ class Color {
             return pluginConfig.grey;
         }
         const auto timeSinceAobt =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.aobt).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.aobt).count();
         if (timeSinceAobt >= 0) {
             // hide Timer
         }
         const auto timeSinceAsat =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.asat).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.asat).count();
         const auto timeSinceTsat =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.tsat).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.tsat).count();
         // Pushback required
         if (pilot.taxizoneIsTaxiout != false) {
             /*
@@ -245,7 +245,7 @@ class Color {
 
    private:
     static std::optional<std::array<unsigned int, 3>> colorizeEobtAndTobt(const types::Pilot &pilot) {
-        const auto now = std::chrono::utc_clock::now();
+        const auto now = std::chrono::system_clock::now();
         const auto timeSinceTobt = std::chrono::duration_cast<std::chrono::seconds>(now - pilot.tobt).count();
         const auto timeSinceTsat = std::chrono::duration_cast<std::chrono::seconds>(now - pilot.tsat).count();
         const auto diffTsatTobt = std::chrono::duration_cast<std::chrono::seconds>(pilot.tsat - pilot.tobt).count();
@@ -289,7 +289,7 @@ class Color {
         }
 
         const auto timetoctot =
-            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::utc_clock::now() - pilot.ctot).count();
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - pilot.ctot).count();
         if (timetoctot >= 5 * 60) {
             return pluginConfig.lightgreen;
         }

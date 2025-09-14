@@ -68,7 +68,7 @@ class DataManager {
     std::list<std::string> m_activeAirports;
 
     struct ScopeFlightplanUpdate {
-        std::chrono::utc_clock::time_point timeIssued;
+        std::chrono::system_clock::time_point timeIssued;
         types::Pilot data;
     };
 
@@ -95,7 +95,7 @@ class DataManager {
     struct AsynchronousMessage {
         const MessageType type;
         const std::string callsign;
-        const std::chrono::utc_clock::time_point value;
+        const std::chrono::system_clock::time_point value;
     };
 
     std::mutex m_asyncMessagesLock;
@@ -106,7 +106,7 @@ class DataManager {
     void setActiveAirports(const std::list<std::string> activeAirports);
     void queueFlightplanUpdate(PluginSDK::Flightplan::Flightplan flightplan, PluginSDK::Aircraft::Aircraft aircraft, double distanceFromOrigin);
     void handleTagFunction(MessageType message, const std::string callsign,
-                           const std::chrono::utc_clock::time_point value);
+                           const std::chrono::system_clock::time_point value);
 
     bool checkPilotExists(const std::string &callsign);
     const types::Pilot getPilot(const std::string &callsign);

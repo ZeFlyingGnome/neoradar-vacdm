@@ -26,9 +26,9 @@ typedef struct EcfmpFlowMeasure_t {
     std::string ident;
     std::int64_t event_id;
     std::string reason;
-    std::chrono::utc_clock::time_point starttime;
-    std::chrono::utc_clock::time_point endtime;
-    std::chrono::utc_clock::time_point withdrawn_at;
+    std::chrono::system_clock::time_point starttime;
+    std::chrono::system_clock::time_point endtime;
+    std::chrono::system_clock::time_point withdrawn_at;
     std::vector<int> notified_fir_regions;
     std::vector<EcfmpMeasure> measures;
     std::vector<EcfmpFilter> filters;

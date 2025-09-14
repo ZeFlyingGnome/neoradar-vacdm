@@ -16,7 +16,7 @@ class NeoVACDMCommandProvider;
 
 struct TagCacheItem {
     std::string text;
-    std::optional<std::array<unsigned int, 3Ui64>> colour;
+    std::optional<std::array<unsigned int, 3>> colour;
 };
 
 struct TagCache {
