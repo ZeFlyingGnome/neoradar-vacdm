@@ -103,7 +103,7 @@ void NeoVACDM::RegisterTagItems()
 
 }
 
-std::string formatTime(const std::chrono::utc_clock::time_point timepoint) {
+std::string formatTime(const std::chrono::system_clock::time_point timepoint) {
     if (timepoint.time_since_epoch().count() > 0)
         return std::format("{:%H%M}", timepoint);
     else

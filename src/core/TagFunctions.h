@@ -242,7 +242,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
     if (actionId == "plugin:NeoVACDM:ACTION_EXOTModify")
     {
         if (userInput && isNumber(*userInput)) {
-            const auto exot = std::chrono::utc_clock::time_point(std::chrono::minutes(std::atoi(userInput->c_str())));
+            const auto exot = std::chrono::system_clock::time_point(std::chrono::minutes(std::atoi(userInput->c_str())));
             if (exot != pilot.exot)
                 DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateEXOT, pilot.callsign,
                                                             exot);
@@ -252,7 +252,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
     {
 
             DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBT, pilot.callsign,
-                                                      std::chrono::utc_clock::now());
+                                                      std::chrono::system_clock::now());
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_TOBTManual") {
         if (userInput) {
@@ -275,38 +275,38 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
     else if (actionId == "plugin:NeoVACDM:ACTION_ASATNow") {
 
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASAT, pilot.callsign,
-                                                    std::chrono::utc_clock::now());
+                                                    std::chrono::system_clock::now());
         // if ASRT has not been set yet -> set ASRT
         if (pilot.asrt == types::defaultTime) {
             DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
-                                                        std::chrono::utc_clock::now());
+                                                        std::chrono::system_clock::now());
         }
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ASATNowAndStartup") {
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASAT, pilot.callsign,
-                                                    std::chrono::utc_clock::now());
+                                                    std::chrono::system_clock::now());
 
         // if ASRT has not been set yet -> set ASRT
         if (pilot.asrt == types::defaultTime) {
             DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
-                                                        std::chrono::utc_clock::now());
+                                                        std::chrono::system_clock::now());
         }
 
         controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::Start);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_StartupRequest") {
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
-                                                    std::chrono::utc_clock::now());
+                                                    std::chrono::system_clock::now());
         ;
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_AOBTNowAndState") {
         // set ASRT if ASRT has not been set yet
         if (pilot.asrt == types::defaultTime) {
             DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateAORT, pilot.callsign,
-                                                        std::chrono::utc_clock::now());
+                                                        std::chrono::system_clock::now());
         }
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateAOBT, pilot.callsign,
-                                                    std::chrono::utc_clock::now());
+                                                    std::chrono::system_clock::now());
 
         // set status depending on if the aircraft is positioned at a taxi-out position
         if (pilot.taxizoneIsTaxiout) {
@@ -321,7 +321,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_OffblockRequest") {
         DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateAORT, pilot.callsign,
-                                                    std::chrono::utc_clock::now());
+                                                    std::chrono::system_clock::now());
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetTOBT") {
         DataManager::instance().handleTagFunction(DataManager::MessageType::ResetTOBT, pilot.callsign,

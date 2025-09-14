@@ -63,14 +63,14 @@ class Server {
     void sendPatchMessage(const std::string& endpointUrl, const nlohmann::json& root);
     void sendDeleteMessage(const std::string& endpointUrl);
 
-    void updateExot(const std::string& pilot, const std::chrono::utc_clock::time_point& exot);
-    void updateTobt(const types::Pilot& pilot, const std::chrono::utc_clock::time_point& tobt, bool manualTobt);
-    void updateAsat(const std::string& callsign, const std::chrono::utc_clock::time_point& asat);
-    void updateAsrt(const std::string& callsign, const std::chrono::utc_clock::time_point& asrt);
-    void updateAobt(const std::string& callsign, const std::chrono::utc_clock::time_point& aobt);
-    void updateAort(const std::string& callsign, const std::chrono::utc_clock::time_point& aort);
+    void updateExot(const std::string& pilot, const std::chrono::system_clock::time_point& exot);
+    void updateTobt(const types::Pilot& pilot, const std::chrono::system_clock::time_point& tobt, bool manualTobt);
+    void updateAsat(const std::string& callsign, const std::chrono::system_clock::time_point& asat);
+    void updateAsrt(const std::string& callsign, const std::chrono::system_clock::time_point& asrt);
+    void updateAobt(const std::string& callsign, const std::chrono::system_clock::time_point& aobt);
+    void updateAort(const std::string& callsign, const std::chrono::system_clock::time_point& aort);
 
-    void resetTobt(const std::string& callsign, const std::chrono::utc_clock::time_point& tobt,
+    void resetTobt(const std::string& callsign, const std::chrono::system_clock::time_point& tobt,
                    const std::string& tobtState);
     void deletePilot(const std::string& callsign);
 

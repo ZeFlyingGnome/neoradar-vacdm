@@ -187,7 +187,7 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                 pilots.back().ttot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["ttot"].get<std::string>());
                 pilots.back().tsat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["tsat"].get<std::string>());
                 pilots.back().exot =
-                    std::chrono::utc_clock::time_point(std::chrono::minutes(pilot["vacdm"]["exot"].get<long int>()));
+                    std::chrono::system_clock::time_point(std::chrono::minutes(pilot["vacdm"]["exot"].get<long int>()));
                 pilots.back().asat = utils::Date::isoStringToTimestamp(pilot["vacdm"]["asat"].get<std::string>());
                 pilots.back().aobt = utils::Date::isoStringToTimestamp(pilot["vacdm"]["aobt"].get<std::string>());
                 pilots.back().atot = utils::Date::isoStringToTimestamp(pilot["vacdm"]["atot"].get<std::string>());
@@ -303,7 +303,7 @@ void Server::postPilot(types::Pilot pilot) {
     this->sendPostMessage("/api/v1/pilots", root);
 }
 
-void Server::updateExot(const std::string& callsign, const std::chrono::utc_clock::time_point& exot) {
+void Server::updateExot(const std::string& callsign, const std::chrono::system_clock::time_point& exot) {
     nlohmann::json root;
 
     root["callsign"] = callsign;
@@ -318,7 +318,7 @@ void Server::updateExot(const std::string& callsign, const std::chrono::utc_cloc
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
-void Server::updateTobt(const types::Pilot& pilot, const std::chrono::utc_clock::time_point& tobt, bool manualTobt) {
+void Server::updateTobt(const types::Pilot& pilot, const std::chrono::system_clock::time_point& tobt, bool manualTobt) {
     nlohmann::json root;
 
     bool resetTsat = (tobt == types::defaultTime && true == manualTobt) || tobt >= pilot.tsat;
@@ -338,7 +338,7 @@ void Server::updateTobt(const types::Pilot& pilot, const std::chrono::utc_clock:
     this->sendPatchMessage("/api/v1/pilots/" + pilot.callsign, root);
 }
 
-void Server::updateAsat(const std::string& callsign, const std::chrono::utc_clock::time_point& asat) {
+void Server::updateAsat(const std::string& callsign, const std::chrono::system_clock::time_point& asat) {
     nlohmann::json root;
 
     root["callsign"] = callsign;
@@ -348,7 +348,7 @@ void Server::updateAsat(const std::string& callsign, const std::chrono::utc_cloc
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
-void Server::updateAsrt(const std::string& callsign, const std::chrono::utc_clock::time_point& asrt) {
+void Server::updateAsrt(const std::string& callsign, const std::chrono::system_clock::time_point& asrt) {
     nlohmann::json root;
 
     root["callsign"] = callsign;
@@ -358,7 +358,7 @@ void Server::updateAsrt(const std::string& callsign, const std::chrono::utc_cloc
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
-void Server::updateAobt(const std::string& callsign, const std::chrono::utc_clock::time_point& aobt) {
+void Server::updateAobt(const std::string& callsign, const std::chrono::system_clock::time_point& aobt) {
     nlohmann::json root;
 
     root["callsign"] = callsign;
@@ -368,7 +368,7 @@ void Server::updateAobt(const std::string& callsign, const std::chrono::utc_cloc
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
-void Server::updateAort(const std::string& callsign, const std::chrono::utc_clock::time_point& aort) {
+void Server::updateAort(const std::string& callsign, const std::chrono::system_clock::time_point& aort) {
     nlohmann::json root;
 
     root["callsign"] = callsign;
@@ -378,7 +378,7 @@ void Server::updateAort(const std::string& callsign, const std::chrono::utc_cloc
     this->sendPatchMessage("/api/v1/pilots/" + callsign, root);
 }
 
-void Server::resetTobt(const std::string& callsign, const std::chrono::utc_clock::time_point& tobt,
+void Server::resetTobt(const std::string& callsign, const std::chrono::system_clock::time_point& tobt,
                        const std::string& tobtState) {
     nlohmann::json root;
 

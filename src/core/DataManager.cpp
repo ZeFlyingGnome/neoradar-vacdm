@@ -215,7 +215,7 @@ void DataManager::processAsynchronousMessages(std::map<std::string, std::array<t
 }
 
 void DataManager::handleTagFunction(MessageType type, const std::string callsign,
-                                    const std::chrono::utc_clock::time_point value) {
+                                    const std::chrono::system_clock::time_point value) {
     // do not handle the tag function if the aircraft does not exist or the client is not master
     if (false == this->checkPilotExists(callsign) || false == Server::instance().getMaster()) return;
 
@@ -231,7 +231,7 @@ void DataManager::handleTagFunction(MessageType type, const std::string callsign
     auto it = this->m_pilots.find(callsign);
     auto& pilot = it->second[ConsolidatedData];
 
-    pilot.lastUpdate = std::chrono::utc_clock::now();
+    pilot.lastUpdate = std::chrono::system_clock::now();
 
     switch (type) {
         case MessageType::UpdateEXOT:
@@ -388,7 +388,7 @@ void DataManager::queueFlightplanUpdate(Flightplan flightplan, Aircraft aircraft
     auto pilot = this->CFlightPlanToPilot(flightplan, aircraft, distanceFromOrigin);
 
     std::lock_guard guard(this->m_scopeUpdatesLock);
-    this->m_scopeFlightplanUpdates.push_back({std::chrono::utc_clock::now(), pilot});
+    this->m_scopeFlightplanUpdates.push_back({std::chrono::system_clock::now(), pilot});
 }
 
 void DataManager::consolidateWithBackend(std::map<std::string, std::array<types::Pilot, 3U>>& pilots) {
@@ -545,7 +545,7 @@ types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flight
     types::Pilot pilot;
 
     pilot.callsign = flightplan.callsign;
-    pilot.lastUpdate = std::chrono::utc_clock::now();
+    pilot.lastUpdate = std::chrono::system_clock::now();
 
     // position data
     pilot.latitude = aircraft.position.latitude;
