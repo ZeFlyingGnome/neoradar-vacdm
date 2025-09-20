@@ -104,65 +104,55 @@ void Logger::log(const LogSender &sender, const std::string &message, const LogL
     }
 }
 
-std::string Logger::handleLogCommand(std::string command) {
-    auto elements = vacdm::utils::String::splitString(command, " ");
+std::pair<std::string,bool> Logger::handleLogCommand(std::string arg) {
+    std::string usageString = "Usage: .vacdm log ON/OFF/DEBUG";
 
-    std::string usageString = "Usage: .vacdm LOG ON/OFF/DEBUG";
-    if (elements.size() != 2) return usageString;
+    std::transform(arg.begin(), arg.end(), arg.begin(), ::toupper);
 
-    if ("ON" == elements[1]) {
+    if ("ON" == arg) {
         this->enableLogging();
-        return "Enabled logging";
-    } else if ("OFF" == elements[1]) {
+        return {"Enabled logging", true};
+    } else if ("OFF" == arg) {
         this->disableLogging();
-        return "Disabled logging";
-    } else if ("DEBUG" == elements[1]) {
+        return {"Disabled logging", true};
+    } else if ("DEBUG" == arg) {
         std::lock_guard guard(this->m_logLock);
         if (false == this->m_LogAll) {
             this->m_LogAll = true;
-            return "Set all log levels to DEBUG";
+            return {"Set all log levels to DEBUG", true};
         } else {
             this->m_LogAll = false;
-            return "Reset log levels, using previous settings";
+            return {"Reset log levels, using previous settings", true};
         }
     }
 
-    return usageString;
+    return {usageString, false};
 }
 
-std::string Logger::handleLogLevelCommand(std::string command) {
-    const auto elements = vacdm::utils::String::splitString(command, " ");
-    if (elements.size() != 3) {
-        return "Usage: .vacdm LOGLEVEL sender loglevel";
-    }
-
-    std::string sender = elements[1];
-    std::string newLevel = elements[2];
+std::pair<std::string,bool> Logger::handleLogLevelCommand(const std::vector<std::string> &args) {
+    std::string sender = args[0];
+    std::string newLevel = args[1];
+    std::transform(sender.begin(), sender.end(), sender.begin(), ::toupper);
 
     std::lock_guard guard(this->m_logLock);
     auto logsetting = std::find_if(logSettings.begin(), logSettings.end(), [sender](const LogSetting &setting) {
         std::string uppercaseName = setting.name;
-#pragma warning(push)
-#pragma warning(disable : 4244)
         std::transform(uppercaseName.begin(), uppercaseName.end(), uppercaseName.begin(), ::toupper);
-#pragma warning(pop)
+
         return uppercaseName == sender;
     });
 
     // sender not found
     if (logsetting == logSettings.end()) {
-        return "Sender " + sender + " not found. Available senders are " +
+        return {"Sender " + sender + " not found. Available senders are " +
                std::accumulate(std::next(logSettings.begin()), logSettings.end(), logSettings.front().name,
-                               [](std::string acc, const LogSetting &setting) { return acc + " " + setting.name; });
+                               [](std::string acc, const LogSetting &setting) { return acc + " " + setting.name; }), false};
     }
 
     // Modify logsetting by reference
     auto &logSettingRef = *logsetting;
 
-#pragma warning(push)
-#pragma warning(disable : 4244)
     std::transform(newLevel.begin(), newLevel.end(), newLevel.begin(), ::toupper);
-#pragma warning(pop)
 
     if (newLevel == "DEBUG") {
         logSettingRef.minimumLevel = LogLevel::Debug;
@@ -179,7 +169,7 @@ std::string Logger::handleLogLevelCommand(std::string command) {
     } else if (newLevel == "DISABLED") {
         logSettingRef.minimumLevel = LogLevel::Disabled;
     } else {
-        return "Invalid log level: " + newLevel;
+        return {"Invalid log level: " + newLevel, false};
     }
 
     // check if at least one sender is set to log
@@ -192,7 +182,7 @@ std::string Logger::handleLogLevelCommand(std::string command) {
     }
     this->loggingEnabled = enableLogging;
 
-    return "Changed sender " + sender + " to " + newLevel;
+    return {"Changed sender " + logSettingRef.name + " to " + newLevel, true};
 }
 
 void Logger::enableLogging() {
