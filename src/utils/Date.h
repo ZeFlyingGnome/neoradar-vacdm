@@ -11,6 +11,8 @@
 #define MKTIME_UTC timegm
 #endif
 
+#define DEFAULT_TIMESTAMP "1969-12-31T23:59:59.999Z"
+
 namespace vacdm::utils {
 
 class Date {
@@ -41,7 +43,7 @@ class Date {
             timestamp = timestamp.substr(0, timestamp.length() - 4) + "Z";
             return timestamp;
         } else {
-            return "1969-12-31T23:59:59.999Z";
+            return DEFAULT_TIMESTAMP;
         }
     }
 
@@ -61,9 +63,14 @@ class Date {
         std::stringstream stream;
         std::tm timeDate = {};
 
-        stream << timestamp.substr(0, timestamp.length() - 5);
-        stream >> std::get_time(&timeDate, "%Y-%m-%dT%H:%M:%S");
-        retval = std::chrono::system_clock::from_time_t(MKTIME_UTC(&timeDate));
+        if (timestamp == DEFAULT_TIMESTAMP) {
+            retval = types::defaultTime;
+        }
+        else {
+            stream << timestamp.substr(0, timestamp.length() - 5);
+            stream >> std::get_time(&timeDate, "%Y-%m-%dT%H:%M:%S");
+            retval = std::chrono::system_clock::from_time_t(MKTIME_UTC(&timeDate));
+        }
 
         return retval;
     }
