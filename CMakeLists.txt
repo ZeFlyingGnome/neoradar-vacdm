@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+set(VCPKG_BUILD_TYPE "release") 
+
 project(NeoVACDM VERSION "1.4.1.4")
 
 set(CMAKE_CXX_STANDARD 20)
