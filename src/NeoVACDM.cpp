@@ -71,14 +71,14 @@ void NeoVACDM::Shutdown()
     this->m_stop = true;
     this->m_worker.join();
 
-    chatAPI_->unregisterCommand(commandId_);
+    this->unRegisterCommand();
 }
 
-void NeoVACDM::DisplayMessage(const std::string &message, const std::string &sender) {
+void NeoVACDM::DisplayMessage(const std::string &message, const bool &dedicated, const std::string &sender) {
     Chat::ClientTextMessageEvent textMessage;
     textMessage.sentFrom = "NeoVACDM";
     (sender.empty()) ? textMessage.message = message : textMessage.message = sender + ": " + message;
-    textMessage.useDedicatedChannel = true;
+    textMessage.useDedicatedChannel = dedicated;
 
     chatAPI_->sendClientMessage(textMessage);
 }

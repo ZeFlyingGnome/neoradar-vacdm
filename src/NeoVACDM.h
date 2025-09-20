@@ -45,7 +45,7 @@ public:
     void Shutdown() override;
     PluginMetadata GetMetadata() const override;
 
-    void DisplayMessage(const std::string &message, const std::string &sender = "");
+    void DisplayMessage(const std::string &message, const bool &dedicated = true, const std::string &sender = "");
 
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
@@ -60,6 +60,14 @@ public:
     // Command handling
     void TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput = std::nullopt);
     void reloadConfiguration(bool initialLoading = false);
+
+    std::string helpCommandId_;
+    std::string masterCommandId_;
+    std::string slaveCommandId_;
+    std::string reloadCommandId_;
+    std::string logCommandId_;
+    std::string loglevelCommandId_;
+    std::string updaterateCommandId_;    
 
 private:
     bool initialized_ = false;
@@ -86,6 +94,7 @@ private:
     void RegisterTagItems();
     void RegisterTagActions();
     void RegisterCommand();
+    void unRegisterCommand();
 
     // IDs
     std::string EOBTTagID_;
@@ -120,9 +129,7 @@ private:
 	std::string ResetAOBTActionId_;
 	std::string ResetMenuActionId_;
 	std::string ResetPilotActionId_;
-
-    std::string commandId_;
-
+ 
     std::thread m_worker;
     bool m_stop;
     void run();
