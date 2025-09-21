@@ -85,11 +85,11 @@ void NeoVACDM::DisplayMessage(const std::string &message, const bool &dedicated,
 
 void NeoVACDM::checkServerConfiguration() {
     if (Server::instance().checkWebApi() == false) {
-        DisplayMessage("Connection failed.", "Server");
-        DisplayMessage(Server::instance().errorMessage().c_str(), "Server");
+        DisplayMessage("Connection failed.", false, "Server");
+        DisplayMessage(Server::instance().errorMessage().c_str(), false, "Server");
     } else {
         std::string serverName = Server::instance().getServerConfig().name;
-        DisplayMessage(("Connected to " + serverName), "Server");
+        DisplayMessage(("Connected to " + serverName), true, "Server");
         // set active airports and runways
         this->OnAirportConfigurationsUpdated(nullptr);
     }
@@ -119,9 +119,9 @@ void NeoVACDM::reloadConfiguration(bool initialLoading) {
 
     if (false == parser.parse(settingsPath, newConfig) || false == newConfig.valid) {
         std::string message = "vacdm.txt:" + std::to_string(parser.errorLine()) + ": " + parser.errorMessage();
-        DisplayMessage(message, "Config");
+        DisplayMessage(message, false, "Config");
     } else {
-        DisplayMessage(true == initialLoading ? "Loaded the config" : "Reloaded the config", "Config");
+        DisplayMessage(true == initialLoading ? "Loaded the config" : "Reloaded the config", true, "Config");
         if (this->m_pluginConfig.serverUrl != newConfig.serverUrl)
             this->changeServerUrl(newConfig.serverUrl);
         else
