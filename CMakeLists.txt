@@ -36,7 +36,7 @@ include_directories(
 # Find external dependencies
 find_package(httplib CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL CONFIG REQUIRED)
 
 # Source files
 set(SOURCES
