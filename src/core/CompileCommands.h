@@ -167,8 +167,8 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
             return {true, std::nullopt};
         }
 
-        neoVACDM_->DisplayMessage("Cannot upgrade to Master");
-        neoVACDM_->DisplayMessage(userIsNotEligibleMessage);
+        neoVACDM_->DisplayMessage("Cannot upgrade to Master", false);
+        neoVACDM_->DisplayMessage(userIsNotEligibleMessage, false);
         return {false, userIsNotEligibleMessage};
     } else if (commandId == neoVACDM_->slaveCommandId_) {
         neoVACDM_->DisplayMessage("Executing vACDM as the SLAVE");
@@ -204,7 +204,7 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
     else 
     {
         std::string error = "Invalid command. To list available commands use .vacdm help";
-        neoVACDM_->DisplayMessage(error);
+        neoVACDM_->DisplayMessage(error, false);
         return {false, error};
     }
 

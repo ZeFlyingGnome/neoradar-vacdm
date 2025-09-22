@@ -264,12 +264,12 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
                     DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBT, pilot.callsign,
                                                                 utils::Date::convertStringToTimePoint(clock));
                 else
-                    DisplayMessage("Invalid time format. Expected: HHMM (24 hours)");
+                    DisplayMessage("Invalid time format. Expected: HHMM (24 hours)", false);
             } else if (clock.length() != 0) {
-                DisplayMessage("Invalid time format. Expected: HHMM (24 hours)");
+                DisplayMessage("Invalid time format. Expected: HHMM (24 hours)", false);
             }
         } else {
-            DisplayMessage("No input provided. Expected: HHMM (24 hours)");
+            DisplayMessage("No input provided. Expected: HHMM (24 hours)", false);
         }
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ASATNow") {
