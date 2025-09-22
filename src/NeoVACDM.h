@@ -45,7 +45,7 @@ public:
     void Shutdown() override;
     PluginMetadata GetMetadata() const override;
 
-    void DisplayMessage(const std::string &message, const bool &dedicated = true, const std::string &sender = "");
+    void DisplayMessage(const std::string &message, const bool &dedicated = true, const std::string &sender = "", const bool &important = false);
 
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
@@ -60,6 +60,8 @@ public:
     // Command handling
     void TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput = std::nullopt);
     void reloadConfiguration(bool initialLoading = false);
+
+    std::pair<bool, std::string> newVersionAvailable();    
 
     std::string helpCommandId_;
     std::string masterCommandId_;

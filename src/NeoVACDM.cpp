@@ -36,7 +36,15 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
 
     logging::Logger::instance().setLogger(logger_);
 
-    DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", "Initialisation");
+
+	std::pair<bool, std::string> updateAvailable = newVersionAvailable();
+#ifndef DEV    
+	if (updateAvailable.first) {
+		DisplayMessage("A new version of NeoVACDM is available: " + updateAvailable.second + " (current version: " + PLUGIN_VERSION + ")", false, "Update", true);
+	}    
+#endif
+
+    DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", true, "Initialisation");
     logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
                            logging::Logger::LogLevel::System);
 
@@ -60,6 +68,40 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     this->m_worker = std::thread(&NeoVACDM::run, this);
 }
 
+std::pair<bool, std::string> NeoVACDM::newVersionAvailable()
+{
+    httplib::SSLClient cli("api.github.com");
+    httplib::Headers headers = { {"User-Agent", "VersionChecker"} };
+    std::string apiEndpoint = "/repos/ZeFlyingGnome/neoradar-vacdm/releases/latest";
+
+    auto res = cli.Get(apiEndpoint.c_str(), headers);
+    if (res && res->status == 200) {
+        try
+        {
+            auto json = nlohmann::json::parse(res->body);
+            std::string latestVersion = json["tag_name"];
+            latestVersion.erase(0, 1); // remove leading 'v'
+            if (latestVersion != PLUGIN_VERSION) {
+                logger_->warning("A new version of NeoVACDM is available: " + latestVersion + " (current version: " + PLUGIN_VERSION + ")");
+                return { true, latestVersion };
+            }
+            else {
+                logger_->log(PluginSDK::Logger::LogLevel::Info, "NeoVACDM is up to date.");
+                return { false, "" };
+            }
+        }
+        catch (const std::exception& e)
+        {
+            logger_->error("Failed to parse version information from GitHub: " + std::string(e.what()));
+            return { false, "" };
+        }
+    }
+    else {
+        logger_->error("Failed to check for NeoVACDM updates. HTTP status: " + std::to_string(res ? res->status : 0));
+        return { false, "" };
+    }
+}
+
 void NeoVACDM::Shutdown()
 {
     if (initialized_)
@@ -74,11 +116,14 @@ void NeoVACDM::Shutdown()
     this->unRegisterCommand();
 }
 
-void NeoVACDM::DisplayMessage(const std::string &message, const bool &dedicated, const std::string &sender) {
+void NeoVACDM::DisplayMessage(const std::string &message, const bool &dedicated, const std::string &sender, const bool &important) {
     Chat::ClientTextMessageEvent textMessage;
     textMessage.sentFrom = "NeoVACDM";
     (sender.empty()) ? textMessage.message = message : textMessage.message = sender + ": " + message;
     textMessage.useDedicatedChannel = dedicated;
+    if (important) {
+        textMessage.colour = std::array<int, 3>{255, 0, 0};
+    }
 
     chatAPI_->sendClientMessage(textMessage);
 }
