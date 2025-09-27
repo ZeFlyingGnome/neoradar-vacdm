@@ -20,24 +20,9 @@ namespace vacdm::core {
 constexpr int maxUpdateCycleSeconds = 10;
 constexpr int minUpdateCycleSeconds = 1;
 class DataManager {
-   private:
-    DataManager();
-
-    std::thread m_worker;
-    bool m_pause;
-    bool m_stop;
-
-    void run();
-    int updateCycleSeconds = 5;
-
    public:
+    DataManager();
     ~DataManager();
-    DataManager(const DataManager &) = delete;
-    DataManager(DataManager &&) = delete;
-
-    DataManager &operator=(const DataManager &) = delete;
-    DataManager &operator=(DataManager &&) = delete;
-    static DataManager &instance();
 
     std::string setUpdateCycleSeconds(const int newUpdateCycleSeconds);
 
@@ -62,6 +47,13 @@ class DataManager {
     };
 
    private:
+    std::thread m_worker;
+    bool m_pause;
+    bool m_stop;
+
+    void run();
+    
+    int updateCycleSeconds = 5;
     std::mutex m_pilotLock;
     std::map<std::string, std::array<types::Pilot, 3>> m_pilots;
     std::mutex m_airportLock;

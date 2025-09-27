@@ -157,7 +157,7 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
                 "You are logged in on a Sweatbox Server and Server does not allow Sweatbox connections";
         } else {
             // Clear all pilot data when switching to master mode
-            DataManager::instance().clearAllPilotData();
+            neoVACDM_->GetDataManager()->clearAllPilotData();
             neoVACDM_->DisplayMessage("All pilot data cleared");
 
             neoVACDM_->DisplayMessage("Executing vACDM as the MASTER");
@@ -176,7 +176,7 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
         com::Server::instance().setMaster(false);
 
         // Clear all pilot data when switching to slave mode
-        DataManager::instance().clearAllPilotData();
+        neoVACDM_->GetDataManager()->clearAllPilotData();
         neoVACDM_->DisplayMessage("All pilot data cleared");
         return {true, std::nullopt};
     } else if (commandId == neoVACDM_->reloadCommandId_) {
@@ -199,7 +199,7 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
             neoVACDM_->DisplayMessage(error, false);
             return {false, error};
         }
-        neoVACDM_->DisplayMessage(DataManager::instance().setUpdateCycleSeconds(std::stoi(updaterate)));
+        neoVACDM_->DisplayMessage(neoVACDM_->GetDataManager()->setUpdateCycleSeconds(std::stoi(updaterate)));
     }    
     else 
     {

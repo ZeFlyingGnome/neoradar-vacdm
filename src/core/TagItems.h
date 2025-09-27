@@ -111,11 +111,11 @@ std::string formatTime(const std::chrono::system_clock::time_point timepoint) {
 }
 
 void NeoVACDM::UpdateTagItems() {
-    std::vector<std::string> callsigns = DataManager::instance().getPilots();
+    std::vector<std::string> callsigns = dataManager_->getPilots();
 
     for (std::string callsign : callsigns) {
 
-        auto pilot = DataManager::instance().getPilot(callsign);
+        auto pilot = dataManager_->getPilot(callsign);
         std::string text;
         Tag::TagContext context;
         context.callsign = callsign;

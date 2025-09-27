@@ -22,11 +22,6 @@ DataManager::~DataManager() {
     this->m_worker.join();
 }
 
-DataManager& DataManager::instance() {
-    static DataManager __instance;
-    return __instance;
-}
-
 bool DataManager::checkPilotExists(const std::string& callsign) {
     if (true == this->m_pause) return false;
 

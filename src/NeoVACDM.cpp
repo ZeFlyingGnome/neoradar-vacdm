@@ -34,6 +34,8 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     logger_ = &lcoreAPI->logger();
     tagInterface_ = lcoreAPI->tag().getInterface();
 
+    dataManager_ = std::make_unique<core::DataManager>();
+
     logging::Logger::instance().setLogger(logger_);
 
 
@@ -113,6 +115,8 @@ void NeoVACDM::Shutdown()
     this->m_stop = true;
     this->m_worker.join();
 
+	if (dataManager_) dataManager_.reset();
+
     this->unRegisterCommand();
 }
 
@@ -150,7 +154,7 @@ void NeoVACDM::runScopeUpdate() {
         if (aircraft) {
             auto distanceFromOrigin = aircraftAPI_->getDistanceFromOrigin(flightplan.callsign);
             if (distanceFromOrigin) {
-                DataManager::instance().queueFlightplanUpdate(flightplan, *aircraft, *distanceFromOrigin);
+                dataManager_->queueFlightplanUpdate(flightplan, *aircraft, *distanceFromOrigin);
             }
         }
     }
@@ -173,17 +177,17 @@ void NeoVACDM::reloadConfiguration(bool initialLoading) {
             this->checkServerConfiguration();
 
         this->m_pluginConfig = newConfig;
-        DisplayMessage(DataManager::instance().setUpdateCycleSeconds(newConfig.updateCycleSeconds));
+        DisplayMessage(dataManager_->setUpdateCycleSeconds(newConfig.updateCycleSeconds));
         tagitems::Color::updatePluginConfig(newConfig);
     }
 }
 
 void NeoVACDM::changeServerUrl(const std::string &url) {
-    DataManager::instance().pause();
+    dataManager_->pause();
     Server::instance().changeServerAddress(url);
     this->checkServerConfiguration();
 
-    DataManager::instance().resume();
+    dataManager_->resume();
     DisplayMessage("Changed URL to " + url);
     logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Changed URL to " + url, logging::Logger::LogLevel::Info);
 }
@@ -193,7 +197,7 @@ void NeoVACDM::OnTimer(int Counter) {
 }
 
 /* void vACDM::OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) {
-    DataManager::instance().queueFlightplanUpdate(FlightPlan);
+    dataManager_->queueFlightplanUpdate(FlightPlan);
 }
 
 void vACDM::OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) {
@@ -203,7 +207,7 @@ void vACDM::OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPla
         EuroScopePlugIn::CTR_DATA_TYPE_DIRECT_TO == DataType) {
         return;
     }
-    DataManager::instance().queueFlightplanUpdate(FlightPlan);
+    dataManager_->queueFlightplanUpdate(FlightPlan);
 }*/
 
 void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) {
@@ -232,7 +236,7 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
                                 [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
             logging::Logger::LogLevel::Info);
     }
-    DataManager::instance().setActiveAirports(activeAirports);
+    dataManager_->setActiveAirports(activeAirports);
 }
 
 void NeoVACDM::run() {
