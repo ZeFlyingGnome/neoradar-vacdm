@@ -1,7 +1,5 @@
 #include "DataManager.h"
 
-#include "core/Server.h"
-#include "log/Logger.h"
 #include "utils/Date.h"
 
 using namespace vacdm::com;
@@ -15,7 +13,9 @@ static constexpr std::size_t ConsolidatedData = 0;
 static constexpr std::size_t ScopeData = 1;
 static constexpr std::size_t ServerData = 2;
 
-DataManager::DataManager(com::Server* server) : m_pause(false), m_stop(false), server_(server) { this->m_worker = std::thread(&DataManager::run, this); }
+DataManager::DataManager(com::Server* server, logging::Logger* logger) 
+     : m_pause(false), m_stop(false), server_(server), vacdmLogger_(logger) 
+     { this->m_worker = std::thread(&DataManager::run, this); }
 
 DataManager::~DataManager() {
     this->m_stop = true;
@@ -64,7 +64,8 @@ void DataManager::clearAllPilotData() {
     std::lock_guard guardMessages(this->m_asyncMessagesLock);
     this->m_asynchronousMessages.clear();
 
-    Logger::instance().log(Logger::LogSender::DataManager, "All pilot data cleared", Logger::LogLevel::Info);
+    if (vacdmLogger_)
+        vacdmLogger_->log(Logger::LogSender::DataManager, "All pilot data cleared", Logger::LogLevel::Info);
 }
 
 std::string DataManager::setUpdateCycleSeconds(const int newUpdateCycleSeconds) {
@@ -119,7 +120,8 @@ void DataManager::run() {
         }
 #ifdef DEV
         else {
-            Logger::instance().log(Logger::LogSender::DataManager, "No server instance available 3", Logger::LogLevel::Warning);
+            if (vacdmLogger_)
+                vacdmLogger_->log(Logger::LogSender::DataManager, "No server instance available 3", Logger::LogLevel::Info);
         }
 #endif
 
@@ -208,11 +210,13 @@ void DataManager::processAsynchronousMessages(std::map<std::string, std::array<t
                 }
 #ifdef DEV
                 else {
-                    Logger::instance().log(Logger::LogSender::DataManager, "No server instance available 4", Logger::LogLevel::Warning);
+                    if (vacdmLogger_)
+                        vacdmLogger_->log(Logger::LogSender::DataManager, "No server instance available 4", Logger::LogLevel::Info);
                 }
 #endif
 
-                Logger::instance().log(Logger::LogSender::DataManager,
+                if (vacdmLogger_)
+                    vacdmLogger_->log(Logger::LogSender::DataManager,
                                        "Sending " + messageType + " update: " + callsign + " - " +
                                            utils::Date::timestampToIsoString(message.value),
                                        Logger::LogLevel::Info);
@@ -227,7 +231,8 @@ void DataManager::handleTagFunction(MessageType type, const std::string callsign
                                     const std::chrono::system_clock::time_point value) {
     if (!server_){
 #ifdef DEV
-        Logger::instance().log(Logger::LogSender::DataManager, "No server instance available 5", Logger::LogLevel::Warning); 
+    if (vacdmLogger_)
+        vacdmLogger_->log(Logger::LogSender::DataManager, "No server instance available 5", Logger::LogLevel::Info); 
 #endif
         return;
     }
@@ -411,7 +416,8 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
     if (!server_)
     {
 #ifdef DEV
-        Logger::instance().log(Logger::LogSender::DataManager, "No server instance available 6", Logger::LogLevel::Warning);
+    if (vacdmLogger_)
+        vacdmLogger_->log(Logger::LogSender::DataManager, "No server instance available 6", Logger::LogLevel::Info);
 #endif
         return;
     } 
@@ -422,10 +428,11 @@ void DataManager::consolidateWithBackend(std::map<std::string, std::array<types:
         bool removeFlight = pilot->second[ServerData].inactive == true;
         for (auto updateIt = backendPilots.begin(); updateIt != backendPilots.end(); ++updateIt) {
             if (updateIt->callsign == pilot->second[ScopeData].callsign) {
-                Logger::instance().log(
-                    Logger::LogSender::DataManager,
-                    "Updating " + pilot->second[ScopeData].callsign + " with " + updateIt->callsign,
-                    Logger::LogLevel::Info);
+                if (vacdmLogger_)
+                    vacdmLogger_->log(
+                        Logger::LogSender::DataManager,
+                        "Updating " + pilot->second[ScopeData].callsign + " with " + updateIt->callsign,
+                        Logger::LogLevel::Info);
                 pilot->second[ServerData] = *updateIt;
                 DataManager::consolidateData(pilot->second);
                 removeFlight = false;
@@ -475,10 +482,12 @@ void DataManager::consolidateData(std::array<types::Pilot, 3>& pilot) {
         pilot[ConsolidatedData].runway = pilot[ScopeData].runway;
         pilot[ConsolidatedData].sid = pilot[ScopeData].sid;
 
-        logging::Logger::instance().log(Logger::LogSender::DataManager, "Consolidated " + pilot[ServerData].callsign,
+        if (vacdmLogger_)
+            vacdmLogger_->log(Logger::LogSender::DataManager, "Consolidated " + pilot[ServerData].callsign,
                                         logging::Logger::LogLevel::Info);
     } else {
-        logging::Logger::instance().log(Logger::LogSender::DataManager,
+        if (vacdmLogger_)
+            vacdmLogger_->log(Logger::LogSender::DataManager,
                                         "Callsign mismatch during consolidation: " + pilot[ScopeData].callsign +
                                             ", " + pilot[ServerData].callsign,
                                         logging::Logger::LogLevel::Critical);
@@ -502,7 +511,8 @@ void DataManager::processScopeUpdates(std::map<std::string, std::array<types::Pi
         // find pilot in list
         for (auto& pair : pilots) {
             if (pilot.callsign == pair.first) {
-                Logger::instance().log(Logger::LogSender::DataManager, "Updated data of " + pilot.callsign,
+                if (vacdmLogger_)
+                    vacdmLogger_->log(Logger::LogSender::DataManager, "Updated data of " + pilot.callsign,
                                        Logger::LogLevel::Info);
 
                 pair.second[ScopeData] = pilot;
@@ -512,8 +522,9 @@ void DataManager::processScopeUpdates(std::map<std::string, std::array<types::Pi
         }
 
         if (false == found) {
-            Logger::instance().log(Logger::LogSender::DataManager, "Added " + pilot.callsign, Logger::LogLevel::Info);
-            pilots.insert({pilot.callsign, {pilot, pilot, types::Pilot()}});
+        if (vacdmLogger_)
+            vacdmLogger_->log(Logger::LogSender::DataManager, "Added " + pilot.callsign, Logger::LogLevel::Info);
+                pilots.insert({pilot.callsign, {pilot, pilot, types::Pilot()}});
         }
     }
 }
@@ -544,18 +555,21 @@ void DataManager::consolidateFlightplanUpdates(std::list<ScopeFlightplanUpdate>&
             if (currentUpdate.timeIssued > it->timeIssued) {
                 // Update with the newer data
                 *it = currentUpdate;
-                Logger::instance().log(Logger::LogSender::DataManager,
+                if (vacdmLogger_)
+                    vacdmLogger_->log(Logger::LogSender::DataManager,
                                        "Updated: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info);
             } else {
                 // Existing data is already newer, no update needed
-                Logger::instance().log(Logger::LogSender::DataManager,
+                if (vacdmLogger_)
+                    vacdmLogger_->log(Logger::LogSender::DataManager,
                                        "Skipped old update for: " + std::string(currentUpdate.data.callsign),
                                        Logger::LogLevel::Info);
             }
         } else {
             // Flight plan with the callsign doesn't exist, add it to the result list
             resultList.push_back(currentUpdate);
-            Logger::instance().log(Logger::LogSender::DataManager,
+            if (vacdmLogger_)
+                vacdmLogger_->log(Logger::LogSender::DataManager,
                                    "Update added: " + std::string(currentUpdate.data.callsign), Logger::LogLevel::Info);
         }
     }

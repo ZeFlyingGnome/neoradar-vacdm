@@ -11,6 +11,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "log/Logger.h"
 #include "Server.h"
 #include "types/Pilot.h"
 
@@ -22,7 +23,7 @@ constexpr int maxUpdateCycleSeconds = 10;
 constexpr int minUpdateCycleSeconds = 1;
 class DataManager {
    public:
-    DataManager(com::Server* server);
+    DataManager(com::Server* server, logging::Logger* vacdmLogger);
     ~DataManager();
 
     std::string setUpdateCycleSeconds(const int newUpdateCycleSeconds);
@@ -53,6 +54,7 @@ class DataManager {
     bool m_stop;
 
     com::Server* server_ = nullptr;
+    logging::Logger* vacdmLogger_ = nullptr;
 
     void run();
     

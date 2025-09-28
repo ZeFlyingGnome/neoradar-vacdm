@@ -65,6 +65,7 @@ public:
 
     core::DataManager* GetDataManager() const { return dataManager_.get(); }
     com::Server* GetServer() const { return server_.get(); }
+    logging::Logger* GetLogger() const { return vacdmLogger_.get(); }
 
     std::pair<bool, std::string> newVersionAvailable();    
 
@@ -91,6 +92,7 @@ private:
 
     std::unique_ptr<core::DataManager> dataManager_ = nullptr;
     std::unique_ptr<com::Server> server_ = nullptr;
+    std::unique_ptr<logging::Logger> vacdmLogger_ = nullptr;
 
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 

@@ -10,6 +10,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "log/Logger.h"
 #include "types/Pilot.h"
 
 namespace vacdm::com {
@@ -21,7 +22,7 @@ class Server {
         bool allowMasterAsObserver = false;
     } ServerConfiguration;
 
-    Server();
+    Server(logging::Logger* vacdmLogger);
     ~Server();
 
     void changeServerAddress(const std::string& url);
@@ -71,6 +72,8 @@ class Server {
     bool m_clientIsMaster;
     std::string m_errorCode;
     ServerConfiguration m_serverConfiguration;
+
+    logging::Logger* vacdmLogger_ = nullptr;
 
 };
 }  // namespace vacdm::com

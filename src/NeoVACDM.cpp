@@ -34,10 +34,12 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     logger_ = &lcoreAPI->logger();
     tagInterface_ = lcoreAPI->tag().getInterface();
 
-    server_ = std::make_unique<Server>();
-    dataManager_ = std::make_unique<core::DataManager>(GetServer());
+    vacdmLogger_ = std::make_unique<logging::Logger>();
+    server_ = std::make_unique<Server>(GetLogger());
+    dataManager_ = std::make_unique<core::DataManager>(GetServer(), GetLogger());
 
-    logging::Logger::instance().setLogger(logger_);
+    if (vacdmLogger_)
+        vacdmLogger_->setLogger(logger_);
 
 
 	std::pair<bool, std::string> updateAvailable = newVersionAvailable();
@@ -48,7 +50,8 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
 #endif
 
     DisplayMessage("Version " + std::string(PLUGIN_VERSION) + " loaded", true, "Initialisation");
-    logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
+    if (vacdmLogger_)
+        vacdmLogger_->log(logging::Logger::LogSender::vACDM, "Version " + std::string(PLUGIN_VERSION) + " loaded",
                            logging::Logger::LogLevel::System);
 
 
@@ -118,6 +121,7 @@ void NeoVACDM::Shutdown()
 
 	if (dataManager_) dataManager_.reset();
     if (server_) server_.reset();
+    if (vacdmLogger_) vacdmLogger_.reset();
 
     this->unRegisterCommand();
 }
@@ -203,7 +207,8 @@ void NeoVACDM::changeServerUrl(const std::string &url) {
 
     dataManager_->resume();
     DisplayMessage("Changed URL to " + url);
-    logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Changed URL to " + url, logging::Logger::LogLevel::Info);
+    if (vacdmLogger_)
+        vacdmLogger_->log(logging::Logger::LogSender::vACDM, "Changed URL to " + url, logging::Logger::LogLevel::Info);
 }
 
 void NeoVACDM::OnTimer(int Counter) {
@@ -240,15 +245,17 @@ void NeoVACDM::OnAirportConfigurationsUpdated(const Airport::AirportConfiguratio
     }
 
     if (activeAirports.empty()) {
-        logging::Logger::instance().log(logging::Logger::LogSender::vACDM,
+        if (vacdmLogger_)
+            vacdmLogger_->log(logging::Logger::LogSender::vACDM,
                                "Airport/Runway Change, no active airports: ", logging::Logger::LogLevel::Info);
     } else {
-        logging::Logger::instance().log(
-            logging::Logger::LogSender::vACDM,
-                "Airport/Runway Change, active airports: " +
-                std::accumulate(std::next(activeAirports.begin()), activeAirports.end(), activeAirports.front(),
-                                [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
-            logging::Logger::LogLevel::Info);
+        if (vacdmLogger_)
+                vacdmLogger_->log(
+                logging::Logger::LogSender::vACDM,
+                    "Airport/Runway Change, active airports: " +
+                    std::accumulate(std::next(activeAirports.begin()), activeAirports.end(), activeAirports.front(),
+                                    [](const std::string &acc, const std::string &str) { return acc + " " + str; }),
+                logging::Logger::LogLevel::Info);
     }
     dataManager_->setActiveAirports(activeAirports);
 }
