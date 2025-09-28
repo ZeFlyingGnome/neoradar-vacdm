@@ -142,9 +142,9 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
             userIsObserver = (*connectionInfo).facility == Fsd::NetworkFacility::OBS;
         }
 #ifndef DEV
-        bool serverAllowsObsAsMaster = com::Server::instance().getServerConfig().allowMasterAsObserver;
+        bool serverAllowsObsAsMaster = neoVACDM_->GetServer()->getServerConfig().allowMasterAsObserver;
 #endif // !DEV
-        bool serverAllowsSweatboxAsMaster = com::Server::instance().getServerConfig().allowMasterInSweatbox;
+        bool serverAllowsSweatboxAsMaster = neoVACDM_->GetServer()->getServerConfig().allowMasterInSweatbox;
 
         if (!connectionInfo || !userIsConnected) {
             userIsNotEligibleMessage = "You are not logged in to the VATSIM network";
@@ -162,7 +162,7 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
 
             neoVACDM_->DisplayMessage("Executing vACDM as the MASTER");
             logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
-            com::Server::instance().setMaster(true);
+            neoVACDM_->GetServer()->setMaster(true);
             
             return {true, std::nullopt};
         }
@@ -173,7 +173,7 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
     } else if (commandId == neoVACDM_->slaveCommandId_) {
         neoVACDM_->DisplayMessage("Executing vACDM as the SLAVE");
         logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to SLAVE", logging::Logger::LogLevel::Info);
-        com::Server::instance().setMaster(false);
+        neoVACDM_->GetServer()->setMaster(false);
 
         // Clear all pilot data when switching to slave mode
         neoVACDM_->GetDataManager()->clearAllPilotData();

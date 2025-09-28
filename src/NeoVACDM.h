@@ -8,6 +8,7 @@
 #include "config/PluginConfig.h"
 #include "core/DataManager.h"
 #include "core/NeoVACDMCommandProvider.h"
+#include "core/Server.h"
 
 using namespace PluginSDK;
 
@@ -63,6 +64,7 @@ public:
     void reloadConfiguration(bool initialLoading = false);
 
     core::DataManager* GetDataManager() const { return dataManager_.get(); }
+    com::Server* GetServer() const { return server_.get(); }
 
     std::pair<bool, std::string> newVersionAvailable();    
 
@@ -88,6 +90,7 @@ private:
     Tag::TagInterface *tagInterface_ = nullptr;
 
     std::unique_ptr<core::DataManager> dataManager_ = nullptr;
+    std::unique_ptr<com::Server> server_ = nullptr;
 
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 

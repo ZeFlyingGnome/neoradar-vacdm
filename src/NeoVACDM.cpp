@@ -34,7 +34,8 @@ void NeoVACDM::Initialize(const PluginMetadata &metadata, CoreAPI *coreAPI, Clie
     logger_ = &lcoreAPI->logger();
     tagInterface_ = lcoreAPI->tag().getInterface();
 
-    dataManager_ = std::make_unique<core::DataManager>();
+    server_ = std::make_unique<Server>();
+    dataManager_ = std::make_unique<core::DataManager>(GetServer());
 
     logging::Logger::instance().setLogger(logger_);
 
@@ -116,6 +117,7 @@ void NeoVACDM::Shutdown()
     this->m_worker.join();
 
 	if (dataManager_) dataManager_.reset();
+    if (server_) server_.reset();
 
     this->unRegisterCommand();
 }
@@ -133,15 +135,22 @@ void NeoVACDM::DisplayMessage(const std::string &message, const bool &dedicated,
 }
 
 void NeoVACDM::checkServerConfiguration() {
-    if (Server::instance().checkWebApi() == false) {
-        DisplayMessage("Connection failed.", false, "Server");
-        DisplayMessage(Server::instance().errorMessage().c_str(), false, "Server");
-    } else {
-        std::string serverName = Server::instance().getServerConfig().name;
-        DisplayMessage(("Connected to " + serverName), true, "Server");
-        // set active airports and runways
-        this->OnAirportConfigurationsUpdated(nullptr);
+    if (server_) {
+        if (server_->checkWebApi() == false) {
+            DisplayMessage("Connection failed.", false, "Server");
+            DisplayMessage(server_->errorMessage().c_str(), false, "Server");
+        } else {
+            std::string serverName = server_->getServerConfig().name;
+            DisplayMessage(("Connected to " + serverName), true, "Server");
+            // set active airports and runways
+            this->OnAirportConfigurationsUpdated(nullptr);
+        }
     }
+#ifdef DEV
+    else {
+        logger_->info("No server instance available 1");
+    }
+#endif    
 }
 
 void NeoVACDM::runScopeUpdate() {
@@ -184,7 +193,12 @@ void NeoVACDM::reloadConfiguration(bool initialLoading) {
 
 void NeoVACDM::changeServerUrl(const std::string &url) {
     dataManager_->pause();
-    Server::instance().changeServerAddress(url);
+    if (server_)
+        server_->changeServerAddress(url);
+#ifdef DEV
+    else
+        logger_->info("No server instance available 2");
+#endif
     this->checkServerConfiguration();
 
     dataManager_->resume();

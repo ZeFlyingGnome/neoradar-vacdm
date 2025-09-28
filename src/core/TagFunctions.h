@@ -227,7 +227,13 @@ void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *ev
     }
 
     // do not handle functions if client is not master
-    if (false == Server::instance().getMaster()) return;
+    if (!server_) {
+#ifdef DEV
+        logger_->info("No server instance available 7");
+#endif
+        return;
+    }
+    if (false == server_->getMaster()) return;
 
     std::string actionId = "plugin:NeoVACDM:ACTION_" + event->componentId;
     TagProcessing(event->callsign, actionId, event->userInput);    

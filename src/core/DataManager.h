@@ -11,6 +11,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "Server.h"
 #include "types/Pilot.h"
 
 using namespace vacdm;
@@ -21,7 +22,7 @@ constexpr int maxUpdateCycleSeconds = 10;
 constexpr int minUpdateCycleSeconds = 1;
 class DataManager {
    public:
-    DataManager();
+    DataManager(com::Server* server);
     ~DataManager();
 
     std::string setUpdateCycleSeconds(const int newUpdateCycleSeconds);
@@ -50,6 +51,8 @@ class DataManager {
     std::thread m_worker;
     bool m_pause;
     bool m_stop;
+
+    com::Server* server_ = nullptr;
 
     void run();
     
