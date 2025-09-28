@@ -227,7 +227,13 @@ void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *ev
     }
 
     // do not handle functions if client is not master
-    if (false == Server::instance().getMaster()) return;
+    if (!server_) {
+#ifdef DEV
+        logger_->info("No server instance available 7");
+#endif
+        return;
+    }
+    if (false == server_->getMaster()) return;
 
     std::string actionId = "plugin:NeoVACDM:ACTION_" + event->componentId;
     TagProcessing(event->callsign, actionId, event->userInput);    
@@ -235,23 +241,23 @@ void NeoVACDM::OnTagDropdownAction(const PluginSDK::Tag::DropdownActionEvent *ev
 
 void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput)
 {
-    if (false == DataManager::instance().checkPilotExists(callsign)) return;
+    if (false == dataManager_->checkPilotExists(callsign)) return;
 
-    auto pilot = DataManager::instance().getPilot(callsign);
+    auto pilot = dataManager_->getPilot(callsign);
 
     if (actionId == "plugin:NeoVACDM:ACTION_EXOTModify")
     {
         if (userInput && isNumber(*userInput)) {
             const auto exot = std::chrono::system_clock::time_point(std::chrono::minutes(std::atoi(userInput->c_str())));
             if (exot != pilot.exot)
-                DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateEXOT, pilot.callsign,
+                dataManager_->handleTagFunction(DataManager::MessageType::UpdateEXOT, pilot.callsign,
                                                             exot);
         }
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_TOBTNow")
     {
 
-            DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::UpdateTOBT, pilot.callsign,
                                                       std::chrono::system_clock::now());
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_TOBTManual") {
@@ -261,7 +267,7 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
                 const auto hours = std::atoi(clock.substr(0, 2).c_str());
                 const auto minutes = std::atoi(clock.substr(2, 4).c_str());
                 if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60)
-                    DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBT, pilot.callsign,
+                    dataManager_->handleTagFunction(DataManager::MessageType::UpdateTOBT, pilot.callsign,
                                                                 utils::Date::convertStringToTimePoint(clock));
                 else
                     DisplayMessage("Invalid time format. Expected: HHMM (24 hours)", false);
@@ -274,38 +280,38 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ASATNow") {
 
-        DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASAT, pilot.callsign,
+        dataManager_->handleTagFunction(DataManager::MessageType::UpdateASAT, pilot.callsign,
                                                     std::chrono::system_clock::now());
         // if ASRT has not been set yet -> set ASRT
         if (pilot.asrt == types::defaultTime) {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
                                                         std::chrono::system_clock::now());
         }
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ASATNowAndStartup") {
-        DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASAT, pilot.callsign,
+        dataManager_->handleTagFunction(DataManager::MessageType::UpdateASAT, pilot.callsign,
                                                     std::chrono::system_clock::now());
 
         // if ASRT has not been set yet -> set ASRT
         if (pilot.asrt == types::defaultTime) {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
                                                         std::chrono::system_clock::now());
         }
 
         controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::Start);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_StartupRequest") {
-        DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
+        dataManager_->handleTagFunction(DataManager::MessageType::UpdateASRT, pilot.callsign,
                                                     std::chrono::system_clock::now());
         ;
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_AOBTNowAndState") {
         // set ASRT if ASRT has not been set yet
         if (pilot.asrt == types::defaultTime) {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateAORT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::UpdateAORT, pilot.callsign,
                                                         std::chrono::system_clock::now());
         }
-        DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateAOBT, pilot.callsign,
+        dataManager_->handleTagFunction(DataManager::MessageType::UpdateAOBT, pilot.callsign,
                                                     std::chrono::system_clock::now());
 
         // set status depending on if the aircraft is positioned at a taxi-out position
@@ -316,46 +322,46 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
         }
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_TOBTConfirm") {
-        DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateTOBTConfirmed, pilot.callsign,
+        dataManager_->handleTagFunction(DataManager::MessageType::UpdateTOBTConfirmed, pilot.callsign,
                                                     pilot.tobt);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_OffblockRequest") {
-        DataManager::instance().handleTagFunction(DataManager::MessageType::UpdateAORT, pilot.callsign,
+        dataManager_->handleTagFunction(DataManager::MessageType::UpdateAORT, pilot.callsign,
                                                     std::chrono::system_clock::now());
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetTOBT") {
-        DataManager::instance().handleTagFunction(DataManager::MessageType::ResetTOBT, pilot.callsign,
+        dataManager_->handleTagFunction(DataManager::MessageType::ResetTOBT, pilot.callsign,
                                                     types::defaultTime);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetASAT") {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::ResetASAT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::ResetASAT, pilot.callsign,
                                                       types::defaultTime);
             controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::None);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetASRT") {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::ResetASRT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::ResetASRT, pilot.callsign,
                                                       types::defaultTime);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetTOBTConfirmed") {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::ResetTOBTConfirmed, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::ResetTOBTConfirmed, pilot.callsign,
                                                       types::defaultTime);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetAORT") {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::ResetAORT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::ResetAORT, pilot.callsign,
                                                       types::defaultTime);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetAOBT") {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::ResetAOBT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::ResetAOBT, pilot.callsign,
                                                       types::defaultTime);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetAOBTandState") {
-            DataManager::instance().handleTagFunction(DataManager::MessageType::ResetAOBT, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::ResetAOBT, pilot.callsign,
                                                       types::defaultTime);
             controllerDataAPI_->setGroundStatus(pilot.callsign, ControllerData::GroundStatus::None);
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_ResetPilot") {
 
-            DataManager::instance().handleTagFunction(DataManager::MessageType::ResetPilot, pilot.callsign,
+            dataManager_->handleTagFunction(DataManager::MessageType::ResetPilot, pilot.callsign,
                                                       types::defaultTime);
     }
     else

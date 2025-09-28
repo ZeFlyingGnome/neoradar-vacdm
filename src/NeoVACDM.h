@@ -6,7 +6,9 @@
 #include <NeoRadarSDK/SDK.h>
 
 #include "config/PluginConfig.h"
+#include "core/DataManager.h"
 #include "core/NeoVACDMCommandProvider.h"
+#include "core/Server.h"
 
 using namespace PluginSDK;
 
@@ -61,6 +63,10 @@ public:
     void TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput = std::nullopt);
     void reloadConfiguration(bool initialLoading = false);
 
+    core::DataManager* GetDataManager() const { return dataManager_.get(); }
+    com::Server* GetServer() const { return server_.get(); }
+    logging::Logger* GetLogger() const { return vacdmLogger_.get(); }
+
     std::pair<bool, std::string> newVersionAvailable();    
 
     std::string helpCommandId_;
@@ -83,6 +89,10 @@ private:
     Fsd::FsdAPI *fsdAPI_ = nullptr;
     PluginSDK::Logger::LoggerAPI *logger_ = nullptr;
     Tag::TagInterface *tagInterface_ = nullptr;
+
+    std::unique_ptr<core::DataManager> dataManager_ = nullptr;
+    std::unique_ptr<com::Server> server_ = nullptr;
+    std::unique_ptr<logging::Logger> vacdmLogger_ = nullptr;
 
     std::optional<Aircraft::Aircraft> GetAircraftByCallsign(const std::string &callsign);
 

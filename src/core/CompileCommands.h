@@ -142,9 +142,9 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
             userIsObserver = (*connectionInfo).facility == Fsd::NetworkFacility::OBS;
         }
 #ifndef DEV
-        bool serverAllowsObsAsMaster = com::Server::instance().getServerConfig().allowMasterAsObserver;
+        bool serverAllowsObsAsMaster = neoVACDM_->GetServer()->getServerConfig().allowMasterAsObserver;
 #endif // !DEV
-        bool serverAllowsSweatboxAsMaster = com::Server::instance().getServerConfig().allowMasterInSweatbox;
+        bool serverAllowsSweatboxAsMaster = neoVACDM_->GetServer()->getServerConfig().allowMasterInSweatbox;
 
         if (!connectionInfo || !userIsConnected) {
             userIsNotEligibleMessage = "You are not logged in to the VATSIM network";
@@ -157,12 +157,12 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
                 "You are logged in on a Sweatbox Server and Server does not allow Sweatbox connections";
         } else {
             // Clear all pilot data when switching to master mode
-            DataManager::instance().clearAllPilotData();
+            neoVACDM_->GetDataManager()->clearAllPilotData();
             neoVACDM_->DisplayMessage("All pilot data cleared");
 
             neoVACDM_->DisplayMessage("Executing vACDM as the MASTER");
-            logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
-            com::Server::instance().setMaster(true);
+            neoVACDM_->GetLogger()->log(logging::Logger::LogSender::vACDM, "Switched to MASTER", logging::Logger::LogLevel::Info);
+            neoVACDM_->GetServer()->setMaster(true);
             
             return {true, std::nullopt};
         }
@@ -172,22 +172,22 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
         return {false, userIsNotEligibleMessage};
     } else if (commandId == neoVACDM_->slaveCommandId_) {
         neoVACDM_->DisplayMessage("Executing vACDM as the SLAVE");
-        logging::Logger::instance().log(logging::Logger::LogSender::vACDM, "Switched to SLAVE", logging::Logger::LogLevel::Info);
-        com::Server::instance().setMaster(false);
+        neoVACDM_->GetLogger()->log(logging::Logger::LogSender::vACDM, "Switched to SLAVE", logging::Logger::LogLevel::Info);
+        neoVACDM_->GetServer()->setMaster(false);
 
         // Clear all pilot data when switching to slave mode
-        DataManager::instance().clearAllPilotData();
+        neoVACDM_->GetDataManager()->clearAllPilotData();
         neoVACDM_->DisplayMessage("All pilot data cleared");
         return {true, std::nullopt};
     } else if (commandId == neoVACDM_->reloadCommandId_) {
         neoVACDM_->reloadConfiguration();
         return {true, std::nullopt};
     } else if (commandId == neoVACDM_->loglevelCommandId_) {
-        std::pair<std::string,bool> result = logging::Logger::instance().handleLogLevelCommand(args);
+        std::pair<std::string,bool> result = neoVACDM_->GetLogger()->handleLogLevelCommand(args);
         neoVACDM_->DisplayMessage(result.first, result.second);
         return {true, std::nullopt};
     } else if (commandId == neoVACDM_->logCommandId_) {
-        std::pair<std::string,bool> result = logging::Logger::instance().handleLogCommand(args[0]);
+        std::pair<std::string,bool> result = neoVACDM_->GetLogger()->handleLogCommand(args[0]);
         neoVACDM_->DisplayMessage(result.first, result.second);
         return {true, std::nullopt};
     } else if (commandId == neoVACDM_->updaterateCommandId_) {
@@ -199,7 +199,7 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
             neoVACDM_->DisplayMessage(error, false);
             return {false, error};
         }
-        neoVACDM_->DisplayMessage(DataManager::instance().setUpdateCycleSeconds(std::stoi(updaterate)));
+        neoVACDM_->DisplayMessage(neoVACDM_->GetDataManager()->setUpdateCycleSeconds(std::stoi(updaterate)));
     }    
     else 
     {

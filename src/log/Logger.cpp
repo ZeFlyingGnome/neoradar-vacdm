@@ -177,8 +177,3 @@ void Logger::disableLogging() {
     std::lock_guard guard(this->m_logLock);
     this->loggingEnabled = false;
 }
-
-Logger &Logger::instance() {
-    static Logger __instance;
-    return __instance;
-}

@@ -10,6 +10,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "log/Logger.h"
 #include "types/Pilot.h"
 
 namespace vacdm::com {
@@ -21,29 +22,8 @@ class Server {
         bool allowMasterAsObserver = false;
     } ServerConfiguration;
 
-   private:
-    Server();
-
-    std::string m_authToken;
-    std::mutex m_clientMutex;
-    std::unique_ptr<httplib::Client> m_client;
-
-    bool m_apiIsChecked;
-    bool m_apiIsValid;
-    std::string m_baseUrl;
-    bool m_clientIsMaster;
-    std::string m_errorCode;
-    ServerConfiguration m_serverConfiguration;
-
-   public:
+    Server(logging::Logger* vacdmLogger);
     ~Server();
-    Server(const Server&) = delete;
-    Server(Server&&) = delete;
-
-    Server& operator=(const Server&) = delete;
-    Server& operator=(Server&&) = delete;
-
-    static Server& instance();
 
     void changeServerAddress(const std::string& url);
     bool checkWebApi();
@@ -81,5 +61,19 @@ class Server {
    private:
     // Helper method to initialize/reinitialize the HTTP client
     void initClient();
+
+    std::string m_authToken;
+    std::mutex m_clientMutex;
+    std::unique_ptr<httplib::Client> m_client;
+
+    bool m_apiIsChecked;
+    bool m_apiIsValid;
+    std::string m_baseUrl;
+    bool m_clientIsMaster;
+    std::string m_errorCode;
+    ServerConfiguration m_serverConfiguration;
+
+    logging::Logger* vacdmLogger_ = nullptr;
+
 };
 }  // namespace vacdm::com

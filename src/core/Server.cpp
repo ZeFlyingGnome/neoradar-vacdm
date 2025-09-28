@@ -3,14 +3,13 @@
 #include <numeric>
 
 #include "Version.h"
-#include "log/Logger.h"
 #include "utils/Date.h"
 
 using namespace vacdm;
 using namespace vacdm::com;
 using namespace vacdm::logging;
 
-Server::Server()
+Server::Server(logging::Logger* vacdmLogger)
     : m_authToken(),
       m_clientMutex(),
       m_client(nullptr),
@@ -18,7 +17,8 @@ Server::Server()
       m_apiIsValid(false),
       m_baseUrl("https://app.vacdm.net"),
       m_clientIsMaster(false),
-      m_errorCode() {
+      m_errorCode(),
+      vacdmLogger_(vacdmLogger) {
     initClient();
 }
 
@@ -74,16 +74,18 @@ bool Server::checkWebApi() {
     // Send GET request
     auto result = m_client->Get(url);
     if (!result || result->status != 200) {
-        Logger::instance().log(
-            Logger::LogSender::Server,
-            "Failed to connect to API: " + (result ? std::to_string(result->status) : "connection error"),
-            Logger::LogLevel::Info);
+        if (vacdmLogger_)
+            vacdmLogger_->log(
+                Logger::LogSender::Server,
+                "Failed to connect to API: " + (result ? std::to_string(result->status) : "connection error"),
+                Logger::LogLevel::Info);
         this->m_apiIsValid = false;
         return m_apiIsValid;
     }
 
     std::string response = result->body;
-    Logger::instance().log(Logger::LogSender::Server, "Received API-version-message: " + response,
+    if (vacdmLogger_)
+        vacdmLogger_->log(Logger::LogSender::Server, "Received API-version-message: " + response,
                            Logger::LogLevel::Info);
     try {
         auto root = nlohmann::json::parse(response);
@@ -94,7 +96,8 @@ bool Server::checkWebApi() {
             this->m_apiIsValid = true;
         }
     } catch (const std::exception& e) {
-        Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+        if (vacdmLogger_)
+            vacdmLogger_->log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
                                Logger::LogLevel::Info);
         this->m_errorCode = "Invalid backend-version response: " + response;
         this->m_apiIsValid = false;
@@ -115,7 +118,8 @@ Server::ServerConfiguration Server::getServerConfig() {
         if (result && result->status == 200) {
             nlohmann::json root;
 
-            Logger::instance().log(Logger::LogSender::Server, "Received configuration: " + result->body,
+            if (vacdmLogger_)
+                vacdmLogger_->log(Logger::LogSender::Server, "Received configuration: " + result->body,
                                    Logger::LogLevel::Info);
 
             try {
@@ -126,7 +130,8 @@ Server::ServerConfiguration Server::getServerConfig() {
                 config.allowMasterAsObserver = root["allowObsMaster"].get<bool>();
                 return config;
             } catch (const std::exception& e) {
-                Logger::instance().log(Logger::LogSender::Server,
+                if (vacdmLogger_)
+                    vacdmLogger_->log(Logger::LogSender::Server,
                                        "Failed to parse response JSON: " + std::string(e.what()),
                                        Logger::LogLevel::Info);
             }
@@ -151,7 +156,8 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                                [](const std::string& a, const std::string& b) { return a + "," + b; });
     }
 
-    Logger::instance().log(Logger::LogSender::Server, url, Logger::LogLevel::Info);
+    if (vacdmLogger_)
+        vacdmLogger_->log(Logger::LogSender::Server, url, Logger::LogLevel::Info);
 
     auto result = m_client->Get(url);
     if (result && result->status == 200) {
@@ -210,12 +216,14 @@ std::list<types::Pilot> Server::getPilots(const std::list<std::string> airports)
                 // event booking data
                 pilots.back().hasBooking = pilot["hasBooking"].get<bool>();
             }
-            Logger::instance().log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
+            if (vacdmLogger_)
+                vacdmLogger_->log(Logger::LogSender::Server, "Pilots size: " + std::to_string(pilots.size()),
                                    Logger::LogLevel::Info);
             return pilots;
 
         } catch (const std::exception& e) {
-            Logger::instance().log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
+            if (vacdmLogger_)
+                vacdmLogger_->log(Logger::LogSender::Server, "Failed to parse response JSON: " + std::string(e.what()),
                                    Logger::LogLevel::Info);
         }
     }
@@ -228,7 +236,8 @@ void Server::sendPostMessage(const std::string& endpointUrl, const nlohmann::jso
     const auto message = root.dump();
 
     if (root.contains("callsign")) {
-        Logger::instance().log(Logger::LogSender::Server,
+        if (vacdmLogger_)
+            vacdmLogger_->log(Logger::LogSender::Server,
                                "Posting " + root["callsign"].get<std::string>() + " with message: " + message,
                                Logger::LogLevel::Debug);
     }
@@ -238,7 +247,8 @@ void Server::sendPostMessage(const std::string& endpointUrl, const nlohmann::jso
         auto result = m_client->Post(endpointUrl, message, "application/json");
 
         if (result && root.contains("callsign")) {
-            Logger::instance().log(Logger::LogSender::Server,
+            if (vacdmLogger_)
+                vacdmLogger_->log(Logger::LogSender::Server,
                                    "Posted " + root["callsign"].get<std::string>() + " response: " + result->body,
                                    Logger::LogLevel::Debug);
         }
@@ -251,7 +261,8 @@ void Server::sendPatchMessage(const std::string& endpointUrl, const nlohmann::js
     const auto message = root.dump();
 
     if (root.contains("callsign")) {
-        Logger::instance().log(Logger::LogSender::Server,
+        if (vacdmLogger_)
+            vacdmLogger_->log(Logger::LogSender::Server,
                                "Patching " + root["callsign"].get<std::string>() + " with message: " + message,
                                Logger::LogLevel::Debug);
     }
@@ -261,7 +272,8 @@ void Server::sendPatchMessage(const std::string& endpointUrl, const nlohmann::js
         auto result = m_client->Patch(endpointUrl, message, "application/json");
 
         if (result && root.contains("callsign")) {
-            Logger::instance().log(Logger::LogSender::Server,
+            if (vacdmLogger_)
+                vacdmLogger_->log(Logger::LogSender::Server,
                                    "Patched " + root["callsign"].get<std::string>() + " response: " + result->body,
                                    Logger::LogLevel::Debug);
         }
@@ -404,8 +416,3 @@ void Server::setMaster(bool master) { this->m_clientIsMaster = master; }
 bool Server::getMaster() { return this->m_clientIsMaster; }
 
 const std::string& Server::errorMessage() const { return this->m_errorCode; }
-
-Server& Server::instance() {
-    static Server __instance;
-    return __instance;
-}

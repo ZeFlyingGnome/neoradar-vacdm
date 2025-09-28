@@ -41,8 +41,18 @@ class Logger {
         LogLevel loglevel;
     };
 
-   private:
     Logger();
+    ~Logger();
+    /// @brief queues a log message to be processed asynchronously
+    /// @param sender the sender (e.g. class)
+    /// @param message the message to be displayed
+    /// @param loglevel the severity, must be greater than m_minimumLogLevel to be logged
+    void log(const LogSender &sender, const std::string &message, const LogLevel loglevel);
+    void setLogger(PluginSDK::Logger::LoggerAPI *vacdmLogger) { vacdmLogger_ = vacdmLogger; };
+    std::pair<std::string,bool> handleLogCommand(std::string arg);
+    std::pair<std::string,bool> handleLogLevelCommand(const std::vector<std::string> &args);
+    
+   private:
 #ifdef DEV
     std::vector<LogSetting> logSettings = {
         {vACDM, "vACDM", Debug},   {DataManager, "DataManager", Info},
@@ -71,16 +81,6 @@ class Logger {
 
     PluginSDK::Logger::LoggerAPI *vacdmLogger_ = nullptr;;
 
-   public:
-    ~Logger();
-    /// @brief queues a log message to be processed asynchronously
-    /// @param sender the sender (e.g. class)
-    /// @param message the message to be displayed
-    /// @param loglevel the severity, must be greater than m_minimumLogLevel to be logged
-    void log(const LogSender &sender, const std::string &message, const LogLevel loglevel);
-    void setLogger(PluginSDK::Logger::LoggerAPI *vacdmLogger) { vacdmLogger_ = vacdmLogger; };
-    std::pair<std::string,bool> handleLogCommand(std::string arg);
-    std::pair<std::string,bool> handleLogLevelCommand(const std::vector<std::string> &args);
-    static Logger &instance();
+
 };
 }  // namespace vacdm::logging
