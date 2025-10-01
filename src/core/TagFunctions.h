@@ -306,8 +306,8 @@ void NeoVACDM::TagProcessing(const std::string &callsign, const std::string &act
         ;
     }
     else if (actionId == "plugin:NeoVACDM:ACTION_AOBTNowAndState") {
-        // set ASRT if ASRT has not been set yet
-        if (pilot.asrt == types::defaultTime) {
+        // set AORT if AORT has not been set yet
+        if (pilot.aort == types::defaultTime) {
             dataManager_->handleTagFunction(DataManager::MessageType::UpdateAORT, pilot.callsign,
                                                         std::chrono::system_clock::now());
         }
