@@ -122,7 +122,7 @@ void NeoVACDM::UpdateTagItems() {
 
         text = formatTime(pilot.eobt);
         context.colour = Color::colorizeEobt(pilot);
-        if (tagCache.eobt.text != text || tagCache.eobt.colour != context.colour)
+        if (tagCache.eobt[callsign].text != text || tagCache.eobt[callsign].colour != context.colour)
         {
             tagInterface_->UpdateTagValue(EOBTTagID_, text, context);
             tagCache.eobt[callsign].text = text;
