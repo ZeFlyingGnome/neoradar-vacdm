@@ -53,12 +53,9 @@ public:
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
     void OnTimer(int Counter);
-    /* void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
-    void OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) override;*/
     void OnTagAction(const Tag::TagActionEvent *event) override;
     void OnTagDropdownAction(const Tag::DropdownActionEvent *event) override;
     void UpdateTagItems();
-    /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
     // Command handling
     void TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput = std::nullopt);
