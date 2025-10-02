@@ -113,6 +113,9 @@ std::string formatTime(const std::chrono::system_clock::time_point timepoint) {
 void NeoVACDM::UpdateTagItems() {
     std::vector<std::string> callsigns = dataManager_->getPilots();
 
+    for (const auto& [key, value] : tagCache.eobt)
+        vacdmLogger_->log(logging::Logger::LogSender::vACDM, "Cahe for: " + key, logging::Logger::LogLevel::Info);    
+
     for (std::string callsign : callsigns) {
 
         auto pilot = dataManager_->getPilot(callsign);
@@ -122,7 +125,7 @@ void NeoVACDM::UpdateTagItems() {
 
         text = formatTime(pilot.eobt);
         context.colour = Color::colorizeEobt(pilot);
-        if (tagCache.eobt.text != text || tagCache.eobt.colour != context.colour)
+        if (tagCache.eobt[callsign].text != text || tagCache.eobt[callsign].colour != context.colour)
         {
             tagInterface_->UpdateTagValue(EOBTTagID_, text, context);
             tagCache.eobt[callsign].text = text;
@@ -245,5 +248,25 @@ void NeoVACDM::UpdateTagItems() {
         }
 
     }
+}
+
+void NeoVACDM::OnAircraftDisconnected(const Aircraft::AircraftDisconnectedEvent *event)
+{
+
+    vacdmLogger_->log(logging::Logger::LogSender::vACDM, "Aircraft disconnected: " + event->callsign, logging::Logger::LogLevel::Info);
+
+    tagCache.eobt.erase(event->callsign);
+    tagCache.tobt.erase(event->callsign);
+    tagCache.tsat.erase(event->callsign);
+    tagCache.ttot.erase(event->callsign);
+    tagCache.exot.erase(event->callsign);
+    tagCache.asat.erase(event->callsign);
+    tagCache.aobt.erase(event->callsign);
+    tagCache.atot.erase(event->callsign);
+    tagCache.asrt.erase(event->callsign);
+    tagCache.aort.erase(event->callsign);
+    tagCache.ctot.erase(event->callsign);
+    tagCache.eventBooking.erase(event->callsign);
+    tagCache.ecfmpMeasures.erase(event->callsign);
 }
 }  // namespace vacdm
