@@ -610,3 +610,159 @@ types::Pilot DataManager::CFlightPlanToPilot(const PluginSDK::Flightplan::Flight
 
     return pilot;
 }
+
+void DataManager::setPilotEobtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.eobtCache.text = text;
+        pilot.eobtCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotAsatCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.asatCache.text = text;
+        pilot.asatCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotAobtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.aobtCache.text = text;
+        pilot.aobtCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotAtotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.atotCache.text = text;
+        pilot.atotCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotAsrtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.asrtCache.text = text;
+        pilot.asrtCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotAortCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.aortCache.text = text;
+        pilot.aortCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotTobtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.tobtCache.text = text;
+        pilot.tobtCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotTsatCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.tsatCache.text = text;
+        pilot.tsatCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotTtotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.ttotCache.text = text;
+        pilot.ttotCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotCtotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.ctotCache.text = text;
+        pilot.ctotCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotExotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.exotCache.text = text;
+        pilot.exotCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotEventBookingCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.eventBookingCache.text = text;
+        pilot.eventBookingCache.colour = colour;
+    }
+}
+
+void DataManager::setPilotEcfmpMeasuresCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour)
+{   
+    std::lock_guard guard(this->m_pilotLock);
+    auto it = this->m_pilots.find(callsign);
+    if (it != this->m_pilots.end())
+    {
+        auto &pilot = it->second[ConsolidatedData];
+        pilot.ecfmpMeasuresCache.text = text;
+        pilot.ecfmpMeasuresCache.colour = colour;
+    }
+}

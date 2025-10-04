@@ -9,6 +9,11 @@ namespace vacdm::types {
 static constexpr std::chrono::system_clock::time_point defaultTime =
     std::chrono::system_clock::time_point(std::chrono::milliseconds(-1));
 
+struct TagCacheItem {
+    std::string text;
+    std::optional<std::array<unsigned int, 3>> colour;
+};
+
 typedef struct Pilot_t {
     std::string callsign;
     std::chrono::system_clock::time_point lastUpdate;
@@ -55,5 +60,21 @@ typedef struct Pilot_t {
     // event booking data
 
     bool hasBooking = false;
+
+    // cache for tag colors
+    TagCacheItem eobtCache;
+    TagCacheItem tobtCache;
+    TagCacheItem tsatCache;
+    TagCacheItem ttotCache; 
+    TagCacheItem exotCache;
+    TagCacheItem asatCache;
+    TagCacheItem aobtCache;
+    TagCacheItem atotCache;
+    TagCacheItem asrtCache;
+    TagCacheItem aortCache;
+    TagCacheItem ctotCache;
+    TagCacheItem eventBookingCache;
+    TagCacheItem ecfmpMeasuresCache;
+
 } Pilot;
 }  // namespace vacdm::types

@@ -122,103 +122,92 @@ void NeoVACDM::UpdateTagItems() {
 
         text = formatTime(pilot.eobt);
         context.colour = Color::colorizeEobt(pilot);
-        if (tagCache.eobt[callsign].text != text || tagCache.eobt[callsign].colour != context.colour)
+        if (pilot.eobtCache.text != text || pilot.eobtCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(EOBTTagID_, text, context);
-            tagCache.eobt[callsign].text = text;
-            tagCache.eobt[callsign].colour = context.colour;
+            dataManager_->setPilotEobtCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.tobt);
         context.colour = Color::colorizeTobt(pilot);
-        if (tagCache.tobt[callsign].text != text || tagCache.tobt[callsign].colour != context.colour)
+        if (pilot.tobtCache.text != text || pilot.tobtCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(TOBTTagID_, text, context);
-            tagCache.tobt[callsign].text = text;
-            tagCache.tobt[callsign].colour = context.colour;
+            dataManager_->setPilotTobtCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.tsat);
         context.colour = Color::colorizeTsat(pilot);
-        if (tagCache.tsat[callsign].text != text || tagCache.tsat[callsign].colour != context.colour)
+        if (pilot.tsatCache.text != text || pilot.tsatCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(TSATTagID_, text, context);
-            tagCache.tsat[callsign].text = text;
-            tagCache.tsat[callsign].colour = context.colour;
+            dataManager_->setPilotTsatCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.ttot);
         context.colour = Color::colorizeTtot(pilot);
-        if (tagCache.ttot[callsign].text != text || tagCache.ttot[callsign].colour != context.colour)
+        if (pilot.ttotCache.text != text || pilot.ttotCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(TTOTTagID_, text, context);
-            tagCache.ttot[callsign].text = text;
-            tagCache.ttot[callsign].colour = context.colour;
+            dataManager_->setPilotTtotCache(callsign, text, context.colour);
         }
 
         if (pilot.exot.time_since_epoch().count() > 0) {
             text = std::format("{:%M}", pilot.exot);
             context.colour = std::nullopt;
-            if (tagCache.exot[callsign].text != text || tagCache.exot[callsign].colour != context.colour)
+            if (pilot.exotCache.text != text || pilot.exotCache.colour != context.colour)
             {
                 tagInterface_->UpdateTagValue(EXOTTagID_, text, context);
-                tagCache.exot[callsign].text = text;
-                tagCache.exot[callsign].colour = context.colour;
+                dataManager_->setPilotExotCache(callsign, text, context.colour);
             }
         }
 
         text = formatTime(pilot.asat);
         context.colour = Color::colorizeAsat(pilot);
-        if (tagCache.asat[callsign].text != text || tagCache.asat[callsign].colour != context.colour)
+        if (pilot.asatCache.text != text || pilot.asatCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(ASATTagID_, text, context);
-            tagCache.asat[callsign].text = text;
-            tagCache.asat[callsign].colour = context.colour;
+            dataManager_->setPilotAsatCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.aobt);
         context.colour = Color::colorizeAobt(pilot);
-        if (tagCache.aobt[callsign].text != text || tagCache.aobt[callsign].colour != context.colour)
+        if (pilot.aobtCache.text != text || pilot.aobtCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(AOBTTagID_, text, context);
-            tagCache.aobt[callsign].text = text;
-            tagCache.aobt[callsign].colour = context.colour;
+            dataManager_->setPilotAobtCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.atot);
         context.colour = Color::colorizeAtot(pilot);
-        if (tagCache.atot[callsign].text != text || tagCache.atot[callsign].colour != context.colour)
+        if (pilot.atotCache.text != text || pilot.atotCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(ATOTTagID_, text, context);
-            tagCache.atot[callsign].text = text;
-            tagCache.atot[callsign].colour = context.colour;
+            dataManager_->setPilotAtotCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.asrt);
         context.colour = Color::colorizeAsrt(pilot);
-        if (tagCache.asrt[callsign].text != text || tagCache.asrt[callsign].colour != context.colour)
+        if (pilot.asrtCache.text != text || pilot.asrtCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(ASRTTagID_, text, context);
-            tagCache.asrt[callsign].text = text;
-            tagCache.asrt[callsign].colour = context.colour;
+            dataManager_->setPilotAsrtCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.aort);
         context.colour = Color::colorizeAort(pilot);
-        if (tagCache.aort[callsign].text != text || tagCache.aort[callsign].colour != context.colour)
+        if (pilot.aortCache.text != text || pilot.aortCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(AORTTagID_, text, context);
-            tagCache.aort[callsign].text = text;
-            tagCache.aort[callsign].colour = context.colour;
+            dataManager_->setPilotAortCache(callsign, text, context.colour);
         }
 
         text = formatTime(pilot.ctot);
         context.colour = Color::colorizeCtot(pilot);
-        if (tagCache.ctot[callsign].text != text || tagCache.ctot[callsign].colour != context.colour)
+        if (pilot.ctotCache.text != text || pilot.ctotCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(CTOTTagID_, text, context);
-            tagCache.ctot[callsign].text = text;
-            tagCache.ctot[callsign].colour = context.colour;
+            dataManager_->setPilotCtotCache(callsign, text, context.colour);
         }
 
         if (false == pilot.measures.empty()) {
@@ -227,21 +216,19 @@ void NeoVACDM::UpdateTagItems() {
 
             text = std::format("{:02}:{:02}", measureMinutes, measureSeconds);
             context.colour = Color::colorizeEcfmpMeasure(pilot);
-            if (tagCache.ecfmpMeasures[callsign].text != text || tagCache.ecfmpMeasures[callsign].colour != context.colour)
+            if (pilot.ecfmpMeasuresCache.text != text || pilot.ecfmpMeasuresCache.colour != context.colour)
             {
                 tagInterface_->UpdateTagValue(ECFMPMeasuresTagID_, text, context);
-                tagCache.ecfmpMeasures[callsign].text = text;
-                tagCache.ecfmpMeasures[callsign].colour = context.colour;
+                dataManager_->setPilotEcfmpMeasuresCache(callsign, text, context.colour);
             }
         }
 
         text = (pilot.hasBooking ? "B" : "");
         context.colour = Color::colorizeEventBooking(pilot);
-        if (tagCache.eventBooking[callsign].text != text || tagCache.eventBooking[callsign].colour != context.colour)
+        if (pilot.eventBookingCache.text != text || pilot.eventBookingCache.colour != context.colour)
         {
             tagInterface_->UpdateTagValue(EventBookingTagID_, text, context);
-            tagCache.eventBooking[callsign].text = text;
-            tagCache.eventBooking[callsign].colour = context.colour;
+            dataManager_->setPilotEventBookingCache(callsign, text, context.colour);
         }
 
     }
