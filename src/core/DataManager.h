@@ -111,5 +111,19 @@ class DataManager {
     void pause();
     void resume();
     void clearAllPilotData();
+
+    void setPilotEobtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotTobtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotTsatCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotTtotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotExotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotAsatCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotAobtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotAtotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotAsrtCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotAortCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotCtotCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotEventBookingCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
+    void setPilotEcfmpMeasuresCache(const std::string &callsign, const std::string &text, const std::optional<std::array<unsigned int, 3>> &colour);
 };
 }  // namespace vacdm::core
