@@ -1,5 +1,6 @@
 // NeoVACDM.h
 #pragma once
+#include <map>
 #include <memory>
 #include <thread>
 
@@ -22,19 +23,19 @@ struct TagCacheItem {
 };
 
 struct TagCache {
-    TagCacheItem eobt = {"", std::nullopt};
-    TagCacheItem tobt = {"", std::nullopt};
-    TagCacheItem tsat = {"", std::nullopt};
-    TagCacheItem ttot = {"", std::nullopt}; 
-    TagCacheItem exot = {"", std::nullopt};
-    TagCacheItem asat = {"", std::nullopt};
-    TagCacheItem aobt = {"", std::nullopt};
-    TagCacheItem atot = {"", std::nullopt};
-    TagCacheItem asrt = {"", std::nullopt};
-    TagCacheItem aort = {"", std::nullopt};
-    TagCacheItem ctot = {"", std::nullopt};
-    TagCacheItem eventBooking = {"", std::nullopt};
-    TagCacheItem ecfmpMeasures = {"", std::nullopt};
+    std::map<std::string,TagCacheItem> eobt;
+    std::map<std::string,TagCacheItem> tobt;
+    std::map<std::string,TagCacheItem> tsat;
+    std::map<std::string,TagCacheItem> ttot; 
+    std::map<std::string,TagCacheItem> exot;
+    std::map<std::string,TagCacheItem> asat;
+    std::map<std::string,TagCacheItem> aobt;
+    std::map<std::string,TagCacheItem> atot;
+    std::map<std::string,TagCacheItem> asrt;
+    std::map<std::string,TagCacheItem> aort;
+    std::map<std::string,TagCacheItem> ctot;
+    std::map<std::string,TagCacheItem> eventBooking;
+    std::map<std::string,TagCacheItem> ecfmpMeasures;
 };
 
 class NeoVACDM : public BasePlugin
@@ -52,12 +53,9 @@ public:
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
     void OnTimer(int Counter);
-    /* void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
-    void OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) override;*/
     void OnTagAction(const Tag::TagActionEvent *event) override;
     void OnTagDropdownAction(const Tag::DropdownActionEvent *event) override;
     void UpdateTagItems();
-    /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
     // Command handling
     void TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput = std::nullopt);
