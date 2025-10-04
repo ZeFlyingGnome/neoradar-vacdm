@@ -15,7 +15,6 @@ class Color {
     Color &operator=(Color &&) = delete;
 
     static inline PluginConfig pluginConfig;
-    static types::Pilot pilotT;
     static void updatePluginConfig(PluginConfig newPluginConfig) { pluginConfig = newPluginConfig; }
 
     static std::optional<std::array<unsigned int, 3>> colorizeEobt(const types::Pilot &pilot) { return colorizeEobtAndTobt(pilot); }

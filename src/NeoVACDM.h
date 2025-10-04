@@ -1,5 +1,6 @@
 // NeoVACDM.h
 #pragma once
+#include <map>
 #include <memory>
 #include <thread>
 
@@ -16,27 +17,6 @@ namespace vacdm {
 
 class NeoVACDMCommandProvider;
 
-struct TagCacheItem {
-    std::string text;
-    std::optional<std::array<unsigned int, 3>> colour;
-};
-
-struct TagCache {
-    TagCacheItem eobt = {"", std::nullopt};
-    TagCacheItem tobt = {"", std::nullopt};
-    TagCacheItem tsat = {"", std::nullopt};
-    TagCacheItem ttot = {"", std::nullopt}; 
-    TagCacheItem exot = {"", std::nullopt};
-    TagCacheItem asat = {"", std::nullopt};
-    TagCacheItem aobt = {"", std::nullopt};
-    TagCacheItem atot = {"", std::nullopt};
-    TagCacheItem asrt = {"", std::nullopt};
-    TagCacheItem aort = {"", std::nullopt};
-    TagCacheItem ctot = {"", std::nullopt};
-    TagCacheItem eventBooking = {"", std::nullopt};
-    TagCacheItem ecfmpMeasures = {"", std::nullopt};
-};
-
 class NeoVACDM : public BasePlugin
 {
 public:
@@ -52,12 +32,9 @@ public:
     // Scope events
     void OnAirportConfigurationsUpdated(const Airport::AirportConfigurationsUpdatedEvent* event) override;
     void OnTimer(int Counter);
-    /* void OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan) override;
-    void OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType) override;*/
     void OnTagAction(const Tag::TagActionEvent *event) override;
     void OnTagDropdownAction(const Tag::DropdownActionEvent *event) override;
     void UpdateTagItems();
-    /*    bool OnCompileCommand(const char *sCommandLine) override;*/
 
     // Command handling
     void TagProcessing(const std::string &callsign, const std::string &actionId, std::optional<std::string> userInput = std::nullopt);
@@ -145,8 +122,6 @@ private:
     std::thread m_worker;
     bool m_stop;
     void run();
-
-    TagCache tagCache;
 
     std::shared_ptr<NeoVACDMCommandProvider> CommandProvider_;
 };
