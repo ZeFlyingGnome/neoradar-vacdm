@@ -394,7 +394,20 @@ DataManager::MessageType DataManager::deltaScopeToBackend(const std::array<types
 
 void DataManager::setActiveAirports(const std::list<std::string> activeAirports) {
     std::lock_guard guard(this->m_airportLock);
-    this->m_activeAirports = activeAirports;
+
+    std::list<std::string> supportedAirports = server_->getSupportedAirports();
+    std::list<std::string> cdmActiveAirports;
+
+    for (const auto& activeAirport : activeAirports) {
+        for (const auto& supportedAirport : supportedAirports) {
+            if (supportedAirport == activeAirport) {
+                cdmActiveAirports.push_back(supportedAirport);
+                break;
+            }
+        }
+    }
+
+    this->m_activeAirports = cdmActiveAirports;
 }
 
 void DataManager::queueFlightplanUpdate(Flightplan flightplan, Aircraft aircraft, double distanceFromOrigin) {
