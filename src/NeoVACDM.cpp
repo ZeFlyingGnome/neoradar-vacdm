@@ -146,6 +146,7 @@ void NeoVACDM::checkServerConfiguration() {
         } else {
             std::string serverName = server_->getServerConfig().name;
             DisplayMessage(("Connected to " + serverName), true, "Server");
+            server_->retrieveSupportedAirports();
             // set active airports and runways
             this->OnAirportConfigurationsUpdated(nullptr);
         }

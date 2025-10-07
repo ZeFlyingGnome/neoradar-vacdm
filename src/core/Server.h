@@ -58,6 +58,9 @@ class Server {
     void setMaster(bool master);
     bool getMaster();
 
+    void retrieveSupportedAirports();
+    std::list<std::string> getSupportedAirports();
+
    private:
     // Helper method to initialize/reinitialize the HTTP client
     void initClient();
@@ -72,6 +75,8 @@ class Server {
     bool m_clientIsMaster;
     std::string m_errorCode;
     ServerConfiguration m_serverConfiguration;
+
+    std::list<std::string> m_supportedAirports;
 
     logging::Logger* vacdmLogger_ = nullptr;
 
