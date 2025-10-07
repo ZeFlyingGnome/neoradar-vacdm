@@ -53,6 +53,9 @@ public:
     std::string logCommandId_;
     std::string loglevelCommandId_;
     std::string updaterateCommandId_;    
+#ifdef DEV
+    std::string purgeCommandId_;
+#endif
 
 private:
     bool initialized_ = false;

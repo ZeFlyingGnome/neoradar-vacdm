@@ -95,6 +95,19 @@ void NeoVACDM::RegisterCommand() {
 
         updaterateCommandId_ = chatAPI_->registerCommand(definition.name, definition, CommandProvider_);        
   
+#ifdef DEV
+        definition.name = "vacdm purge";
+        definition.description = "Delete aircraft for CDM (to cleanup long disconnected aircrafts)";
+        definition.lastParameterHasSpaces = false;
+		definition.parameters.clear();
+
+        parameter.name = "CALLSIGN";
+        parameter.type = Chat::ParameterType::String; 
+        parameter.required = true;
+        definition.parameters.push_back(parameter);
+
+        purgeCommandId_ = chatAPI_->registerCommand(definition.name, definition, CommandProvider_);        
+#endif
     }
     catch (const std::exception &ex)
     {
@@ -113,6 +126,9 @@ inline void NeoVACDM::unRegisterCommand()
         chatAPI_->unregisterCommand(logCommandId_);
         chatAPI_->unregisterCommand(loglevelCommandId_);
         chatAPI_->unregisterCommand(updaterateCommandId_);
+#ifdef DEV
+        chatAPI_->unregisterCommand(purgeCommandId_);
+#endif        
         CommandProvider_.reset();
 	}
 }
@@ -201,6 +217,14 @@ Chat::CommandResult NeoVACDMCommandProvider::Execute(
         }
         neoVACDM_->DisplayMessage(neoVACDM_->GetDataManager()->setUpdateCycleSeconds(std::stoi(updaterate)));
     }    
+#ifdef DEV
+    else if (commandId == neoVACDM_->purgeCommandId_) {
+        std::string callsign = args[0];
+        neoVACDM_->GetServer()->deletePilot(callsign);
+        logger_->info("Purging aircraft with callsign " + callsign + " from vACDM ...");
+        return {true, std::nullopt};
+    }
+#endif  
     else 
     {
         std::string error = "Invalid command. To list available commands use .vacdm help";
