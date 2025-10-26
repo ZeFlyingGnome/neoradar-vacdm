@@ -1,3 +1,7 @@
 TODO:
 * EXOT
 * Reset pilot issue
+* Reset ASRT should reset ASAT, AOBT, AORT.
+* Init messages to log including in Release
+* connect/disconnect to main
+* only errors to vACDM window
