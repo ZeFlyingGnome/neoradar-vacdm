@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  plugin_name: NeoVACDM
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -100,7 +103,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NeoVACDM-${{ matrix.platform }}-${{ matrix.architecture }}
+          name: ${{ env.plugin_name }}-${{ matrix.platform }}-${{ matrix.architecture }}
           path: |
-            lib/NeoVACDM*
-            bin\${{ env.build_type }}\NeoVACDM.dll
+            lib/${{ env.plugin_name }}*
+            bin\${{ env.build_type }}\${{ env.plugin_name }}.dll
